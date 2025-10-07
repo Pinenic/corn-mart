@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [ dev, staging ]
+  pull_request:
+    branches: [ dev, staging, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+        working-directory: ./frontend
+      - run: npm run lint
+        working-directory: ./frontend
+      - run: npm test
+        working-directory: ./frontend
+      # Optional: run backend tests
+      - run: |
+          cd backend || exit 0
+          npm ci || true
+          npm test || true
