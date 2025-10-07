@@ -2,26 +2,44 @@ name: CI
 
 on:
   push:
-    branches: [ dev, staging ]
+    branches:
+      - main
+      - staging
+      - dev
   pull_request:
-    branches: [ dev, staging, main ]
+    branches:
+      - main
+      - staging
 
 jobs:
-  build-and-test:
+  build:
+    name: 🧪 Build & Test
     runs-on: ubuntu-latest
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - run: npm ci
-        working-directory: ./frontend
-      - run: npm run lint
-        working-directory: ./frontend
-      - run: npm test
-        working-directory: ./frontend
-      # Optional: run backend tests
-      - run: |
-          cd backend || exit 0
-          npm ci || true
-          npm test || true
+          node-version: 20
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Lint & Type Check
+        run: |
+          npm run lint --if-present
+          npm run type-check --if-present
+
+      - name: 🧱 Build project
+        run: npm run build
+
+      - name: ✅ Run tests
+        run: npm test --if-present
