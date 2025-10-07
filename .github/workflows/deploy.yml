@@ -1,0 +1,31 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+      # TODO: Replace with your hosting provider action (Vercel / Netlify / Cloudflare)
+      - name: Deploy to hosting (placeholder)
+        run: echo "Add provider-specific deploy action here"
+      - name: Push DB migrations (optional)
+        run: |
+          npm i -g supabase
+          # supabase login -- token via secrets or use GitHub runner secrets
+          # supabase db push --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
