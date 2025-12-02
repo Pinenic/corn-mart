@@ -3,17 +3,22 @@
 import { generateSlug } from "@/utils/slug";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+// import { ViewProductModal } from "./ViewProductsModal";
 
-export default function ProductCard({product, view = "Grid"}) {
+export default function ProductCard({ product, view = "Grid" }) {
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
   const handleNav = () => {
-    router.push(`/shopping/product/${generateSlug(product.name)}-${product.id}`)
-  }
+    router.push(
+      `/shopping/product/${generateSlug(product.name)}-${product.id}`
+    );
+  };
   return (
     <div onClick={handleNav}>
       {/* static heart icon top-right */}
       <div className="absolute top-3 right-3 z-10">
-        <div className="w-9 h-9 rounded-full bg-white shadow flex items-center justify-center">
+        <div className="w-9 h-9 rounded-full bg-background shadow flex items-center justify-center">
           <Heart className="w-4 h-4 text-muted-foreground" />
         </div>
       </div>
@@ -28,18 +33,21 @@ export default function ProductCard({product, view = "Grid"}) {
                 alt={product.name}
                 className="h-56"
               />
-            ): (<img
-              src={product?.images?.thumbnail}
-              alt={product.name}
-              className="object-contain"
-            />)}
+            ) : (
+              <img
+                src={product?.images?.thumbnail}
+                alt={product.name}
+                className="object-contain"
+              />
+            )}
           </div>
 
           <div className="p-1">
-
             <div className="mt-1 flex items-baseline justify-between">
               <div>
-                <div className="text-lg font-medium">K{product?.price.toFixed(2)}</div>
+                <div className="text-lg font-medium">
+                  K{product?.price.toFixed(2)}
+                </div>
                 {product?.oldPrice && (
                   <div className="text-xs text-muted-foreground line-through">
                     ${product.oldPrice}
@@ -52,9 +60,7 @@ export default function ProductCard({product, view = "Grid"}) {
               </div>
             </div>
 
-            <h3 className="text-sm line-clamp-2">
-              {product?.name}
-            </h3>
+            <h3 className="text-sm line-clamp-2">{product?.name}</h3>
 
             <div className="mt-3 text-xs text-muted-foreground flex items-center justify-between">
               <div>{product?.shipping || "Free shipping"}</div>
@@ -87,7 +93,9 @@ export default function ProductCard({product, view = "Grid"}) {
 
             <div className="mt-3 flex items-center justify-between">
               <div>
-                <div className="text-lg font-bold">${product?.price.toFixed(2)}</div>
+                <div className="text-lg font-bold">
+                  ${product?.price.toFixed(2)}
+                </div>
                 {product?.oldPrice && (
                   <div className="text-xs text-muted-foreground line-through">
                     ${product.oldPrice}
@@ -109,6 +117,8 @@ export default function ProductCard({product, view = "Grid"}) {
           </div>
         </div>
       )}
+
+      {/* <ViewProductModal open={isOpen} onOpenChange={setIsOpen} product={product} /> */}
     </div>
   );
 }

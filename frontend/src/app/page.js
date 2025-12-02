@@ -13,7 +13,6 @@ export default function Home() {
   const { user, signOut } = useAuthStore();
 
   return (
-    <AuthGuard>
       <div className="text-center">
         <Hero />
         <HowItWorks />
@@ -33,6 +32,5 @@ export default function Home() {
           Log Out
         </button> */}
       </div>
-    </AuthGuard>
   );
 }

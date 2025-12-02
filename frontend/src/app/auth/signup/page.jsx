@@ -4,9 +4,11 @@ import AuthForm from "@/components/auth/AuthForm";
 import { createUserFolder } from "@/app/actions/signupAction";
 import { createProfile } from "@/app/actions/profileAction";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const { signUp } = useAuthStore();
+  const router = useRouter();
 
   async function handleSignup({ email, password, firstname, lastname, phone }) {
     const user = await signUp(email, password, firstname, lastname, phone);
@@ -16,6 +18,7 @@ export default function SignupPage() {
       await createUserFolder(user.id);
       await createProfile(user, url, phone);
       toast.success("Signup successful! Folder created. You can now log in.");
+      router.push("/");
     }
   }
 

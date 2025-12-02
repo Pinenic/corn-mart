@@ -2,19 +2,25 @@
 
 import { createOrder } from "@/lib/ordersApi";
 import { useCart } from "@/store/useCart";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function CheckoutSummary({ subtotal, itemCount }) {
-  const { user, cartId } = useCart();
+  const router = useRouter();
+  const { user, cartId, getCart } = useCart();
   const [placing, setPlacing] = useState(false);
   const handlePlaceOrder = async () => {
     try {
       setPlacing(true);
       const res = await createOrder(cartId, user);
-      res
-        ? toast.success("Order placed successfully", { id: res.order_id })
-        : toast.error("failed to place order");
+      if (!res) {
+        toast.error("failed to place order");
+        setPlacing(false);
+      }
+      toast.success("Order placed successfully", { id: res.order_id });
+      getCart(user);
+      router.push("/shopping");
       setPlacing(false);
     } catch (error) {
       console.error(error);
@@ -22,9 +28,9 @@ export default function CheckoutSummary({ subtotal, itemCount }) {
     }
   };
 
-  useEffect(()=>{
-    console.log(user, cartId)
-  },[])
+  useEffect(() => {
+    console.log(user, cartId);
+  }, []);
   return (
     <div className="rounded-xl border p-4 bg-white dark:bg-muted shadow-sm sticky top-8">
       <h2 className="font-semibold text-lg mb-4">Order Summary</h2>
@@ -41,7 +47,7 @@ export default function CheckoutSummary({ subtotal, itemCount }) {
 
       <button
         className="mt-4 w-full bg-black dark:bg-foreground dark:text-background text-white py-3 rounded-lg font-medium hover:bg-gray-800"
-        onClick={()=> handlePlaceOrder()}
+        onClick={() => handlePlaceOrder()}
       >
         {placing ? "Placing..." : "Place order"}
       </button>

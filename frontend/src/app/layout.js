@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import ToasterProvider from "@/components/ToasterProvider";
 import "./globals.css";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+// import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export default function RootLayout({ children }) {

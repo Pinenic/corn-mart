@@ -13,11 +13,11 @@ export async function generateMetadata(props) {
   const product = res?.data?.[0];
 
   if (!product) {
-    return { title: "Product Not Found | Pine Stores" };
+    return { title: "Product Not Found | Corn Mart" };
   }
 
   return {
-    title: `${product.name} | Pine Stores`,
+    title: `${product.name} | Corn Mart`,
     description: product.description?.slice(0, 160),
     openGraph: {
       title: product.name,

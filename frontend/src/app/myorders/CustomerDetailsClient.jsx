@@ -6,7 +6,7 @@ import { getBuyerOrderDetails } from "@/lib/ordersApi";
 import { useEffect, useState } from "react";
 import OrderDetailsStoreSection from "./_components/OrderDetailsStoreSection";
 
-export default function CustomerDetails({ orderId, loading }) {
+export default function CustomerDetails({ orderId, handleUpdate, loading }) {
   const [order, setOrder] = useState({});
   const [fetching, setFetching] = useState(false);
 
@@ -37,7 +37,7 @@ export default function CustomerDetails({ orderId, loading }) {
           <div className="flex-1">
             {!(orderId == null) ? ( <>
             <TabsContent value="details">
-              {fetching ? <p>fetching..</p> : (<> {order?.store_orders.map((sto) => <OrderDetailsStoreSection storeOrder={sto} key={sto.id} />)}</>)}
+              {fetching ? <p>fetching..</p> : (<> {order?.store_orders.map((sto) => <OrderDetailsStoreSection storeOrder={sto} key={sto.id} handleUpdate={handleUpdate} />)}</>)}
             </TabsContent>
             <TabsContent value="status">
               <p>status tab</p>

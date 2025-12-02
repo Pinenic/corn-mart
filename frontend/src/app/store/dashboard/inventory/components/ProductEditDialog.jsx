@@ -12,41 +12,41 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 // Example usage component
-export default function ProductEditExample() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [product, setProduct] = useState({
-    id: 1,
-    name: 'Wireless Mouse',
-    stock: 45,
-    price: 29.99,
-    low_stock_threshold: 10
-  });
+// export default function ProductEditExample() {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [product, setProduct] = useState({
+//     id: 1,
+//     name: 'Wireless Mouse',
+//     stock: 45,
+//     price: 29.99,
+//     low_stock_threshold: 10
+//   });
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Current Product</h2>
-        <div className="space-y-2 text-sm mb-4">
-          <p><span className="font-medium">Name:</span> {product.name}</p>
-          <p><span className="font-medium">Stock:</span> {product.stock}</p>
-          <p><span className="font-medium">Price:</span> ${product.price}</p>
-          <p><span className="font-medium">Low Stock Alert:</span> {product.low_stock_threshold}</p>
-        </div>
-        <Button onClick={() => setIsOpen(true)}>Edit Product</Button>
+//   return (
+//     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+//       <div className="bg-white p-6 rounded-lg shadow-sm">
+//         <h2 className="text-xl font-semibold mb-4">Current Product</h2>
+//         <div className="space-y-2 text-sm mb-4">
+//           <p><span className="font-medium">Name:</span> {product.name}</p>
+//           <p><span className="font-medium">Stock:</span> {product.stock}</p>
+//           <p><span className="font-medium">Price:</span> ${product.price}</p>
+//           <p><span className="font-medium">Low Stock Alert:</span> {product.low_stock_threshold}</p>
+//         </div>
+//         <Button onClick={() => setIsOpen(true)}>Edit Product</Button>
 
-        <ProductEditDialog
-          open={isOpen}
-          onOpenChange={setIsOpen}
-          product={product}
-          onSave={(updatedProduct) => {
-            setProduct(updatedProduct);
-            setIsOpen(false);
-          }}
-        />
-      </div>
-    </div>
-  );
-}
+//         <ProductEditDialog
+//           open={isOpen}
+//           onOpenChange={setIsOpen}
+//           product={product}
+//           onSave={(updatedProduct) => {
+//             setProduct(updatedProduct);
+//             setIsOpen(false);
+//           }}
+//         />
+//       </div>
+//     </div>
+//   );
+// }
 
 // Reusable dialog component
 export function ProductEditDialog({ open, onOpenChange, product, onSave, loading }) {

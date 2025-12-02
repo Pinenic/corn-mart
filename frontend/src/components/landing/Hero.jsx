@@ -25,8 +25,8 @@ export default function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white text-base px-6 py-3 rounded-full shadow-md">
-              <Link href="/shop">Start Shopping</Link>
+            <Button asChild className="bg-primary hover:bg-primary/80 text-white text-base px-6 py-3 rounded-full shadow-md">
+              <Link href="/shopping">Start Shopping</Link>
             </Button>
 
             <Button asChild variant="outline" className="border-corn-400 text-corn-600 hover:bg-corn-50 text-base px-6 py-3 rounded-full">
@@ -55,7 +55,7 @@ export default function Hero() {
 
       {/* Decorative background elements */}
       <div className="absolute -top-20 -left-20 w-60 h-60 bg-corn-100 rounded-full blur-3xl opacity-40" />
-      <div className="absolute bottom-[80%] right-0 w-72 h-72 bg-blue-100 rounded-full blur-3xl opacity-40" />
+      <div className="absolute bottom-[80%] right-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl opacity-40" />
     </section>
   );
 }

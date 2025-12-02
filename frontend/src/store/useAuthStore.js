@@ -37,9 +37,9 @@ export const useAuthStore = create((set) => ({
       .eq("owner_id", data.session?.user.id)
       .maybeSingle();
 
-    if(!storeError && storeData){
+    if (!storeError && storeData) {
       const userStore = useStoreStore();
-      userStore.fetchStore(data.session?.user.id)
+      userStore.fetchStore(data.session?.user.id);
     }
 
     supabase.auth.onAuthStateChange((_event, session) => {

@@ -13,7 +13,7 @@ export default function StoresPage() {
   const getStores = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/stores", {
+      const res = await fetch("http://192.168.8.118:5000/api/stores", {
         method: "GET",
       });
 

@@ -54,8 +54,8 @@ export default function CategorySidebar() {
 
 function TopLevelSidebar({ categories, loading }) {
   return (
-    <div className="hidden md:block w-fit pr-4">
-      <h2>Shop By Category</h2>
+    <div className=" w-fit pr-4">
+      <h2 className="text-lg font-semibold mb-3">Shop By Category</h2>
       {loading && (
         <div className="flex flex-col gap-3 mt-3">
           {[...Array(4)].map((_, i) => (
@@ -66,12 +66,12 @@ function TopLevelSidebar({ categories, loading }) {
         </div>
       )}
 
-      <div className="hidden md:block w-fit pr-4">
+      <div className=" w-fit pr-4">
         {categories.map((cat, i) => (
           <div key={i} className="mb-4">
             <Link
               href={`/shopping/${cat.slug}`}
-              className="font-semibold text-sm mb-2"
+              className="font-medium text-sm mb-2"
             >
               {cat.name}
             </Link>
@@ -103,13 +103,13 @@ function CategoryLevelSidebar({ category, subcats }) {
     getSubs();
   }, []);
   return (
-    <div className="hidden md:block w-64 pr-4">
+    <div className=" w-64 pr-4">
       <h2>
         {category.charAt(0).toUpperCase() +
           decodeURIComponent(category.slice(1).replace(/-/g, " "))}
       </h2>
 
-      <div className="hidden md:block w-64 pr-4">
+      <div className=" w-64 pr-4">
         <div className="flex flex-col gap-1 pl-2">
           {subcategories.map((s, j) => (
             <Link

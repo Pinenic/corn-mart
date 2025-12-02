@@ -24,7 +24,6 @@ import { AutoBreadcrumb } from "./AutoBreadcrumb";
 import SearchBar from "./SearchBar";
 import { getAllProducts, searchMarket } from "@/lib/marketplaceApi";
 import { Spinner } from "@/components/ui/spinner";
-import PageTop from "./pageTop";
 
 const Categories = [
   "Electronics",
@@ -93,9 +92,6 @@ export default function SearchResultsGrid({initialProducts, loading, title}) {
 
   return (
     <div className="flex">
-      {/* <div className="h-[90vh] w-96 border-2">
-        <CategorySidebar />
-      </div> */}
       <main className="w-full">
 
         <div className="flex justify-between px-3 mt-5">
@@ -138,7 +134,7 @@ export default function SearchResultsGrid({initialProducts, loading, title}) {
         <div
           className={
             view == "Grid"
-              ? "grid grid-cols-4 gap-6 p-4 overflow-y-scroll mt-4"
+              ? "grid  grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 overflow-y-scroll mt-4"
               : "flex flex-col overflow-y-scroll mt-4 "
           }
         >

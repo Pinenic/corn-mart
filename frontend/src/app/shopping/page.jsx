@@ -1,22 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllProducts, getCategories, searchMarket } from "@/lib/marketplaceApi";
+import {
+  getAllProducts,
+  getCategories,
+  searchMarket,
+} from "@/lib/marketplaceApi";
 import { Spinner } from "@/components/ui/spinner";
 import ProductGrid from "./components/ProductGrid";
 import PageTop from "./components/pageTop";
 import SearchResultsGrid from "./components/SearchResultsGrid";
 
+let Categories = [];
 
-  let Categories = [];
-
-  try {
-    const cursor = await getCategories();
-    Categories = cursor.data;
-  } catch (err) {
-    // server-side fetch failed; client will handle retries
-    console.error("Failed to fetch order on server:", err?.message || err);
-  }
+try {
+  const cursor = await getCategories();
+  Categories = cursor.data;
+} catch (err) {
+  // server-side fetch failed; client will handle retries
+  console.error("Failed to fetch order on server:", err?.message || err);
+}
 
 export default function Page() {
   const [products, setProducts] = useState([]);
@@ -49,6 +52,11 @@ export default function Page() {
 
   return (
     <div className="flex flex-col w-full">
+      <PageTop
+        Categories={Categories}
+        setLoading={setLoading}
+        onResults={setResults}
+      />
       {loading ? (
         <>
           <div className="flex w-full items-center justify-center min-h-[100vh]">
@@ -58,11 +66,6 @@ export default function Page() {
         </>
       ) : (
         <>
-          <PageTop
-            Categories={Categories}
-            setLoading={setLoading}
-            onResults={setResults}
-          />
           {searchResults.length > 0 ? (
             <SearchResultsGrid
               initialProducts={searchResults}

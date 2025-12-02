@@ -35,11 +35,11 @@ const Categories = [
   "Toys & Games",
 ];
 
-export default function ProductGrid({initialProducts, loading, title}) {
-  const { ref, inView } = useInView()
+export default function ProductGrid({ initialProducts, loading, title }) {
+  const { ref, inView } = useInView();
   const [view, setView] = useState("Grid");
   const [products, setProducts] = useState(initialProducts);
-//   const [loading, setLoading] = useState(false);
+  //   const [loading, setLoading] = useState(false);
   const views = [
     {
       name: "List",
@@ -51,54 +51,28 @@ export default function ProductGrid({initialProducts, loading, title}) {
     },
   ];
   const [page, setPage] = useState(1);
-  const totalPages = 10;
-
-//   async function fetchProducts() {
-//     try {
-//       setLoading(true);
-//       const res = await getAllProducts(0);
-//       setProducts(res.data);
-//       setLoading(false);
-//     } catch (error) {
-//       console.error("failed to fetch products", error);
-//     }
-//   }
 
   async function fetchMoreProducts() {
     try {
-      const res = await getAllProducts((page-1)+1);
-      setProducts([...products,...res.data]);
+      const res = await getAllProducts(page - 1 + 1);
+      setProducts([...products, ...res.data]);
     } catch (error) {
       console.error("failed to fetch products", error);
     }
   }
 
-  async function search(q) {
-    try {
-      const res = await searchMarket(q);
-      return res.data
-    } catch (error) {
-      return error.message;
-    }
-  }
-
   useEffect(() => {
-    if(inView){
-      setPage(page+1);
+    if (inView) {
+      setPage(page + 1);
       fetchMoreProducts();
     }
-    // fetchProducts();
   }, [inView]);
 
   return (
     <div className="flex">
-      {/* <div className="h-[90vh] w-96 border-2">
-        <CategorySidebar />
-      </div> */}
       <main className="w-full">
-
         <div className="flex justify-between px-3 mt-5">
-          {title ? (<h2>{title}</h2>) : <AutoBreadcrumb />}
+          {title ? <h2>{title}</h2> : <AutoBreadcrumb />}
           <div className="flex gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -137,7 +111,7 @@ export default function ProductGrid({initialProducts, loading, title}) {
         <div
           className={
             view == "Grid"
-              ? "grid grid-cols-4 gap-6 p-4 overflow-y-scroll mt-4"
+              ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 overflow-y-scroll mt-4"
               : "flex flex-col overflow-y-scroll mt-4 "
           }
         >
@@ -156,55 +130,16 @@ export default function ProductGrid({initialProducts, loading, title}) {
             ))
           )}
         </div>
-        <div className={products.length == 0 ? "hidden" : "flex w-full justify-center gap-8 mt-2"}>
-
+        <div
+          className={
+            products.length == 0
+              ? "hidden"
+              : "flex w-full justify-center gap-8 mt-2"
+          }
+        >
           <div ref={ref} className={loading ? "hidden" : "flex"}>
             Loading...
           </div>
-          {/* <div className="flex w-fit items-center justify-center text-sm font-medium">
-            Page {page} of {totalPages}
-          </div>
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => setPage(1)}
-              disabled={page == 1}
-            >
-              <span className="sr-only">Go to first page</span>
-              <IconChevronsLeft />
-            </Button>
-            <Button
-              variant="outline"
-              className="size-8"
-              size="icon"
-              onClick={() => setPage(page - 1)}
-              disabled={page == 1}
-            >
-              <span className="sr-only">Go to previous page</span>
-              <IconChevronLeft />
-            </Button>
-            <Button
-              variant="outline"
-              className="size-8"
-              size="icon"
-              onClick={() => setPage(page + 1)}
-              disabled={page == totalPages}
-            >
-              <span className="sr-only">Go to next page</span>
-              <IconChevronRight />
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden size-8 lg:flex"
-              size="icon"
-              onClick={() => setPage(totalPages)}
-              disabled={page == totalPages}
-            >
-              <span className="sr-only">Go to last page</span>
-              <IconChevronsRight />
-            </Button>
-          </div> */}
         </div>
       </main>
     </div>

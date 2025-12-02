@@ -7,39 +7,39 @@ const products = [
   {
     id: 1,
     name: "Handcrafted Wooden Bowl",
-    price: "$24.99",
+    price: "K24.99",
     image: "https://images.unsplash.com/photo-1606813902919-3d0139d3d93e?auto=format&fit=crop&w=800&q=60",
   },
   {
     id: 2,
     name: "Stylish Leather Wallet",
-    price: "$45.00",
+    price: "K45.00",
     image: "https://images.unsplash.com/photo-1618354691481-89b8f58b29b3?auto=format&fit=crop&w=800&q=60",
   },
   {
     id: 3,
     name: "Minimal Ceramic Mug",
-    price: "$12.50",
+    price: "K12.50",
     image: "https://images.unsplash.com/photo-1603791452906-c9a7a3d57b1b?auto=format&fit=crop&w=800&q=60",
   },
   {
     id: 4,
     name: "Eco Cotton Tote Bag",
-    price: "$18.99",
+    price: "K18.99",
     image: "https://images.unsplash.com/photo-1627374641533-1c1fd49c1d5f?auto=format&fit=crop&w=800&q=60",
   },
 ];
 
 export default function FeaturedProducts() {
   return (
-    <section className="bg-white py-20 px-6 md:px-12">
+    <section className="bg-background py-20 px-6 md:px-12">
       <div className="max-w-6xl mx-auto text-center">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-extrabold text-blueMain-700 mb-4"
+          className="text-3xl md:text-4xl font-extrabold mb-4"
         >
           Featured Products
         </motion.h2>
@@ -62,12 +62,14 @@ export default function FeaturedProducts() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="bg-blueMain-50 rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group"
+              className="bg-muted rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group"
             >
               <div className="relative w-full h-56">
-                <img
+                <Image
                   src={product.image}
                   alt={product.name}
+                  width={800}
+                  height={60}
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
@@ -75,7 +77,7 @@ export default function FeaturedProducts() {
                 <h3 className="text-lg font-semibold text-blueMain-700 mb-1">
                   {product.name}
                 </h3>
-                <p className="text-gray-600">{product.price}</p>
+                <p className="text-primary">{product.price}</p>
               </div>
             </motion.div>
           ))}

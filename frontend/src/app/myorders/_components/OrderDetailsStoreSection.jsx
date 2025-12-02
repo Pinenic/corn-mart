@@ -1,8 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-export default function OrderDetailsStoreSection({ storeOrder }) {
+export default function OrderDetailsStoreSection({ storeOrder, handleUpdate }) {
   return (
     <div className="rounded-xl mb-4 border p-4 bg-white dark:bg-muted shadow-sm">
       {/* You may later replace storeId with store name if you fetch it */}
@@ -41,7 +42,18 @@ export default function OrderDetailsStoreSection({ storeOrder }) {
           </div>
         ))}
       </div>
-      <p className="text-sm mt-1 font-semibold text-right">Subtotal: K{storeOrder.subtotal}</p>
+      <div className="flex justify-between pt-4">
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => handleUpdate(storeOrder.id, storeOrder.store_id, storeOrder.status)}
+        >
+          Cancel
+        </Button>
+        <p className="text-sm mt-1 font-semibold text-right">
+          Subtotal: K{storeOrder.subtotal}
+        </p>
+      </div>
     </div>
   );
 }

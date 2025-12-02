@@ -43,7 +43,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/70 dark:bg-muted/40 backdrop-blur-md border-b border-gray-100 dark:border-none shadow-sm">
       <div className="mx-auto flex justify-between items-center px-4 py-3 lg:py-4">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-blue-600">
+        <Link href="/" className="text-2xl font-bold text-primary">
           Corn<span className="text-corn-500">Mart</span>
         </Link>
 
@@ -55,8 +55,8 @@ export default function Header() {
               href={link.href}
               className={`text-sm font-medium transition-colors ${
                 pathname === link.href
-                  ? "text-blue-600"
-                  : "text-gray-600 hover:text-blue-500"
+                  ? "text-primary"
+                  : "text-gray-600 hover:text-primary/90"
               }`}
             >
               {link.name}
@@ -68,6 +68,7 @@ export default function Header() {
         <div className="flex items-center gap-3">
           {!user && !loading ? (
             <>
+              <ThemeToggle />
               <Button
                 variant="outline"
                 onClick={() => router.push("/auth/login")}
@@ -75,7 +76,7 @@ export default function Header() {
                 Login
               </Button>
               <Button
-                className="bg-blue-600 hover:bg-blue-500 text-white"
+                className="bg-primary hover:bg-primary/90 text-white"
                 onClick={() => router.push("/auth/signup")}
               >
                 Sign Up
@@ -139,7 +140,7 @@ export default function Header() {
 
         {/* Mobile Menu Toggle */}
         <button
-          className="md:hidden text-blue-600"
+          className="md:hidden text-primary"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           ☰
@@ -148,15 +149,15 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <nav className="md:hidden bg-white border-t border-blue-100">
+        <nav className="md:hidden bg-background/90 border-t border-chart-1">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               className={`block px-4 py-2 text-sm font-medium ${
                 pathname === link.href
-                  ? "text-blue-600"
-                  : "text-gray-600 hover:text-blue-500"
+                  ? "text-primary"
+                  : "text-gray-600 hover:text-primary"
               }`}
               onClick={() => setMenuOpen(false)}
             >
