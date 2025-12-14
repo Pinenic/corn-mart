@@ -28,18 +28,53 @@ jobs:
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: 📥 Install dependencies
-        run: npm ci
-
-      - name: 🔍 Lint & Type Check
+      # --- Frontend Dependencies ---
+      - name: 📥 Install Frontend dependencies
         run: |
+          cd frontend
+          npm ci
+
+      # --- Backend Dependencies ---
+      - name: 📥 Install Backend dependencies
+        run: |
+          cd backend
+          npm ci
+          
+      # The rest of your steps would also need to be scoped
+
+      - name: 🔍 Lint & Type Check (Frontend)
+        run: |
+          cd frontend
           npm run lint --if-present
           npm run type-check --if-present
 
-      - name: 🧱 Build project
-        run: npm run build
+      - name: 🔍 Lint & Type Check (Backend)
+        run: |
+          cd backend
+          npm run lint --if-present
+          npm run type-check --if-present
+
+      - name: ✅ Run Frontend tests
+        run: |
+          cd frontend
+          npm test --if-present
+
+      - name: ✅ Run Backend tests
+        run: |
+          cd backend
+          npm test --if-present
+
+      - name: 🧱 Build Frontend project
+        run: |
+          cd frontend
+          npm run build
+          
+      - name: 🧱 Build Backend project
+        run: |
+          cd backend
+          npm run build
 
       - name: ✅ Run tests
         run: npm test --if-present
