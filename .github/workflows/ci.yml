@@ -44,10 +44,27 @@ jobs:
           
       # The rest of your steps would also need to be scoped
 
-      - name: 🔍 Lint & Type Check
+      - name: 🔍 Lint & Type Check (Frontend)
         run: |
+          cd frontend
           npm run lint --if-present
           npm run type-check --if-present
+
+      - name: 🔍 Lint & Type Check (Backend)
+        run: |
+          cd backend
+          npm run lint --if-present
+          npm run type-check --if-present
+
+      - name: ✅ Run Frontend tests
+        run: |
+          cd frontend
+          npm test --if-present
+
+      - name: ✅ Run Backend tests
+        run: |
+          cd backend
+          npm test --if-present
 
       - name: 🧱 Build Frontend project
         run: |
