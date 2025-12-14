@@ -21,7 +21,7 @@ const nextConfig = {
   },
   experimental: {
     turbo: {
-      root: "/corn-mart/frontend",
+      root: path.join(path.dirname('/'), '..'),
     },
     serverActions: {
       allowedOrigins: ["vpz9b0n1-3000.uks1.devtunnels.ms", "localhost:3000"],
