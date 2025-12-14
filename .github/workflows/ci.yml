@@ -2,26 +2,79 @@ name: CI
 
 on:
   push:
-    branches: [ dev, staging ]
+    branches:
+      - main
+      - staging
+      - dev
   pull_request:
-    branches: [ dev, staging, main ]
+    branches:
+      - main
+      - staging
 
 jobs:
-  build-and-test:
+  build:
+    name: 🧪 Build & Test
     runs-on: ubuntu-latest
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - run: npm ci
-        working-directory: ./frontend
-      - run: npm run lint
-        working-directory: ./frontend
-      - run: npm test
-        working-directory: ./frontend
-      # Optional: run backend tests
-      - run: |
-          cd backend || exit 0
-          npm ci || true
-          npm test || true
+          node-version: 22
+
+      # --- Frontend Dependencies ---
+      - name: 📥 Install Frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      # --- Backend Dependencies ---
+      - name: 📥 Install Backend dependencies
+        run: |
+          cd backend
+          npm ci
+          
+      # The rest of your steps would also need to be scoped
+
+      - name: 🔍 Lint & Type Check (Frontend)
+        run: |
+          cd frontend
+          npm run lint --if-present
+          npm run type-check --if-present
+
+      - name: 🔍 Lint & Type Check (Backend)
+        run: |
+          cd backend
+          npm run lint --if-present
+          npm run type-check --if-present
+
+      - name: ✅ Run Frontend tests
+        run: |
+          cd frontend
+          npm test --if-present
+
+      - name: ✅ Run Backend tests
+        run: |
+          cd backend
+          npm test --if-present
+
+      - name: 🧱 Build Frontend project
+        run: |
+          cd frontend
+          npm run build
+          
+      - name: 🧱 Build Backend project
+        run: |
+          cd backend
+          npm run build
+
+      - name: ✅ Run tests
+        run: npm test --if-present

@@ -1,0 +1,401 @@
+{
+    "products" : [
+      {
+        "id": "dcd78b80-57b4-49d0-a3cd-636b48ea30e0",
+        "store_id": "1f26cc88-9df4-4dbe-944b-66bce3bc6735",
+        "name": "Big hammer",
+        "description": "A very big hammer",
+        "price": 2000,
+        "stock": 0,
+        "category": "accessories",
+        "images": null,
+        "is_active": true,
+        "created_at": "2025-11-14T11:22:02.164342+00:00",
+        "updated_at": "2025-11-14T11:22:02.164342+00:00",
+        "brand": null,
+        "thumbnail_url": null
+      },
+      {
+        "id": "42518a0a-0101-4ec1-8437-4975440dc084",
+        "store_id": "5b7c7299-12da-439e-87f6-b7e574c0a83c",
+        "name": "Let's try this update",
+        "description": "Integration test product",
+        "price": 50,
+        "stock": 0,
+        "category": "accessories",
+        "images": null,
+        "is_active": true,
+        "created_at": "2025-11-11T11:18:29.837681+00:00",
+        "updated_at": "2025-11-11T11:19:03.244204+00:00",
+        "brand": null,
+        "thumbnail_url": null
+      },
+      {
+        "id": "ed1b645a-f882-4e99-8523-8d91dcff5613",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "loader",
+        "description": "this is one of the powerful loader in the world",
+        "price": 5000,
+        "stock": 0,
+        "category": "accessories",
+        "images": null,
+        "is_active": true,
+        "created_at": "2025-11-08T09:08:13.24615+00:00",
+        "updated_at": "2025-11-08T09:08:13.24615+00:00",
+        "brand": null,
+        "thumbnail_url": null
+      },
+      {
+        "id": "8089df50-d078-4056-a3a1-bd126048bad8",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Dummy 10",
+        "description": "Tenth dummy product for test store",
+        "price": 30,
+        "stock": 0,
+        "category": "camera",
+        "images": null,
+        "is_active": true,
+        "created_at": "2025-11-05T15:56:11.488371+00:00",
+        "updated_at": "2025-11-08T09:46:45.343288+00:00",
+        "brand": null,
+        "thumbnail_url": "https://dmrtozxqjgoyjcnsmiky.supabase.co/storage/v1/object/public/user_uploads/fa31a398-aaa8-4bc3-aeb4-4332684f116c/8089df50-d078-4056-a3a1-bd126048bad8/c3da82a5-045e-4c61-bc70-05c089b35ae3-Project_20211225_0008.jpg"
+      },
+      {
+        "id": "814d2e80-a055-443e-9303-727ecbcb7fc3",
+        "store_id": "618e1272-181d-4493-b1d7-58fb630da6ad",
+        "name": "Dummy 9",
+        "description": "Dummy number nine for a different store",
+        "price": 25,
+        "stock": 0,
+        "category": "watch",
+        "images": null,
+        "is_active": true,
+        "created_at": "2025-11-05T15:54:09.896162+00:00",
+        "updated_at": "2025-11-05T15:54:09.896162+00:00",
+        "brand": null,
+        "thumbnail_url": null
+      },
+      {
+        "id": "b26d4663-ff47-49e2-9bb4-383cdb8cde9d",
+        "store_id": "618e1272-181d-4493-b1d7-58fb630da6ad",
+        "name": "Dummy 5",
+        "description": "Dummy number five",
+        "price": 34,
+        "stock": 0,
+        "category": "accessories",
+        "images": null,
+        "is_active": true,
+        "created_at": "2025-11-04T15:44:21.99904+00:00",
+        "updated_at": "2025-11-04T15:44:21.99904+00:00",
+        "brand": null,
+        "thumbnail_url": null
+      },
+      {
+        "id": "4929788d-40f1-4fd1-8a48-4bb61f3c6085",
+        "store_id": "618e1272-181d-4493-b1d7-58fb630da6ad",
+        "name": "test product1",
+        "description": "descriptions placeholder",
+        "price": 30.5,
+        "stock": 0,
+        "category": "tests",
+        "images": null,
+        "is_active": true,
+        "created_at": "2025-10-23T13:28:23.969568+00:00",
+        "updated_at": "2025-11-04T15:26:05.469998+00:00",
+        "brand": "gucci",
+        "thumbnail_url": null
+      },
+      {
+        "id": "6629ca0f-61f3-465c-a942-a0a48a326959",
+        "store_id": "618e1272-181d-4493-b1d7-58fb630da6ad",
+        "name": "Annibale Colombo Sofa",
+        "description": "The Annibale Colombo Sofa is a sophisticated and comfortable seating option, featuring exquisite design and premium upholstery for your living room.",
+        "price": 2499.99,
+        "stock": 60,
+        "category": "furniture",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/1.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/2.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/3.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:02:34.991582+00:00",
+        "brand": "Annibale Colombo",
+        "thumbnail_url": null
+      },
+      {
+        "id": "1bfc0a31-e831-4b43-8a25-c3e56ce9efaa",
+        "store_id": "618e1272-181d-4493-b1d7-58fb630da6ad",
+        "name": "Red Nail Polish",
+        "description": "The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",
+        "price": 8.99,
+        "stock": 79,
+        "category": "beauty",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:01:53.440508+00:00",
+        "brand": "Nail Couture",
+        "thumbnail_url": null
+      },
+      {
+        "id": "b1e78284-44f4-42dc-aa97-d35a378bff67",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Wooden Bathroom Sink With Mirror",
+        "description": "The Wooden Bathroom Sink with Mirror is a unique and stylish addition to your bathroom, featuring a wooden sink countertop and a matching mirror.",
+        "price": 799.99,
+        "stock": 7,
+        "category": "furniture",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/1.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/2.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/3.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:03:52.300071+00:00",
+        "brand": "Bath Trends",
+        "thumbnail_url": null
+      },
+      {
+        "id": "ce0fe5f6-3d0d-4ad1-bcf5-0d88c95eb605",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Annibale Colombo Bed",
+        "description": "The Annibale Colombo Bed is a luxurious and elegant bed frame, crafted with high-quality materials for a comfortable and stylish bedroom.",
+        "price": 1899.99,
+        "stock": 88,
+        "category": "furniture",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/1.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/2.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/3.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:04:11.876751+00:00",
+        "brand": "Annibale Colombo",
+        "thumbnail_url": null
+      },
+      {
+        "id": "fc4be841-ebcb-4e1c-99ad-89a75f96132a",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Bedside Table African Cherry",
+        "description": "The Bedside Table in African Cherry is a stylish and functional addition to your bedroom, providing convenient storage space and a touch of elegance.",
+        "price": 299.99,
+        "stock": 64,
+        "category": "furniture",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/1.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/2.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/3.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:04:57.298077+00:00",
+        "brand": "Furniture Co.",
+        "thumbnail_url": null
+      },
+      {
+        "id": "9b77623f-137d-4385-b8fb-32e1d112d184",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Knoll Saarinen Executive Conference Chair",
+        "description": "The Knoll Saarinen Executive Conference Chair is a modern and ergonomic chair, perfect for your office or conference room with its timeless design.",
+        "price": 499.99,
+        "stock": 26,
+        "category": "furniture",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/1.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/2.webp",
+            "https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/3.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:03:31.117427+00:00",
+        "brand": "Knoll",
+        "thumbnail_url": null
+      },
+      {
+        "id": "201607e0-ea16-4a9a-ae9b-b37443f46304",
+        "store_id": "618e1272-181d-4493-b1d7-58fb630da6ad",
+        "name": "Chanel Coco Noir Eau De",
+        "description": "Coco Noir by Chanel is an elegant and mysterious fragrance, featuring notes of grapefruit, rose, and sandalwood. Perfect for evening occasions.",
+        "price": 129.99,
+        "stock": 58,
+        "category": "fragrances",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp",
+            "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/2.webp",
+            "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/3.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:02:01.834605+00:00",
+        "brand": "Chanel",
+        "thumbnail_url": null
+      },
+      {
+        "id": "a68cfa56-5725-4e50-b8d8-5cf1ac96ac8a",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Red Lipstick",
+        "description": "The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",
+        "price": 12.99,
+        "stock": 91,
+        "category": "beauty",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:03:40.592037+00:00",
+        "brand": "Chic Cosmetics",
+        "thumbnail_url": null
+      },
+      {
+        "id": "d65c2a3a-0528-457a-a2c9-13baca461c92",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Eyeshadow Palette with Mirror",
+        "description": "The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",
+        "price": 19.99,
+        "stock": 34,
+        "category": "beauty",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-11-07T10:31:03.369602+00:00",
+        "brand": "Glamour Beauty",
+        "thumbnail_url": "https://dmrtozxqjgoyjcnsmiky.supabase.co/storage/v1/object/public/user_uploads/fa31a398-aaa8-4bc3-aeb4-4332684f116c/d65c2a3a-0528-457a-a2c9-13baca461c92/15bdaa50-968c-4487-9518-4b8f4ee0c53d-thumbnail.webp"
+      },
+      {
+        "id": "e173c5bb-4727-4a67-a0ae-9dec9a331049",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Gucci Bloom Eau de",
+        "description": "Gucci Bloom by Gucci is a floral and captivating fragrance, with notes of tuberose, jasmine, and Rangoon creeper. It's a modern and romantic scent.",
+        "price": 79.99,
+        "stock": 91,
+        "category": "fragrances",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/1.webp",
+            "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/2.webp",
+            "https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/3.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-11-08T09:02:46.854933+00:00",
+        "brand": "Gucci",
+        "thumbnail_url": "https://dmrtozxqjgoyjcnsmiky.supabase.co/storage/v1/object/public/user_uploads/fa31a398-aaa8-4bc3-aeb4-4332684f116c/e173c5bb-4727-4a67-a0ae-9dec9a331049/c1c5181f-3c37-48c4-940e-34d0e193bf8a-Project_20210615_0003.jpg"
+      },
+      {
+        "id": "cffe512b-9ff0-47e3-8203-8a63cd824323",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Calvin Klein CK One",
+        "description": "CK One by Calvin Klein is a classic unisex fragrance, known for its fresh and clean scent. It's a versatile fragrance suitable for everyday wear.",
+        "price": 49.99,
+        "stock": 29,
+        "category": "fragrances",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp",
+            "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/2.webp",
+            "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/3.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-11-06T14:29:26.556063+00:00",
+        "brand": "Calvin Klein",
+        "thumbnail_url": "https://dmrtozxqjgoyjcnsmiky.supabase.co/storage/v1/object/public/user_uploads/fa31a398-aaa8-4bc3-aeb4-4332684f116c/cffe512b-9ff0-47e3-8203-8a63cd824323/b1e0f14a-be6e-4b53-84f8-5e7101f5f5b7-C2.webp"
+      },
+      {
+        "id": "14166933-009d-4917-b387-ab38aeedd792",
+        "store_id": "618e1272-181d-4493-b1d7-58fb630da6ad",
+        "name": "Apple",
+        "description": "Fresh and crisp apples, perfect for snacking or incorporating into various recipes.",
+        "price": 1.99,
+        "stock": 8,
+        "category": "groceries",
+        "images": {
+          "thumnail": "https://cdn.dummyjson.com/product-images/groceries/apple/thumbnail.webp",
+          "images_arr": [
+            "https://cdn.dummyjson.com/product-images/groceries/apple/1.webp"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-14T15:00:34.23562+00:00",
+        "updated_at": "2025-10-14T15:01:40.51471+00:00",
+        "brand": null,
+        "thumbnail_url": null
+      },
+      {
+        "id": "d92d219e-f0a4-4568-8e69-6b712135f10f",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Laptop",
+        "description": "A powerful laptop",
+        "price": 1000,
+        "stock": 8,
+        "category": "Electronics",
+        "images": {
+          "thumnail": "url1",
+          "images_arr": [
+            "url1",
+            "url2"
+          ]
+        },
+        "is_active": true,
+        "created_at": "2025-10-11T14:58:14.555032+00:00",
+        "updated_at": "2025-10-11T15:12:46.928448+00:00",
+        "brand": null,
+        "thumbnail_url": null
+      },
+      {
+        "id": "1bd9e552-ccbf-4eae-a514-a27550f41247",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "name": "Test cap",
+        "description": "The first test product",
+        "price": 50,
+        "stock": 20,
+        "category": "Testers",
+        "images": null,
+        "is_active": true,
+        "created_at": "2025-10-06T11:37:05+00:00",
+        "updated_at": "2025-10-11T15:24:26.786107+00:00",
+        "brand": null,
+        "thumbnail_url": null
+      }
+    ]
+}

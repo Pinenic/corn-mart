@@ -1,0 +1,305 @@
+[
+  {
+    "id": "4ad8c6b1-8020-449d-954f-17f6cff2f53c",
+    "buyer_id": "55e2d94f-40b9-447a-945a-1e77c87d396e",
+    "total_amount": 150,
+    "status": "processing",
+    "payment_status": "unpaid",
+    "momo_reference_id": null,
+    "created_at": "2025-11-26T11:31:46.285707+00:00",
+    "updated_at": "2025-11-26T11:59:55.174676+00:00",
+    "store_orders": [
+      {
+        "id": "9a5cfd12-6202-49fc-8ae3-7492b583260d",
+        "status": "confirmed",
+        "order_id": "4ad8c6b1-8020-449d-954f-17f6cff2f53c",
+        "store_id": "566f03d2-e841-4d6a-b104-8d5551918158",
+        "subtotal": 150,
+        "created_at": "2025-11-26T11:31:46.285707+00:00",
+        "net_amount": 0,
+        "updated_at": "2025-11-26T11:59:55.174676+00:00",
+        "order_items": [
+          {
+            "id": "8d2812fb-c590-42f9-b4c5-122126ab7f92",
+            "quantity": 1,
+            "subtotal": 150,
+            "product_id": "19a20bc9-0b45-49e4-a276-e8daa3cc2392",
+            "unit_price": 150,
+            "variant_id": "bf5a7e9e-8fa8-4617-9e32-a6b803c651f0",
+            "store_order_id": "9a5cfd12-6202-49fc-8ae3-7492b583260d"
+          }
+        ],
+        "platform_fee": 0,
+        "payout_status": "pending",
+        "shipping_info": {},
+        "account_number": null,
+        "payout_retries": 0,
+        "payout_reference_id": null
+      }
+    ]
+  },
+  {
+    "id": "0312832e-5016-4151-a816-223aed34ab27",
+    "buyer_id": "55e2d94f-40b9-447a-945a-1e77c87d396e",
+    "total_amount": 100,
+    "status": "pending",
+    "payment_status": "unpaid",
+    "momo_reference_id": null,
+    "created_at": "2025-11-26T12:53:54.562578+00:00",
+    "updated_at": "2025-11-26T12:53:54.562578+00:00",
+    "store_orders": [
+      {
+        "id": "c15f5591-b989-4253-996b-2250d2e995d7",
+        "status": "pending",
+        "order_id": "0312832e-5016-4151-a816-223aed34ab27",
+        "store_id": "566f03d2-e841-4d6a-b104-8d5551918158",
+        "subtotal": 100,
+        "created_at": "2025-11-26T12:53:54.562578+00:00",
+        "net_amount": 0,
+        "updated_at": "2025-11-26T12:53:54.562578+00:00",
+        "order_items": [
+          {
+            "id": "7d19358e-d977-4a94-9abf-573f8723596a",
+            "quantity": 1,
+            "subtotal": 100,
+            "product_id": "19a20bc9-0b45-49e4-a276-e8daa3cc2392",
+            "unit_price": 100,
+            "variant_id": "64a3ac96-1c7f-4de8-9db1-f317ace60fe6",
+            "store_order_id": "c15f5591-b989-4253-996b-2250d2e995d7"
+          }
+        ],
+        "platform_fee": 0,
+        "payout_status": "pending",
+        "shipping_info": {},
+        "account_number": null,
+        "payout_retries": 0,
+        "payout_reference_id": null
+      }
+    ]
+  },
+  {
+    "id": "1032f18c-40da-4472-9e28-abd89fd066ed",
+    "buyer_id": "55e2d94f-40b9-447a-945a-1e77c87d396e",
+    "total_amount": 2279,
+    "status": "pending",
+    "payment_status": "unpaid",
+    "momo_reference_id": null,
+    "created_at": "2025-11-26T11:24:35.580022+00:00",
+    "updated_at": "2025-11-26T11:24:35.580022+00:00",
+    "store_orders": [
+      {
+        "id": "5bbefa58-47bc-4375-93a4-de3bbba16abf",
+        "status": "pending",
+        "order_id": "1032f18c-40da-4472-9e28-abd89fd066ed",
+        "store_id": "1f26cc88-9df4-4dbe-944b-66bce3bc6735",
+        "subtotal": 1500,
+        "created_at": "2025-11-26T11:24:35.580022+00:00",
+        "net_amount": 0,
+        "updated_at": "2025-11-26T11:24:35.580022+00:00",
+        "order_items": [
+          {
+            "id": "733a851f-3f27-4a76-a89c-fcef7ebe3bd6",
+            "quantity": 1,
+            "subtotal": 1500,
+            "product_id": "dcd78b80-57b4-49d0-a3cd-636b48ea30e0",
+            "unit_price": 1500,
+            "variant_id": "4863e0b7-107b-4d3f-87fe-d278b08a6f84",
+            "store_order_id": "5bbefa58-47bc-4375-93a4-de3bbba16abf"
+          }
+        ],
+        "platform_fee": 0,
+        "payout_status": "pending",
+        "shipping_info": {},
+        "account_number": null,
+        "payout_retries": 0,
+        "payout_reference_id": null
+      },
+      {
+        "id": "f397eab3-fbc5-4ba7-824d-15981dc3fd76",
+        "status": "pending",
+        "order_id": "1032f18c-40da-4472-9e28-abd89fd066ed",
+        "store_id": "566f03d2-e841-4d6a-b104-8d5551918158",
+        "subtotal": 300,
+        "created_at": "2025-11-26T11:24:35.580022+00:00",
+        "net_amount": 0,
+        "updated_at": "2025-11-26T11:24:35.580022+00:00",
+        "order_items": [
+          {
+            "id": "b4bb30eb-8f6e-4ca3-a9ae-40b1d5bf759f",
+            "quantity": 3,
+            "subtotal": 300,
+            "product_id": "19a20bc9-0b45-49e4-a276-e8daa3cc2392",
+            "unit_price": 100,
+            "variant_id": "64a3ac96-1c7f-4de8-9db1-f317ace60fe6",
+            "store_order_id": "f397eab3-fbc5-4ba7-824d-15981dc3fd76"
+          }
+        ],
+        "platform_fee": 0,
+        "payout_status": "pending",
+        "shipping_info": {},
+        "account_number": null,
+        "payout_retries": 0,
+        "payout_reference_id": null
+      },
+      {
+        "id": "a9e7097c-0615-4c37-a63a-d38ff714d9e7",
+        "status": "pending",
+        "order_id": "1032f18c-40da-4472-9e28-abd89fd066ed",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "subtotal": 479,
+        "created_at": "2025-11-26T11:24:35.580022+00:00",
+        "net_amount": 0,
+        "updated_at": "2025-11-26T11:24:35.580022+00:00",
+        "order_items": [
+          {
+            "id": "bd86a75a-9939-4a0f-a2b0-2b8c376fe3db",
+            "quantity": 4,
+            "subtotal": 224,
+            "product_id": "e173c5bb-4727-4a67-a0ae-9dec9a331049",
+            "unit_price": 56,
+            "variant_id": "ea8689ce-36e0-4d22-99dd-03a9f3a95947",
+            "store_order_id": "a9e7097c-0615-4c37-a63a-d38ff714d9e7"
+          },
+          {
+            "id": "3e2c463f-fbf3-4763-886c-47940be40daa",
+            "quantity": 3,
+            "subtotal": 105,
+            "product_id": "8089df50-d078-4056-a3a1-bd126048bad8",
+            "unit_price": 35,
+            "variant_id": "aead2a9b-1e52-45b5-87a3-1195f83b7931",
+            "store_order_id": "a9e7097c-0615-4c37-a63a-d38ff714d9e7"
+          },
+          {
+            "id": "07821299-14aa-4554-a8fe-f8fe2e6212d8",
+            "quantity": 6,
+            "subtotal": 150,
+            "product_id": "d65c2a3a-0528-457a-a2c9-13baca461c92",
+            "unit_price": 25,
+            "variant_id": "0ad2657a-e08d-472f-b68b-8f4768340427",
+            "store_order_id": "a9e7097c-0615-4c37-a63a-d38ff714d9e7"
+          }
+        ],
+        "platform_fee": 0,
+        "payout_status": "pending",
+        "shipping_info": {},
+        "account_number": null,
+        "payout_retries": 0,
+        "payout_reference_id": null
+      }
+    ]
+  },
+  {
+    "id": "f5364bcd-3cc0-412f-9f39-a2b4da0a3581",
+    "buyer_id": "55e2d94f-40b9-447a-945a-1e77c87d396e",
+    "total_amount": 6300,
+    "status": "processing",
+    "payment_status": "unpaid",
+    "momo_reference_id": null,
+    "created_at": "2025-11-26T12:31:49.556967+00:00",
+    "updated_at": "2025-11-26T12:33:06.445274+00:00",
+    "store_orders": [
+      {
+        "id": "caa3cdc8-15a0-4dc0-a0ea-5fbc3b06ee02",
+        "status": "pending",
+        "order_id": "f5364bcd-3cc0-412f-9f39-a2b4da0a3581",
+        "store_id": "1f26cc88-9df4-4dbe-944b-66bce3bc6735",
+        "subtotal": 6000,
+        "created_at": "2025-11-26T12:31:49.556967+00:00",
+        "net_amount": 0,
+        "updated_at": "2025-11-26T12:31:49.556967+00:00",
+        "order_items": [
+          {
+            "id": "576571ad-1455-41f0-a318-7f048c5bdbae",
+            "quantity": 1,
+            "subtotal": 3000,
+            "product_id": "dcd78b80-57b4-49d0-a3cd-636b48ea30e0",
+            "unit_price": 3000,
+            "variant_id": "d3119bb5-5eca-401d-9ebb-2f5ed541c260",
+            "store_order_id": "caa3cdc8-15a0-4dc0-a0ea-5fbc3b06ee02"
+          },
+          {
+            "id": "b2bf05fd-cc91-4f7f-bc80-6026f3bf4a56",
+            "quantity": 2,
+            "subtotal": 3000,
+            "product_id": "dcd78b80-57b4-49d0-a3cd-636b48ea30e0",
+            "unit_price": 1500,
+            "variant_id": "4863e0b7-107b-4d3f-87fe-d278b08a6f84",
+            "store_order_id": "caa3cdc8-15a0-4dc0-a0ea-5fbc3b06ee02"
+          }
+        ],
+        "platform_fee": 0,
+        "payout_status": "pending",
+        "shipping_info": {},
+        "account_number": null,
+        "payout_retries": 0,
+        "payout_reference_id": null
+      },
+      {
+        "id": "6f7d12d8-268e-482e-9606-c65ce821cfae",
+        "status": "confirmed",
+        "order_id": "f5364bcd-3cc0-412f-9f39-a2b4da0a3581",
+        "store_id": "566f03d2-e841-4d6a-b104-8d5551918158",
+        "subtotal": 300,
+        "created_at": "2025-11-26T12:31:49.556967+00:00",
+        "net_amount": 0,
+        "updated_at": "2025-11-26T12:33:06.445274+00:00",
+        "order_items": [
+          {
+            "id": "416ce4a2-378c-4cf4-85b6-c1ae81634842",
+            "quantity": 2,
+            "subtotal": 300,
+            "product_id": "19a20bc9-0b45-49e4-a276-e8daa3cc2392",
+            "unit_price": 150,
+            "variant_id": "bf5a7e9e-8fa8-4617-9e32-a6b803c651f0",
+            "store_order_id": "6f7d12d8-268e-482e-9606-c65ce821cfae"
+          }
+        ],
+        "platform_fee": 0,
+        "payout_status": "pending",
+        "shipping_info": {},
+        "account_number": null,
+        "payout_retries": 0,
+        "payout_reference_id": null
+      }
+    ]
+  },
+  {
+    "id": "78c3024b-a62e-4b07-83d3-0b50c9b2a9db",
+    "buyer_id": "55e2d94f-40b9-447a-945a-1e77c87d396e",
+    "total_amount": 50,
+    "status": "pending",
+    "payment_status": "unpaid",
+    "momo_reference_id": null,
+    "created_at": "2025-11-26T13:03:11.07409+00:00",
+    "updated_at": "2025-11-26T13:03:11.07409+00:00",
+    "store_orders": [
+      {
+        "id": "0ed4b806-c00b-4c57-ac4f-e9f8f4240ee0",
+        "status": "pending",
+        "order_id": "78c3024b-a62e-4b07-83d3-0b50c9b2a9db",
+        "store_id": "9fa980ba-e1d9-4983-89f3-b735a77e7e7a",
+        "subtotal": 50,
+        "created_at": "2025-11-26T13:03:11.07409+00:00",
+        "net_amount": 0,
+        "updated_at": "2025-11-26T13:03:11.07409+00:00",
+        "order_items": [
+          {
+            "id": "0c7f2f73-c883-42e7-b1e0-6a6a1d60e71a",
+            "quantity": 2,
+            "subtotal": 50,
+            "product_id": "d65c2a3a-0528-457a-a2c9-13baca461c92",
+            "unit_price": 25,
+            "variant_id": "0ad2657a-e08d-472f-b68b-8f4768340427",
+            "store_order_id": "0ed4b806-c00b-4c57-ac4f-e9f8f4240ee0"
+          }
+        ],
+        "platform_fee": 0,
+        "payout_status": "pending",
+        "shipping_info": {},
+        "account_number": null,
+        "payout_retries": 0,
+        "payout_reference_id": null
+      }
+    ]
+  }
+]
