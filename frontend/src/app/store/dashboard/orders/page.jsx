@@ -15,7 +15,9 @@ export default function Page() {
     // const [delloading, setDelLoading] = useState(false);
     // const [message, setMessage] = useState("");
     const {profile} = useProfile();
-  const storeId = profile.stores[0]?.id;
+  const {store} = useStoreStore();
+  const storeId = store?.id;
+  // const storeId = profile.stores[0]?.id;
     // const {store} = useStoreStore()
   
     async function loadOrders() {

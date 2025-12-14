@@ -27,7 +27,7 @@ export default function ProductsPage() {
   const [message, setMessage] = useState("");
   const { profile } = useProfile();
   const { store } = useStoreStore();
-  const storeId = store.id;
+  const storeId = store?.id;
 
   async function loadProducts() {
     try {

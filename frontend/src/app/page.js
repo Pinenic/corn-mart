@@ -8,11 +8,10 @@ import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
 import FeaturedProducts from "@/components/landing/FeaturedProducts";
 import CallToAction from "@/components/landing/CallToAction";
-import useNotifications from "@/hooks/useNotifications";
+// import useNotifications from "@/hooks/useNotifications";
 
 export default function Home() {
   const { user, signOut } = useAuthStore();
-  useNotifications(user.id);
 
   return (
       <div className="text-center">
