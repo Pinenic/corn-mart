@@ -21,7 +21,7 @@ const nextConfig = {
   },
   experimental: {
     turbo: {
-      root: "/home/dive/Desktop/AppeShit/Github/Corn Mart/corn-mart/frontend",
+      root: "/corn-mart/frontend",
     },
     serverActions: {
       allowedOrigins: ["vpz9b0n1-3000.uks1.devtunnels.ms", "localhost:3000"],
