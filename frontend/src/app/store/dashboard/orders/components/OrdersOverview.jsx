@@ -36,9 +36,7 @@ export default function OrdersOverview({ orders, loading }) {
       <CardContent className="p-2 px-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-lg">Overview</h2>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
-            + Create Order
-          </Button>
+          <div></div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

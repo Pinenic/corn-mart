@@ -1,48 +1,56 @@
 "use client";
 import { useEffect, useState } from "react";
-import TopRow from "./TopRowClient";
-import OrderDetails from "./OrderDetailsClient";
-import CustomerDetails from "./CustomerDetailsClient";
-import { getStoreOrderDetails, updateStoreOrderStatus } from "@/lib/ordersApi";
+import {
+  getBuyerOrder,
+  getStoreOrderDetails,
+  updateStoreOrderStatus,
+} from "@/lib/ordersApi";
 import { toast } from "sonner";
 import { useProfile } from "@/store/useProfile";
+import OrderList from "./OrderListClient";
+import OrderDetails from "./OrderDetails";
+import { useAuthStore } from "@/store/useAuthStore";
 
-export default function OrdersClient({ initialOrder = {}}) {
-  const {profile} = useProfile();
-  const [order, setOrder] = useState(initialOrder || {});
+export default function OrdersClient({ initialOrder = {} }) {
+  // const { profile } = useProfile();
+  const { init, user } = useAuthStore();
+  // const userId = profile?.id;
+  const [order, setOrder] = useState([]);
   const [loading, setLoading] = useState(
     !initialOrder || Object.keys(initialOrder).length === 0
   );
   const [selectedOrderId, setSelectedId] = useState(null);
 
-  // async function loadOrders() {
-  //   try {
-  //     setLoading(true);
-  //     const data = await getStoreOrderDetails(soId);
-  //     setOrder(data || {});
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Failed to load order");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const data = await getBuyerOrder(user.id);
+      if (data) toast.success("fetched orders");
+      setOrder(data || {});
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load initial orders");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!initialOrder || Object.keys(initialOrder).length === 0) {
-      setOrder([]);
+    if (!user) {
+      init();
     }
+    loadOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   async function handleUpdateStatus(soId, storeId, oldStatus, metadata = {}) {
     const newStatus =
       oldStatus == "pending"
-        ? "confirmed"
+        ? "cancelled"
         : oldStatus == "confirmed"
-        ? "processing"
+        ? "cancelled"
         : oldStatus == "processing"
-        ? "shipped"
+        ? "cancelled"
         : "delivered";
     try {
       const res = await updateStoreOrderStatus(soId, {
@@ -53,7 +61,7 @@ export default function OrdersClient({ initialOrder = {}}) {
 
       if (res?.success) {
         toast.success("Order updated");
-        await loadOrder();
+        await loadOrders();
         return true;
       }
       toast.error("Failed to update order");
@@ -65,24 +73,74 @@ export default function OrdersClient({ initialOrder = {}}) {
     }
   }
 
+  const [isModalOpen, setModalOpen] = useState(false);
+
   return (
     <div>
-      {/* <TopRow order={order} loading={loading} soId={soId} onUpdateStatus={handleUpdateStatus} /> */}
+      {/* Desktop / large screens layout */}
       <div className="flex flex-col justify-center lg:flex-row p-4">
         <div className="flex w-full lg:w-1/2 p-2">
-          <OrderDetails
-            order={order}
+          <OrderList
+            orders={order}
             loading={loading}
-            onSelect={setSelectedId}
+            onSelect={(id) => {
+              setSelectedId(id);
+              setModalOpen(true); // open modal on mobile when an order is selected
+            }}
           />
         </div>
-        <div className="flex flex-col w-full lg:w-1/3 p-2">
+
+        {/* Inline details for larger screens */}
+        <div className="hidden lg:flex flex-col w-full lg:w-1/3 p-2">
           <div className="flex">
-            <CustomerDetails orderId={selectedOrderId} handleUpdate={handleUpdateStatus} loading={loading} />
+            <OrderDetails
+              orderId={selectedOrderId}
+              handleUpdate={handleUpdateStatus}
+              loading={loading}
+            />
           </div>
           <div className="flex">order History</div>
         </div>
       </div>
+
+      {/* Mobile modal for order details */}
+      {isModalOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center">
+          {/* backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setModalOpen(false)}
+          />
+          {/* modal panel */}
+          <div className="relative w-full max-h-[90vh] overflow-auto bg-white rounded-t-xl p-4 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium">Order Details</h3>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="ml-2 p-2 rounded bg-gray-100 text-sm"
+                aria-label="Close"
+              >
+                Close
+              </button>
+            </div>
+
+            <OrderDetails
+              orderId={selectedOrderId}
+              handleUpdate={async (soId, storeId, oldStatus, metadata) => {
+                const ok = await handleUpdateStatus(
+                  soId,
+                  storeId,
+                  oldStatus,
+                  metadata
+                );
+                if (ok) setModalOpen(false); // optionally close modal after update
+                return ok;
+              }}
+              loading={loading}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

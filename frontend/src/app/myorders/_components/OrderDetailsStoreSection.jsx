@@ -3,7 +3,15 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-export default function OrderDetailsStoreSection({ storeOrder, handleUpdate }) {
+export default function OrderDetailsStoreSection({
+  storeOrder,
+  handleUpdate,
+  refresh,
+}) {
+  const onButtonClick = async () => {
+   await handleUpdate(storeOrder.id, storeOrder.store_id, storeOrder.status);
+    refresh();
+  };
   return (
     <div className="rounded-xl mb-4 border p-4 bg-white dark:bg-muted shadow-sm">
       {/* You may later replace storeId with store name if you fetch it */}
@@ -43,13 +51,38 @@ export default function OrderDetailsStoreSection({ storeOrder, handleUpdate }) {
         ))}
       </div>
       <div className="flex justify-between pt-4">
-        <Button
+        {storeOrder.status == "cancelled" ? (
+          <p>Cancelled</p>
+        ) : storeOrder.status == "shipped" ? (
+          <Button
+            variant="info"
+            size="sm"
+            onClick={() =>
+              onButtonClick()
+            }
+          >
+            Confirm
+          </Button>
+        ) : storeOrder.status == "delivered" ? (
+          <p>Delivered</p>
+        ) : (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() =>
+              onButtonClick()
+            }
+          >
+            Cancel
+          </Button>
+        )}
+        {/* <Button
           variant="destructive"
           size="sm"
           onClick={() => handleUpdate(storeOrder.id, storeOrder.store_id, storeOrder.status)}
         >
           Cancel
-        </Button>
+        </Button> */}
         <p className="text-sm mt-1 font-semibold text-right">
           Subtotal: K{storeOrder.subtotal}
         </p>

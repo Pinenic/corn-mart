@@ -17,3 +17,7 @@ export async function createStore(userId, payload ) {
     body: formData,
   });
 }
+
+export async function getStoreById(id) {
+  return fetchApi(`/api/stores/${id}`)
+}

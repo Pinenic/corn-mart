@@ -1,6 +1,7 @@
 import { supabase } from "../supabaseClient.js";
 
 export const getAllProducts = async ({ offset = 0, limit = 12 }) => {
+  let hasMore = true;
   const from = offset * limit;
   const to = from + (limit - 1);
   const { data: products, error: prodError } = await supabase
@@ -9,7 +10,9 @@ export const getAllProducts = async ({ offset = 0, limit = 12 }) => {
     .range(from, to)
     .order("created_at", { ascending: true });
   if (prodError) throw new Error(`Error fetching products,`, prodError);
-  return products;
+
+  if(products.length < limit) hasMore = false;
+  return {products, hasMore};
 };
 
 export const getProductById = async (id) => {

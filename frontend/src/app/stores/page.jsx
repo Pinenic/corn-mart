@@ -2,13 +2,16 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function StoresPage() {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const getStores = async () => {
     setLoading(true);
@@ -43,6 +46,10 @@ export default function StoresPage() {
       <h1 className="text-3xl font-bold text-blue-700 text-center mb-8">
         Explore Stores
       </h1>
+
+      <Button className={"mb-2"} onClick={()=> router.push("/selling/onboarding")} >
+        <Plus /> Create Store
+      </Button>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {stores.map((store) => (

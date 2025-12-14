@@ -78,9 +78,9 @@ export default function Page() {
   return (
     <div className="flex">
       <main className="w-full">
-        <div className="flex justify-between px-3 mt-5">
+        <div className="flex flex-col md:flex-row justify-between px-3 mt-5">
           <AutoBreadcrumb />
-          <div className="flex gap-4">
+          <div className="flex gap-4 mt-2 md:mt-0 w-full md:w-fit justify-between md:justify-start">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant={"outline"} size={"sm"}>
@@ -117,9 +117,9 @@ export default function Page() {
 
         <div
           className={
-            view == "Grid"
-              ? "grid grid-cols-4 gap-6 p-4 h-[70vh] overflow-y-scroll mt-4"
-              : "flex flex-col h-[70vh] overflow-y-scroll mt-4 "
+            view === "Grid"
+              ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 mt-4"
+              : "flex flex-col gap-4 p-4 mt-4"
           }
         >
           {/* {data.products.map((product) => (
@@ -142,7 +142,7 @@ export default function Page() {
             ))
           )}
         </div>
-        <div className="flex w-full justify-center gap-8 mt-2">
+        {/* <div className="flex w-full justify-center gap-8 mt-2">
           <div className="flex w-fit items-center justify-center text-sm font-medium">
             Page {page} of {totalPages}
           </div>
@@ -187,7 +187,7 @@ export default function Page() {
               <IconChevronsRight />
             </Button>
           </div>
-        </div>
+        </div> */}
       </main>
     </div>
   );

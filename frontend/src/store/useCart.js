@@ -36,7 +36,7 @@ export const useCart = create(
     // -------------------------
     getCart: async (userId) => {
       set({ loading: true });
-      console.log(userId);
+      // console.log(userId);
       const { data: cart, error } = await supabase
         .from("carts")
         .select(
@@ -57,7 +57,7 @@ export const useCart = create(
         )
         .eq("user_id", userId)
         .maybeSingle();
-      console.log(cart);
+      // console.log(cart);
 
       if (error) {
         console.error("Error fetching cart", error);

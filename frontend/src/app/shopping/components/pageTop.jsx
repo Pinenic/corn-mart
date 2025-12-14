@@ -11,12 +11,9 @@ import SearchBar from "./SearchBar";
 import { searchMarket } from "@/lib/marketplaceApi";
 import CategoryNav from "./CategoryNav";
 import MegaMenuCategories from "./MegaMenuCategories";
+import { AutoBreadcrumb } from "./AutoBreadcrumb";
 
-export default function PageTop({
-  Categories,
-  setLoading,
-  onResults,
-}) {
+export default function PageTop({ Categories, setLoading, onResults }) {
   async function search(q) {
     try {
       const res = await searchMarket(q);
@@ -37,31 +34,13 @@ export default function PageTop({
     }
   }
   return (
-    <div className=" w-full flex justify-between p-2 px-3 gap-2">
-      {/* <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant={"outline"} size={"sm"}>
-            <span>All Categories</span>
-            <ChevronDown />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {Categories.map((cat) => (
-            <DropdownMenuItem>{cat}</DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu> */}
-      {/* <CategoryNav categories={Categories}/> */}
+    <div className=" w-full md:flex justify-between mt-3 px-2 pb-2 px-3 gap-2">
+      <div className="hidden lg:inline py-2">
+        <AutoBreadcrumb />
+      </div>
       <MegaMenuCategories categories={Categories} />
 
-      {/* <div className="relative w-1/3 rounded-lg">
-      <Search className="absolute bg-primary hover:bg-primary/90 text-white h-full w-15 p-1 left-[86%] rounded-r-lg" />
-      <Input
-        value={searchQ}
-        onChange={(e) => setSearchQ(e.target.value)}
-        placeholder="Search"
-      />
-    </div> */}<SearchBar onQuery={search} onSearch={handleSearch} />
+      <SearchBar onQuery={search} onSearch={handleSearch} />
     </div>
   );
 }

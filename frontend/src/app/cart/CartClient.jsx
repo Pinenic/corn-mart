@@ -43,7 +43,7 @@ export default function CartClient() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h2 className="text-xl font-semibold mb-4">Your cart is empty</h2>
-        <Link href="/shopping" className="text-blue-600 font-medium hover:underline">
+        <Link href="/shopping" className="text-primary font-medium hover:underline">
           Continue Shopping
         </Link>
       </div>

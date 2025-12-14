@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -16,23 +16,42 @@ import { UploadCloud } from "lucide-react";
 import { createProduct } from "@/lib/inventoryApi";
 import { toast } from "sonner";
 import { useProfile } from "@/store/useProfile";
+import { getCategories } from "@/lib/marketplaceApi";
+import SubcategorySelector from "../components/SubcategorySelector";
+import { useStoreStore } from "@/store/useStore";
+import ImageDropzone from "../components/ImageDropzone";
+import { useRouter } from "next/navigation";
 
+let Categories = [];
+
+try {
+  const cursor = await getCategories();
+  Categories = cursor.data;
+} catch (err) {
+  // server-side fetch failed; client will handle retries
+  console.error("Failed to fetch order on server:", err?.message || err);
+}
 export default function AddProductPage() {
+  const router = useRouter();
+  const [category, setCategory] = useState(Categories[0]);
   const [product, setProduct] = useState({
     name: "",
-    category: "",
+    category: category?.name || "",
     brand: "",
     color: "",
     description: "",
     stock: "",
     price: "",
   });
-  const {profile} = useProfile()
-  const storeId = profile.stores[0]?.id;
-  const userId = profile.id;
+  const [tag, setTag] = useState();
+  const { profile } = useProfile();
+  const { store } = useStoreStore();
+  const storeId = store?.id;
+  const userId = profile?.id;
 
   const [Loading, setLoading] = useState(false);
   const [message, setMeassage] = useState("");
+  const [thumbnail, setThumbnail] = useState(null);
 
   const handleChange = (field, value) => {
     setProduct((prev) => ({ ...prev, [field]: value }));
@@ -41,25 +60,45 @@ export default function AddProductPage() {
   const handleSubmit = async (status) => {
     console.log("Submitting product:", { ...product, status });
     try {
-        setLoading(true);
-        const res = await createProduct({ userId, name:product.name, description:product.description, price:product.price, store_id:storeId, category:product.category, images:[] });
-        res?.success ? setMeassage(res.success) : setMeassage("Something went wrong");
-        setProduct({
-            name: "",
-            category: "",
-            brand: "",
-            color: "",
-            description: "",
-            stock: "",
-            price: "",
-          });
-          toast.success("Product has been created Succesfully", message)
-          setLoading(false);
+      setLoading(true);
+      const res = await createProduct({
+        userId,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        store_id: storeId,
+        category: product.category,
+        brand: product.brand,
+        images: [thumbnail],
+        subcat: tag
+      });
+      res?.success
+        ? setMeassage(res.success)
+        : setMeassage("Something went wrong");
+      setProduct({
+        name: "",
+        category: "",
+        brand: "",
+        color: "",
+        description: "",
+        stock: "",
+        price: "",
+      });
+      toast.success("Product has been created Succesfully", message);
+      setLoading(false);
+      router.back();
     } catch (error) {
-        console.error("Failed to create product", error.message);
-        toast.success("Failed to create product")
+      console.error("Failed to create product", error.message);
+      toast.success("Failed to create product");
     }
-    
+  };
+
+  const addSubcategory = (subcat) => {
+    setCategory((prevState) => ({
+      ...prevState, // Copy all properties from the previous state object
+      subcategories: [...prevState.subcategories, subcat], // Create a new array with existing items and the new item
+    }));
+    setTag(subcat);
   };
 
   return (
@@ -80,6 +119,15 @@ export default function AddProductPage() {
           </div>
 
           <div className="space-y-2">
+            <label>Brand</label>
+            <Input
+              placeholder="Enter brand"
+              value={product.brand}
+              onChange={(e) => handleChange("brand", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
             <label>Category</label>
             <Select
               value={product.category}
@@ -89,40 +137,33 @@ export default function AddProductPage() {
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="laptop">Laptop</SelectItem>
-                <SelectItem value="watch">Watch</SelectItem>
-                <SelectItem value="camera">Camera</SelectItem>
-                <SelectItem value="accessories">Accessories</SelectItem>
+                {Categories.map((cat) => (
+                  <SelectItem
+                    key={cat.id}
+                    value={cat.name}
+                    onClick={() => setCategory(cat)}
+                  >
+                    {cat.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <label>Brand</label>
-            <Select
-              value={product.brand}
-              onValueChange={(val) => handleChange("brand", val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select brand" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="apple">Apple</SelectItem>
-                <SelectItem value="asus">ASUS</SelectItem>
-                <SelectItem value="canon">Canon</SelectItem>
-                <SelectItem value="bose">Bose</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label>Color</label>
-            <Select
+            <label>Tag</label>
+            <SubcategorySelector
+              category={category}
+              selected={tag}
+              onSelect={setTag}
+              onCreate={addSubcategory}
+            />
+            {/* <Select
               value={product.color}
               onValueChange={(val) => handleChange("color", val)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select color" />
+                <SelectValue placeholder="Select tag" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="black">Black</SelectItem>
@@ -130,7 +171,7 @@ export default function AddProductPage() {
                 <SelectItem value="silver">Silver</SelectItem>
                 <SelectItem value="gold">Gold</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
           </div>
 
           <div className="md:col-span-2 space-y-2">
@@ -147,7 +188,7 @@ export default function AddProductPage() {
       {/* ---------- Pricing & Availability ---------- */}
       <Card>
         <CardHeader>
-          <CardTitle>Pricing & Availability</CardTitle>
+          <CardTitle>Pricing</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-6 md:grid-cols-2">
           <div className="space-y-2">
@@ -184,24 +225,16 @@ export default function AddProductPage() {
           <CardTitle>Product Images</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center">
-            <UploadCloud className="w-10 h-10 mb-3 text-gray-400" />
-            <p className="text-sm text-gray-600">
-              Click to upload or drag and drop <br />
-              <span className="text-gray-400 text-xs">
-                SVG, PNG, JPG or GIF (MAX. 800x400px)
-              </span>
-            </p>
-          </div>
+          <ImageDropzone
+            value={thumbnail}
+            onChange={(file) => setThumbnail(file)}
+          />
         </CardContent>
       </Card>
 
       {/* ---------- Buttons ---------- */}
       <div className="flex justify-end gap-3">
-        <Button
-          variant="outline"
-          onClick={() => handleSubmit("draft")}
-        >
+        <Button variant="outline" onClick={() => handleSubmit("draft")}>
           Draft
         </Button>
         <Button onClick={() => handleSubmit("published")}>

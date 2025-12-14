@@ -39,59 +39,61 @@ export default function ProductGrid({ initialProducts, loading, title }) {
   const { ref, inView } = useInView();
   const [view, setView] = useState("Grid");
   const [products, setProducts] = useState(initialProducts);
-  //   const [loading, setLoading] = useState(false);
-  const views = [
-    {
-      name: "List",
-      icon: <List />,
-    },
-    {
-      name: "Grid",
-      icon: <LayoutDashboard />,
-    },
-  ];
   const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const views = [
+    { name: "List", icon: <List /> },
+    { name: "Grid", icon: <LayoutDashboard /> },
+  ];
 
   async function fetchMoreProducts() {
+    if (!hasMore) return;
+
     try {
-      const res = await getAllProducts(page - 1 + 1);
-      setProducts([...products, ...res.data]);
+      setLoadingMore(true);
+      const res = await getAllProducts(page + 1-1);
+
+      setProducts((prev) => [...prev, ...res.data.products]);
+      setPage((prev) => prev + 1);
+      setHasMore(res.data.hasMore);
     } catch (error) {
-      console.error("failed to fetch products", error);
+      console.error("Failed to fetch products", error);
+    } finally {
+      setLoadingMore(false);
     }
   }
-
-  useEffect(() => {
-    if (inView) {
-      setPage(page + 1);
-      fetchMoreProducts();
-    }
-  }, [inView]);
 
   return (
     <div className="flex">
       <main className="w-full">
+        {/* Header */}
         <div className="flex justify-between px-3 mt-5">
-          {title ? <h2>{title}</h2> : <AutoBreadcrumb />}
-          <div className="flex gap-4">
+          {title ? <h2>{title}</h2> : (<div className="hidden"> <AutoBreadcrumb /></div>)}
+
+          <div className="flex w-full md:w-fit gap-4 justify-between md:justify-start">
+            {/* Sort Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant={"outline"} size={"sm"}>
+                <Button variant="outline" size="sm">
                   <span>Sort</span>
                   <ChevronDown />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {Categories.map((cat) => (
-                  <DropdownMenuItem>{cat}</DropdownMenuItem>
+                  <DropdownMenuItem key={cat}>{cat}</DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* View Toggle */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant={"outline"} size={"sm"}>
+                <Button variant="outline" size="sm">
                   <span>{view} view</span>
-                  {view == "Grid" ? <LayoutDashboard /> : <List />}
+                  {view === "Grid" ? <LayoutDashboard /> : <List />}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -108,40 +110,60 @@ export default function ProductGrid({ initialProducts, loading, title }) {
           </div>
         </div>
 
+        {/* Product Display */}
         <div
           className={
-            view == "Grid"
-              ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 overflow-y-scroll mt-4"
-              : "flex flex-col overflow-y-scroll mt-4 "
+            view === "Grid"
+              ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 mt-4"
+              : "flex flex-col gap-4 p-4 mt-4"
           }
         >
+          {/* Initial Page Loading */}
           {loading ? (
-            <>
-              <div className="flex w-full items-center justify-center min-h-[100vh]">
-                {/* <p className="text-gray-600 animate-pulse">Loading session...</p> */}
-                <Spinner className="size-8 text-blue-500" />
-              </div>
-            </>
+            [...Array(8)].map((_, i) => <SkeletonProductCard key={i} />)
           ) : (
             products.map((product) => (
-              <div key={product.id}>
-                <ProductCard product={product} view={view} />
-              </div>
+              <ProductCard key={product.id} product={product} view={view} />
             ))
           )}
+
+          {/* Skeleton Loader for Loading More */}
+          {loadingMore &&
+            [...Array(4)].map((_, i) => <SkeletonProductCard key={`sk-${i}`} />)}
         </div>
-        <div
-          className={
-            products.length == 0
-              ? "hidden"
-              : "flex w-full justify-center gap-8 mt-2"
-          }
-        >
-          <div ref={ref} className={loading ? "hidden" : "flex"}>
-            Loading...
-          </div>
+
+        {/* Load More / No More Message */}
+        <div className="flex w-full justify-center mt-4" ref={ref}>
+          {!loading && !loadingMore && products.length > 0 && inView && hasMore && (
+            <Button
+              onClick={fetchMoreProducts}
+              variant="outline"
+              className="mt-2 mb-2"
+            >
+              Load More
+            </Button>
+          )}
+
+          {!hasMore && (
+            <p className="text-gray-500 mt-2 text-sm">
+              no more products to load.
+            </p>
+          )}
         </div>
       </main>
     </div>
   );
 }
+
+/* ---------------- Skeleton Loader Component ---------------- */
+
+function SkeletonProductCard() {
+  return (
+    <div className="animate-pulse">
+      <div className="bg-gray-300 dark:bg-gray-700 h-36 w-full rounded-md"></div>
+      <div className="mt-2 h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+      <div className="mt-2 h-4 bg-gray-300 dark:bg-gray-700 w-1/2 rounded"></div>
+    </div>
+  );
+}
+

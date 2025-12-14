@@ -31,7 +31,7 @@ export default function Page() {
     try {
       setLoading(true);
       const res = await getAllProducts(0);
-      setProducts(res.data);
+      setProducts(res.data.products);
       setLoading(false);
     } catch (error) {
       console.error("failed to fetch products", error);

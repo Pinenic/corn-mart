@@ -17,6 +17,7 @@ import { deleteProduct, getProductsByStore } from "@/lib/inventoryApi";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { useProfile } from "@/store/useProfile";
+import { useStoreStore } from "@/store/useStore";
 
 export default function ProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -24,8 +25,9 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
   const [delloading, setDelLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const {profile} = useProfile()
-  const storeId = profile.stores[0]?.id;
+  const { profile } = useProfile();
+  const { store } = useStoreStore();
+  const storeId = store.id;
 
   async function loadProducts() {
     try {
@@ -72,7 +74,7 @@ export default function ProductsPage() {
 
   return (
     <div className="h-[calc(80vh-5rem)] p-4">
-      <div className="flex">
+      <div className="flex mb-3">
         <Link href={"/store/dashboard/inventory/new"}>
           <Button>
             <Plus />

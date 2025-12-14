@@ -25,19 +25,12 @@ export default function ProductCard({ product, view = "Grid" }) {
 
       {view === "Grid" ? (
         <>
-          <div className="relative h-56 w-full justify-center bg-zinc-50 dark:bg-muted">
-            {/* expects product.image as string */}
-            {product?.thumbnail_url ? (
+          <div className="relative w-full h-56 flex-shrink-0 bg-zinc-50 dark:bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+            {product?.thumbnail_url && (
               <img
                 src={product.thumbnail_url}
                 alt={product.name}
-                className="h-56"
-              />
-            ) : (
-              <img
-                src={product?.images?.thumbnail}
-                alt={product.name}
-                className="object-contain"
+                className="object-contain w-full h-full"
               />
             )}
           </div>
@@ -72,20 +65,18 @@ export default function ProductCard({ product, view = "Grid" }) {
         </>
       ) : (
         <div className="flex w-full items-center gap-4 p-4">
-          <div className="relative w-40 h-40 flex-shrink-0 bg-zinc-50 rounded-lg overflow-hidden">
+          <div className="relative w-40 h-40 flex-shrink-0 bg-zinc-50 dark:bg-muted rounded-lg overflow-hidden flex items-center justify-center">
             {product?.thumbnail_url && (
               <img
                 src={product.thumbnail_url}
                 alt={product.name}
-                className="object-contain"
+                className="object-contain w-full h-full"
               />
             )}
           </div>
 
           <div className="flex flex-col flex-1">
-            <h3 className="font-medium text-sm line-clamp-2">
-              {product?.name}
-            </h3>
+            <h3 className="font-medium line-clamp-2">{product?.name}</h3>
 
             <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
               {product?.shortDescription}
@@ -94,11 +85,11 @@ export default function ProductCard({ product, view = "Grid" }) {
             <div className="mt-3 flex items-center justify-between">
               <div>
                 <div className="text-lg font-bold">
-                  ${product?.price.toFixed(2)}
+                  K{product?.price.toFixed(2)}
                 </div>
                 {product?.oldPrice && (
                   <div className="text-xs text-muted-foreground line-through">
-                    ${product.oldPrice}
+                    K{product.oldPrice}
                   </div>
                 )}
               </div>

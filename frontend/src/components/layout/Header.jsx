@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useProfile } from "@/store/useProfile";
 import CartDrawer from "../cart/CartDrawer";
 import { ThemeToggle } from "../darkModeButton";
+import { useStoreStore } from "@/store/useStore";
 
 export default function Header() {
   const pathname = usePathname();
@@ -19,16 +20,20 @@ export default function Header() {
   const router = useRouter();
   const { user, signOut , loading} = useAuthStore();
   const {profile} = useProfile()
+  const {store, fetchStore} = useStoreStore();
 
   const handleLogout = async () => {
     await signOut();
     router.push("/auth/login");
   };
 
-  const handleStoreDashboardNav = () => {
-    console.log(profile.stores);
-    if(profile.stores.length >= 1){
-      router.push("store/dashboard")
+  const handleStoreDashboardNav = async () => {
+    await fetchStore(user.id);
+    // console.log(user)
+    console.log(store);
+    // console.log(profile.stores);
+    if(store){
+      router.push("/store/dashboard")
     } else router.push("/");
   }
 
@@ -119,7 +124,7 @@ export default function Header() {
                   <DropdownMenuItem onClick={() => router.push("/profile")}>
                     Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/orders")}>
+                  <DropdownMenuItem onClick={() => router.push("/myorders")}>
                     My Orders
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleStoreDashboardNav}>

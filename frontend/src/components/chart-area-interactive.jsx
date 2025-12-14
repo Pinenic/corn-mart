@@ -49,7 +49,7 @@ const chartConfig = {
 function generate90DayChartData(orders) {
   console.log(
     "Received orders:",
-    orders.filter(o => o.status === "received").length
+    orders.filter(o => o.status === "delivered").length
   );
   
   const today = new Date();
@@ -64,13 +64,13 @@ function generate90DayChartData(orders) {
 
   // Step 1: Group received orders by UTC date
   const grouped = orders.reduce((acc, order) => {
-    if (order.status !== "received") return acc;
+    if (order.status !== "delivered") return acc;
 
     const date = toUTCDateString(order.created_at);
     if (!acc[date]) acc[date] = { date, desktop: 0, mobile: 0 };
 
     acc[date].desktop += 1;
-    acc[date].mobile += Number(order.net_amount) || 0;
+    acc[date].mobile += Number(order.subtotal) || 0;
 
     return acc;
   }, {});

@@ -14,11 +14,11 @@ const steps = [
     title: "List & Sell Products",
     desc: "Upload products, set prices, and reach buyers easily through Corn Mart.",
   },
-  {
-    icon: <CreditCard className="w-10 h-10 text-primary" />,
-    title: "Get Paid Securely",
-    desc: "Receive instant payments and manage your earnings through your dashboard.",
-  },
+  // {
+  //   icon: <CreditCard className="w-10 h-10 text-primary" />,
+  //   title: "Get Paid Securely",
+  //   desc: "Receive instant payments and manage your earnings through your dashboard.",
+  // },
 ];
 
 export default function HowItWorks() {

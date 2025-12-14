@@ -12,7 +12,7 @@ export default function ProductControls({ product }) {
   const { addItem } = useCart();
 
   const variants = product?.product_variants || [];
-  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(variants[0] || null);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
 
@@ -33,9 +33,9 @@ export default function ProductControls({ product }) {
     // Optimistic update
     try {
       addItem(product.id, selectedVariant.id, quantity);
-      toast.success("Added to cart");
+      console.log("Added to cart");
     } catch (e) {
-      toast.error("Failed to add to cart");
+      console.log("Failed to add to cart", e);
     } finally {
       setAdding(false);
     }
@@ -43,15 +43,10 @@ export default function ProductControls({ product }) {
 
   return (
     <div className="mt-4 space-y-6">
-      <VariantSelector
-        variants={variants}
-        chooseVariant={setSelectedVariant}
-      />
+      <p className="text-3xl font-bold mt-2">ZMW {product.price.toFixed(2)}</p>
+      <VariantSelector variants={variants} sv={selectedVariant} chooseVariant={setSelectedVariant} />
 
-      <QuantitySelector
-        setQuantity={setQuantity}
-        quantity={quantity}
-      />
+      <QuantitySelector setQuantity={setQuantity} quantity={quantity} />
 
       <Button
         size="lg"

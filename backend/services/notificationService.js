@@ -1,0 +1,36 @@
+import { supabase } from "../supabaseClient.js";
+
+export async function fetchBuyerNotifications(userId) {
+  const { data: buyerNotifications, error: bnError } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("type", "order_update")
+    .order("created_at", { ascending: false });
+
+  if (bnError) throw new Error(`${bnError}`);
+
+  return buyerNotifications;
+}
+
+export async function markOneAsRead(id) {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    return true;
+}
+
+export async function markAllAsRead(userId) {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    return true;
+}

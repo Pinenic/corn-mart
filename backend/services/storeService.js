@@ -14,7 +14,7 @@ export const getAllStores = async () => {
 export const getStore = async (id) => {
   const { data, error } = await supabase
     .from('stores')
-    .select('*')
+    .select('*, products(*)')
     .eq('id', id)
     .single();
 

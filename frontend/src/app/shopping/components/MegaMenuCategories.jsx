@@ -11,19 +11,16 @@ import {
 
 export default function MegaMenuCategories({ categories = [] }) {
   return (
-    <NavigationMenu className="w-full">
+    <NavigationMenu className="w-full hidden md:block lg:hidden">
       <NavigationMenuList className="w-full">
         <NavigationMenuItem className="w-full">
-
           {/* Trigger Button */}
           <NavigationMenuTrigger className="px-4 py-2">
             Categories
           </NavigationMenuTrigger>
 
           {/* FULL WIDTH DROPDOWN */}
-          <NavigationMenuContent
-            className=" w-full px-6 py-8 bg-background border shadow-lg"
-          >
+          <NavigationMenuContent className=" w-full px-6 py-8 bg-background border shadow-lg">
             <ul className="grid gap-2 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
               {categories.map((cat) => {
                 const Icon = cat.icon;
@@ -31,7 +28,10 @@ export default function MegaMenuCategories({ categories = [] }) {
                   <div key={cat.id}>
                     <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                       {Icon && <Icon size={16} className="opacity-70" />}
-                      <Link href={`/shopping/${cat.slug}`} className="hover:underline">
+                      <Link
+                        href={`/shopping/${cat.slug}`}
+                        className="hover:underline"
+                      >
                         {cat.name}
                       </Link>
                     </h3>
@@ -59,7 +59,6 @@ export default function MegaMenuCategories({ categories = [] }) {
               })}
             </ul>
           </NavigationMenuContent>
-
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

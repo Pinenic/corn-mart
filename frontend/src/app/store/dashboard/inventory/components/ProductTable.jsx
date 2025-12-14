@@ -51,7 +51,7 @@ export default function ProductTable({
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Toolbar */}
-      <div className="flex gap-3 items-center mb-3 px-2">
+      <div className="flex gap-3 items-center mb-3">
         <Input
           placeholder="Search products..."
           value={search}

@@ -13,6 +13,8 @@ import { useProfile } from "@/store/useProfile";
 import { toast } from "sonner";
 import { createStore } from "@/lib/storesApi";
 import AuthGuard from "@/components/auth/AuthGuard";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // Single-file Store Onboarding component
 export default function StoreOnboarding() {
@@ -32,6 +34,9 @@ export default function StoreOnboarding() {
   const [logoPreview, setLogoPreview] = useState(null);
   const [bannerFile, setBannerFile] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(null);
+
+  const {init} = useAuthStore()
+  const router = useRouter();
 
   useEffect(() => {
     if (logoFile) {
@@ -80,8 +85,11 @@ export default function StoreOnboarding() {
       res?.store
         ? toast.success(`Success, ${res.message}`)
         : toast.error(`Failure, ${res.message}`);
+      
 
       setLoading(false);
+      await init();
+      router.push(`/store/dashboard`);
     } catch (error) {
       console.error("Failed to create store", error.message);
       toast.error("Failed to create store");
@@ -396,7 +404,7 @@ export default function StoreOnboarding() {
                                     ))}
                                   </div>
 
-                                  <div className="flex items-center justify-between gap-4 mt-6">
+                                  <div className="flex flex-col-reverse md:flex-row  justify-between gap-4 mt-6">
                                     <Button variant="ghost" onClick={back}>
                                       Back
                                     </Button>

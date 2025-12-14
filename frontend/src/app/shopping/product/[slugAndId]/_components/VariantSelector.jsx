@@ -4,36 +4,36 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-export function VariantSelector({ variants, chooseVariant }) {
-    const [size, setSize] = useState(null);
-    const [color, setColor] = useState(null);
+export function VariantSelector({ variants, sv, chooseVariant }) {
+  const [size, setSize] = useState(null);
+//   const [color, setColor] = useState(null);
 
-    const handleClick = (variant) => {
-        setSize(variant);
-        chooseVariant(variant);
-    }
+  const handleClick = (variant) => {
+    setSize(variant);
+    chooseVariant(variant);
+  };
 
-    return (
-        <div className="space-y-6">
-            {/* Sizes */}
-            <div>
-                <Label className="font-medium">Variants</Label>
-                <div className="flex gap-2 mt-2 flex-wrap">
-                    {variants.map((sz) => (
-                        <Button
-                            key={sz.id}
-                            variant={size === sz ? "default" : "outline"}
-                            onClick={() => handleClick(sz)}
-                            className="px-5 py-2"
-                        >
-                            {sz.name}
-                        </Button>
-                    ))}
-                </div>
-            </div>
+  return (
+    <div className="space-y-6">
+      {/* Sizes */}
+      <div>
+        <Label className="font-medium">Variants</Label>
+        <div className="flex gap-2 mt-2 flex-wrap">
+          {variants.map((sz) => (
+            <Button
+              key={sz.id}
+              variant={sv === sz ? "default" : "outline"}
+              onClick={() => handleClick(sz)}
+              className="px-5 py-2"
+            >
+              {sz.name}
+            </Button>
+          ))}
+        </div>
+      </div>
 
-            {/* Colors */}
-            <div>
+      {/* Colors */}
+      {/* <div>
                 <Label className="font-medium">Color</Label>
                 <div className="flex gap-2 mt-2">
                     {variants.colors?.map((c) => (
@@ -47,7 +47,7 @@ export function VariantSelector({ variants, chooseVariant }) {
                         ></button>
                     ))}
                 </div>
-            </div>
-        </div>
-    );
+            </div> */}
+    </div>
+  );
 }

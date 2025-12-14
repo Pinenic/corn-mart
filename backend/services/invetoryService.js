@@ -28,6 +28,30 @@ export async function getProductByID(productId) {
   return data;
 }
 
+export async function createSubcategory(subcat) {
+  if (subcat.id) {
+    const { data: subcategory, error: subcategoryError } = await supabase
+      .from("subcategories")
+      .select("*")
+      .eq("id", subcat.id)
+      .maybeSingle();
+
+    if (subcategoryError)
+      throw new Error(`Error fetching subcat, ${subcategoryError.message}`);
+    if (subcategory) return subcategory;
+  }
+
+  const { data, error } = await supabase
+    .from("subcategories")
+    .insert([subcat])
+    .select()
+    .single();
+
+  if (error) throw new Error(`Error creating subcat, ${error}`);
+
+  return data;
+}
+
 /**
  * Create a product. A default variant will be created by DB trigger.
  * If you want to create a product + custom variants at once, create the product first then create variants.
@@ -62,12 +86,12 @@ export async function toggleProductActiveStatus(productId, newStatus) {
   const { data, error } = await supabase
     .from("products")
     .update({ is_active: newStatus })
-    .eq('id', productId)
+    .eq("id", productId)
     .select()
     .single();
 
-    if(error) throw error;
-    return data;
+  if (error) throw error;
+  return data;
 }
 
 /**

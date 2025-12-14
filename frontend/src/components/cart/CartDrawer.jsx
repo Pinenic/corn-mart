@@ -8,15 +8,15 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCart} from "@/store/useCart";
+import { useCart } from "@/store/useCart";
 import CartBadge from "./CartBadgeCounter";
 
 export default function CartDrawer() {
   const [open, setOpen] = useState(false);
-  const { items, subtotal } = useCart();
+  const { items, subtotal, removeItem } = useCart();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -42,20 +42,31 @@ export default function CartDrawer() {
             <p className="text-gray-500 text-center mt-8">Your cart is empty</p>
           ) : (
             items?.map((item) => (
-              <div key={item.id} className="flex items-center gap-3">
+              <div
+                key={item.id}
+                className="flex items-center gap-4 border-b pb-4"
+              >
                 <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={60}
-                  height={60}
-                  className="rounded-md border"
+                  src={item.products?.thumbnail_url}
+                  alt={item.products?.name}
+                  width={100}
+                  height={100}
+                  className="rounded-lg border"
                 />
                 <div className="flex-1">
-                  <h4 className="text-sm font-medium line-clamp-1">
-                    {item.name}
-                  </h4>
-                  <p className="text-sm text-gray-500">${item.price}</p>
+                  <h3 className="font-semibold text-lg line-clamp-1">
+                    {item.products?.name}
+                  </h3>
+                  <p className="text-gray-600">K{item.price?.toFixed(2)}</p>
+                  <p>x {item.quantity}</p>
                 </div>
+                <Button
+                  variant="ghost"
+                  onClick={() => removeItem(item.id)}
+                  className="text-destructive"
+                >
+                  <X />
+                </Button>
               </div>
             ))
           )}
@@ -83,7 +94,7 @@ export default function CartDrawer() {
 
             <Button
               asChild
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1 bg-primary hover:bg-primary/80"
               onClick={() => setOpen(false)}
             >
               <Link href="/checkout">Checkout</Link>

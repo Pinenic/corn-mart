@@ -10,7 +10,16 @@ export async function getProductById(productId) {
   return fetchApi(`/api/inventory/product/${productId}`);
 }
 
-export async function createProduct({ userId, name, description, price, store_id, category, images = [] }) {
+export async function createProduct({
+  userId,
+  name,
+  description,
+  price,
+  store_id,
+  category,
+  images = [],
+  subcat
+}) {
   const formData = new FormData();
   formData.append("userId", userId);
   formData.append("name", name);
@@ -18,8 +27,9 @@ export async function createProduct({ userId, name, description, price, store_id
   formData.append("price", price);
   formData.append("store_id", store_id);
   formData.append("category", category);
+  formData.append("subcat", JSON.stringify(subcat));
 
-  images.forEach((file) => formData.append("files", file));
+  images.forEach((file) => formData.append("images", file));
 
   return fetchApi(`/api/inventory/product`, {
     method: "POST",
@@ -27,7 +37,10 @@ export async function createProduct({ userId, name, description, price, store_id
   });
 }
 
-export async function updateProduct(productId, { userId, updates, newImages = [], removedImageIds = [] }) {
+export async function updateProduct(
+  productId,
+  { userId, updates, newImages = [], removedImageIds = [] }
+) {
   const formData = new FormData();
 
   formData.append("userId", userId);
@@ -64,7 +77,13 @@ export async function getVariantById(variantId) {
   return fetchApi(`/api/inventory/variant/${variantId}`);
 }
 
-export async function createVariant({ productId, name, price, stock, lowStockThreshold }) {
+export async function createVariant({
+  productId,
+  name,
+  price,
+  stock,
+  lowStockThreshold,
+}) {
   return fetchApi(`/api/inventory/product/variants`, {
     method: "POST",
     body: JSON.stringify({
@@ -92,7 +111,9 @@ export async function restockVariant(variantId, updates) {
 }
 
 export async function deleteVariant(variantId) {
-  return fetchApi(`/api/inventory/product/variant/${variantId}`, { method: "DELETE" });
+  return fetchApi(`/api/inventory/product/variant/${variantId}`, {
+    method: "DELETE",
+  });
 }
 
 // ---------- 🖼️ IMAGES ----------
@@ -113,14 +134,19 @@ export async function getProductImages(productId) {
  * @param {number} thumbnailIndex - Index of the thumbnail image (default: 0)
  * @returns {Promise<Object>} Response with uploaded images
  */
-export async function uploadProductImages(userId, productId, files, thumbnailIndex = 0) {
+export async function uploadProductImages(
+  userId,
+  productId,
+  files,
+  thumbnailIndex = 0
+) {
   const formData = new FormData();
-  
+
   // Append all files
   files.forEach((file) => {
     formData.append("images", file);
   });
-  
+
   // Append thumbnail index
   formData.append("thumbnailIndex", thumbnailIndex);
 

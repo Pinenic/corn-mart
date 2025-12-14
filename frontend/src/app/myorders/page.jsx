@@ -18,7 +18,7 @@ export default async function Page({ params }) {
   return (
     <div>
       {/* OrdersClient is a client component that manages interactivity and updates */}
-      <OrdersClient initialOrder={data}/>
+      <OrdersClient />
     </div>
   );
 }

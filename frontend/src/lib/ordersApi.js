@@ -36,7 +36,6 @@ export async function getBuyerOrder(buyerId) {
   return fetchApi(`/api/orders/buyer/${buyerId}`);
 }
 
-
 export async function getBuyerOrderDetails(orderId) {
   return fetchApi(`/api/orders/details/${orderId}`);
 }

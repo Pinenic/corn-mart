@@ -10,6 +10,7 @@ import {
   getAllVariants,
   getAVariant,
   deleteAVariant,
+  createSubcategory,
 } from "../services/invetoryService.js";
 import { deleteAllProductImages, updateProductImages, uploadProductImages } from "../services/productImageService.js";
 import {uploadImages} from "../services/prodimageService.js"
@@ -35,11 +36,12 @@ export const getProductById = async (req, res) => {
   }
 };
 
+
 export const createNewProduct = async (req, res) => {
   try {
-    const { userId, name, description, price, store_id, category } = req.body;
-
-    const payload = { name, description, price, store_id, category };
+    const { userId, name, description, price, store_id, category, subcat } = req.body;
+    const subcategory = await createSubcategory(JSON.parse(subcat));
+    const payload = { name, description, price, store_id, category, subcat_id:subcategory.id };
     const product = await createAProduct(payload);
 
     // Handle image upload if files were sent

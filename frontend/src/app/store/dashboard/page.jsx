@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { useProfile } from "@/store/useProfile";
+import { useStoreStore } from "@/store/useStore";
 
 const statusColors = {
   received: "bg-green-100 text-green-700",
@@ -108,8 +109,9 @@ export default function Page() {
   const [revenue, setRevenue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const {profile} = useProfile()
-  const storeId = profile.stores[0]?.id;
+  const { profile } = useProfile();
+  const {store} = useStoreStore();
+  const storeId = store.id;
 
   async function loadData() {
     try {

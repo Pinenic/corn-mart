@@ -6,7 +6,7 @@ import { randomUUID } from "crypto";
  * Upload a single image to Supabase Storage
  * @private
  */
-async function uploadSingleImage(userId, productId, file) {
+export async function uploadSingleImage(userId, productId, file) {
   console.log(file);
   const fileName = `${userId}/${productId}/${randomUUID()}-${file.originalname}`;
   

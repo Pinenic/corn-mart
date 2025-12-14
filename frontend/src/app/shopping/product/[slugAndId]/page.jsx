@@ -7,7 +7,7 @@ import { parseSlugAndId } from "./_utils/parseSlugAndId";
 import { ProductImages } from "./_components/ProductImages";
 
 export async function generateMetadata(props) {
-  const params = await props.params; 
+  const params = await props.params;
   const { id } = parseSlugAndId(params.slugAndId);
   const res = await getProductById(id);
   const product = res?.data?.[0];
@@ -33,10 +33,10 @@ export async function generateMetadata(props) {
 }
 
 export default async function Page(props) {
-  const params = await props.params; 
+  const params = await props.params;
   console.log(params.slugAndId);
   const { id, slug } = parseSlugAndId(params.slugAndId);
-  console.log(id)
+  console.log(id);
   if (!id) return notFound();
 
   const res = await getProductById(id);
@@ -52,16 +52,17 @@ export default async function Page(props) {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        
         {/* LEFT: HERO IMAGE */}
         <div className="space-y-4">
-            <ProductImages images={product?.product_images}/>
+          <ProductImages images={product?.product_images} />
         </div>
 
         {/* RIGHT: PRODUCT INFO */}
         <div>
           <h1 className="text-2xl font-semibold">{product.name}</h1>
-          <p className="text-3xl font-bold mt-2">ZMW {product.price.toFixed(2)}</p>
+          <p className="text-3xl font-bold mt-2">
+            ZMW {product.price.toFixed(2)}
+          </p>
 
           <hr className="my-6" />
 
@@ -82,7 +83,7 @@ export default async function Page(props) {
             "@context": "https://schema.org/",
             "@type": "Product",
             name: product.name,
-            image: product.product_images?.map(i => i.url),
+            image: product.product_images?.map((i) => i.url),
             description: product.description,
             sku: product.id,
             offers: {

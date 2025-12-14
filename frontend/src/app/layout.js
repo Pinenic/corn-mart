@@ -8,7 +8,7 @@ import Header from "@/components/layout/Header";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export default function RootLayout({ children }) {
-  const { init } = useAuthStore();
+  const { init, loading } = useAuthStore();
   
   useEffect(() => {
     init();

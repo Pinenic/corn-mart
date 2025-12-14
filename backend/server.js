@@ -8,6 +8,7 @@ import storeRoutes from './routes/storeRoutes.js';
 import invetoryRoutes from './routes/inventoryRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import marketplaceRoutes from './routes/marketplaceRoutes.js'
+import notificationRoutes from './routes/notificationsRoutes.js'
 // import checkoutRoute from './routes/checkout.js'
 // import payoutRouter from './routes/payout.js'
 // import momoCheckoutRoute from './routes/momoCheckout.js';
@@ -32,6 +33,7 @@ app.use('/api/stores', storeRoutes);
 app.use('/api/inventory', invetoryRoutes)
 app.use('/api/orders', orderRoutes);
 app.use('/api/marketplace', marketplaceRoutes)
+app.use('/api/notifications', notificationRoutes);
 
 // pollPendingPayments();
 // pollEligiblePayouts();
