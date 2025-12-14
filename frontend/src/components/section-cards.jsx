@@ -42,7 +42,7 @@ export function SectionCards({revenue, customers, products, orders, loading}) {
         <CardHeader>
           <CardDescription>Customers</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-          {loading ? "0" : customers.length}
+          {loading ? "0" : customers?.length}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -65,7 +65,7 @@ export function SectionCards({revenue, customers, products, orders, loading}) {
         <CardHeader>
           <CardDescription>Orders</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-          {loading ? "0" : orders.length}
+          {loading ? "0" : orders?.length}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -86,7 +86,7 @@ export function SectionCards({revenue, customers, products, orders, loading}) {
         <CardHeader>
           <CardDescription>Products</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-          {loading ? "0" : products.length}
+          {loading ? "0" : products?.length}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
