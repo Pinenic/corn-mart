@@ -1,0 +1,8 @@
+Payment_failed = 46733123450
+rejected = 46733123451
+expired = 46733123452
+ongoing = 46733123453
+delayed = 46733123454
+notfound = 46733123455
+
+payment_success = any number not on the list
