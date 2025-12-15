@@ -64,7 +64,7 @@ export default function CartClient() {
               className="rounded-lg border"
             />
             <div className="flex-1">
-              <h3 className="font-semibold text-lg">{item.products.name}</h3>
+              <h3 className="font-semibold text-sm">{item.products.name}{" "}{item.product_variants.name}</h3>
               <p className="text-gray-600">K{item.price.toFixed(2)}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Button

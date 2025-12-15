@@ -68,8 +68,8 @@ export default function SearchBar({ onQuery, onSearch }) {
       setActiveIndex((prev) => Math.max(prev - 1, 0));
     }
     if (e.key === "Enter") {
-      const item = results[activeIndex];
-      if (item) window.location.href = `/product/${item.slug}`;
+      // const item = results[activeIndex];
+      // if (item) window.location.href = `/product/${item.slug}`;
       onSearch(query);
       setShowDropdown(false);
     }
