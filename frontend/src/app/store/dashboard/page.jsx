@@ -129,8 +129,8 @@ export default function Page() {
       );
       setRevenue(
         orders_data
-          .filter((order) => order.status === "received") // only include received orders
-          .reduce((sum, order) => sum + (order.net_amount || 0), 0) // sum their net_amounts
+          .filter((order) => order.status === "delivered") // only include received orders
+          .reduce((sum, order) => sum + (order.subtotal || 0), 0) // sum their net_amounts
       );
       setLoading(false);
     } catch (err) {

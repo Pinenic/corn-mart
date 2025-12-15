@@ -50,7 +50,7 @@ export default function OrdersOverview({ orders, loading }) {
           </div>
           <div className="bg-muted/30 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">Completion </p>
-            <h3 className="text-2xl font-semibold mt-1">{stats.completionRate}</h3>
+            <h3 className="text-2xl font-semibold mt-1">{stats.completionRate.toFixed(2)}%</h3>
           </div>
           <div className="bg-muted/30 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">Potential Payout</p>

@@ -43,8 +43,19 @@ export default function ProductControls({ product }) {
 
   return (
     <div className="mt-4 space-y-6">
-      <p className="text-3xl font-bold mt-2">ZMW {product.price.toFixed(2)}</p>
-      <VariantSelector variants={variants} sv={selectedVariant} chooseVariant={setSelectedVariant} />
+      <p className="text-3xl font-bold mt-2">
+        ZMW {selectedVariant.price.toFixed(2)}
+      </p>
+      <hr className="my-6" />
+
+      <p className="text-gray-700">{product.description}</p>
+
+      <hr className="my-6" />
+      <VariantSelector
+        variants={variants}
+        sv={selectedVariant}
+        chooseVariant={setSelectedVariant}
+      />
 
       <QuantitySelector setQuantity={setQuantity} quantity={quantity} />
 

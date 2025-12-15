@@ -150,7 +150,7 @@ export function AppSidebar({
 }) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader className="mt-15">
+      <SidebarHeader className="md:mt-15">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">

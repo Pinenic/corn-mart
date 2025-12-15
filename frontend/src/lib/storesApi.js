@@ -21,3 +21,7 @@ export async function createStore(userId, payload ) {
 export async function getStoreById(id) {
   return fetchApi(`/api/stores/${id}`)
 }
+
+export async function getStores() {
+  return fetchApi(`/api/stores/`)
+}

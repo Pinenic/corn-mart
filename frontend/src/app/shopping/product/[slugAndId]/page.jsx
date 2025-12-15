@@ -60,15 +60,15 @@ export default async function Page(props) {
         {/* RIGHT: PRODUCT INFO */}
         <div>
           <h1 className="text-2xl font-semibold">{product.name}</h1>
-          <p className="text-3xl font-bold mt-2">
+          {/* <p className="text-3xl font-bold mt-2">
             ZMW {product.price.toFixed(2)}
-          </p>
+          </p> */}
 
-          <hr className="my-6" />
+          {/* <hr className="my-6" />
 
           <p className="text-gray-700">{product.description}</p>
 
-          <hr className="my-6" />
+          <hr className="my-6" /> */}
 
           {/* Client component for variant + quantity + cart */}
           <ProductControls product={product} />

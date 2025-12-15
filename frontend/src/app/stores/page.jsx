@@ -6,6 +6,7 @@ import { Plus, Users } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { getStores } from "@/lib/storesApi";
 
 export default function StoresPage() {
   const [stores, setStores] = useState([]);
@@ -13,18 +14,16 @@ export default function StoresPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const getStores = async () => {
+  const fetchStores = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://192.168.8.118:5000/api/stores", {
-        method: "GET",
-      });
+      const res = await getStores();
 
-      const result = await res.json();
+      // const result = await res.json();
 
-      if (!res.ok) throw new Error(result.error || "Failed to create store");
+      // if (!res.ok) throw new Error(result.error || "Failed to fetch stores");
 
-      setStores(result);
+      setStores(res);
     } catch (err) {
       setError(`❌ ${err.message}`);
     } finally {
@@ -33,7 +32,7 @@ export default function StoresPage() {
   };
 
   useEffect(() => {
-    getStores();
+    fetchStores();
   }, []);
 
   if(loading) return (<div className="flex items-center justify-center min-h-screen">

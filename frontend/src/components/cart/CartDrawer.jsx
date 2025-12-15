@@ -54,8 +54,8 @@ export default function CartDrawer() {
                   className="rounded-lg border"
                 />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg line-clamp-1">
-                    {item.products?.name}
+                  <h3 className="font-semibold md:text-lg line-clamp-1">
+                    {item.products?.name}{" "}{item.product_variants?.name}
                   </h3>
                   <p className="text-gray-600">K{item.price?.toFixed(2)}</p>
                   <p>x {item.quantity}</p>

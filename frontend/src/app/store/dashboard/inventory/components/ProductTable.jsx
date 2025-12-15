@@ -93,7 +93,10 @@ export default function ProductTable({
                   K{product.price}
                 </TableCell>
                 <TableCell onClick={() => onSelectProduct(product)}>
-                  {product.stock}
+                  {product.product_variants.reduce(
+                    (sum, pv) => sum + (pv.stock || 0),
+                    0
+                  )}
                 </TableCell>
                 <TableCell onClick={() => handleDeleteDialog(product)}>
                   <Trash className="w-4 text-red-700" />

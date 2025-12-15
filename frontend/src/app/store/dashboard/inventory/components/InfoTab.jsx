@@ -147,7 +147,7 @@ export function Info({ prod, reload }) {
   );
 }
 
-export function Variants({ prodId}) {
+export function Variants({ prodId, reload}) {
   const [varis, setVaris] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -170,6 +170,7 @@ export function Variants({ prodId}) {
     try {
       const data = await getAllVariants(prodId);
       setVaris(data);
+      reload();
     } catch (err) {
       console.error(err.message);
     }
@@ -231,6 +232,7 @@ export function Variants({ prodId}) {
         ? toast.success("Variant has been updated Succesfully")
         : toast.error("Failed to update Variant");
       loadVariants();
+      reload();
       setLoading(false);
       setIsEditOpen(false);
     } catch (error) {
