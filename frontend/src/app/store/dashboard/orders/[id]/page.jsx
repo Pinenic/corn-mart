@@ -8,6 +8,7 @@ import { getStoreOrderDetails, updateStoreOrderStatus } from "@/lib/ordersApi";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import ChatTab from "../components/OrderChatTab";
 
 function TopRow({ order, loading, soId, reload }) {
   const [updating, setUpdating] = useState(false);
@@ -189,6 +190,35 @@ function CustomerDetails({ customer, loading }) {
   );
 }
 
+
+function Chat({ orders, customer, loading }) {
+  return (
+    <>
+      <Card className="rounded-2xl shadow-none w-full">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+              <h2 className="font-semibold text-lg">Chat</h2>
+            </div>
+          </div>
+          {loading ? (
+            <>
+              <div className="flex items-center justify-center">
+                {/* <p className="text-gray-600 animate-pulse">Loading session...</p> */}
+                <Spinner className="size-8 text-blue-500" />
+              </div>
+            </>
+          ) : (
+            <>
+              <ChatTab orders={orders} avatar={customer.avatar_url} loading={loading}/>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
 export default function Page() {
   const { id } = useParams();
   const [order, setOrder] = useState({});
@@ -227,14 +257,14 @@ export default function Page() {
         <div className="flex w-full lg:w-2/3 p-2">
           <OrderDetails order={order} loading={loading} />
         </div>
-        <div className="flex flex-col w-full lg:w-1/3 p-2">
+        <div className="flex flex-col gap-3 w-full lg:w-1/3 p-2">
           <div className="flex">
             <CustomerDetails
               customer={order.customer || {}}
               loading={loading}
             />
           </div>
-          <div className="flex">order History</div>
+          <Chat orders={order} customer={order.customer || {}} loading={loading}/>
         </div>
       </div>
     </div>

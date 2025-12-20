@@ -1,8 +1,15 @@
-export function CategoryTabs({ active, onChange }) {
-  const categories = ["all", "electronics", "fashion", "home", "beauty", "sports"];
+export function CategoryTabs({ categories, active, onChange }) {
+  // const categories = [
+  //   "all",
+  //   "electronics",
+  //   "fashion",
+  //   "home",
+  //   "beauty",
+  //   "sports",
+  // ];
 
   return (
-    <div className="flex gap-4 overflow-x-auto border-b bg-background sticky top-[54px] z-40 px-4 py-3">
+    <div className="flex gap-4 overflow-x-scroll border-b bg-background sticky top-[54px] z-40 px-4 py-3">
       {categories.map((cat) => (
         <button
           key={cat}

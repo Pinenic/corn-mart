@@ -10,6 +10,10 @@ export async function createOrder(cart_id, buyer_id) {
   return data;
 }
 
+/*
+ * STATUS UPDATE METHODS FOR ORDERS
+ */
+
 export async function SellerConfirmOrder(storeOrderId, sellerId) {
   const { data, error } = await supabase.rpc("seller_update_store_order", {
     p_store_order_id: storeOrderId,
@@ -105,6 +109,10 @@ function isValidTransition(currentStatus, newStatus) {
   return validTransitions[currentStatus]?.includes(newStatus);
 }
 
+/*
+ * CRUD OPERATIONS ON ORDERS
+ */
+
 export async function getBuyerOrders(buyer_id) {
   const { data: orders, error: ordersError } = await supabase
     .from("orders")
@@ -119,7 +127,7 @@ export async function getBuyerOrderDetails(orderId) {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "*,store_orders(*,stores(name), order_items(*, products(name, thumbnail_url), product_variants(name, price)))"
+      "*,store_orders(*,stores(name, logo), order_items(*, products(name, thumbnail_url), product_variants(name, price)))"
     )
     .eq("id", orderId)
     .single();
@@ -162,6 +170,42 @@ export async function getStoreOrderDetails(orderId) {
   return { ...data, customer };
 }
 
+/**
+ * ORDER CHAT METHODS
+ */
+
+export async function getOrderMessagesById(orderId) {
+  const { data, error } = await supabase
+    .from("order_messages")
+    .select("*")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw new Error(`Error fetching the messages, ${error.message}`);
+
+  return data;
+}
+
+export async function postMessage(orderId, userId, role, message) {
+  const { data, error } = await supabase
+    .from("order_messages")
+    .insert({
+      order_id: orderId,
+      sender_id: userId,
+      sender_role: role,
+      message,
+    })
+    .select()
+    .single();
+
+  if(error) throw new Error(`Error posting the message, ${error.message}`);
+
+  return data;
+}
+
+/**
+ * HELPER FUNCTIONS
+ */
 //profile helper
 async function getCustomerInfo(oId) {
   const { data, error } = await supabase
@@ -174,7 +218,7 @@ async function getCustomerInfo(oId) {
 
   const { data: customer, error: customerError } = await supabase
     .from("users")
-    .select("id, full_name, email")
+    .select("id, full_name, email, avatar_url")
     .eq("id", data.buyer_id)
     .single();
 

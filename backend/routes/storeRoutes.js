@@ -4,6 +4,14 @@ import {
   getStoreById,
   createStore,
   updateStore,
+  follow,
+  unfollow,
+  checkUserFollow,
+  getFollowersCount,
+  createStoreLocation,
+  updateStoreLocation,
+  getStoreLocation,
+  deleteStoreLocation,
 } from "../controllers/storeController.js";
 import { upload } from "../middlewares/multerConfig.js";
 
@@ -34,5 +42,25 @@ router.put(
   ]),
   updateStore
 );
+
+/**
+ *  STORE FOLLOW ROUTES
+ */
+
+router.post("/:storeId/follow", follow);
+router.delete("/:storeId/follow", unfollow);
+router.get("/:storeId/is-following", checkUserFollow);
+router.get("/:storeId/followers", getFollowersCount);
+
+/**
+ * STORE LOCATION AND DELIVERY ROUTES
+ */
+
+
+router.post("/:storeId/location", createStoreLocation);
+router.get("/:storeId/location", getStoreLocation);
+router.put("/:storeId/location", updateStoreLocation);
+router.delete("/:storeId/location", deleteStoreLocation);
+
 
 export default router;

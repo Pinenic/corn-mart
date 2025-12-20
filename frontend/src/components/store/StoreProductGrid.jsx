@@ -2,29 +2,40 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import ProductQuickViewModal from "../products/ProductQuickVeiwModal";
 
-export function ProductGrid({stores}) {
-  // const [products, setProducts] = useState(
-  //   Array(8).fill({
-  //     name: "Sample Product",
-  //     price: "K29.99",
-  //     image: "https://images.unsplash.com/photo-1606813902919-3d0139d3d93e?w=400&q=60",
-  //   })
-  // );
+export function ProductGrid({ products }) {
+  const [open, setOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleQuickView = (product) => {
+    setSelectedProduct(product);
+    setOpen(true);
+  };
+
+  const handleAddToCart = (product) => {
+    // your cart logic here
+    console.log("Add to cart:", product);
+    setOpen(false);
+  };
 
   return (
+    <>
     <AnimatePresence>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl bg-background mx-auto p-4">
-        {stores?.products?.map((p, i) => (
+        {products?.map((p, i) => (
           <motion.div
-            key={i}
+            key={p.id}
             layout
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.3, delay: i * 0.05 }}
           >
-            <div className="group relative bg-muted border rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+            <div
+              className="group relative bg-muted border rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
+              onClick={() => handleQuickView(p)}
+            >
               {/* Product Image */}
               <div className="relative w-full h-48 overflow-hidden">
                 <motion.img
@@ -58,5 +69,12 @@ export function ProductGrid({stores}) {
         ))}
       </div>
     </AnimatePresence>
+      <ProductQuickViewModal
+        open={open}
+        onOpenChange={setOpen}
+        product={selectedProduct}
+        onAddToCart={handleAddToCart}
+      />
+    </>
   );
 }

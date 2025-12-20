@@ -7,6 +7,8 @@ import {
   createOrder,
   SellerConfirmOrder,
   SellerCancelOrder,
+  getOrderMessagesById,
+  postMessage,
 } from "../services/orderService.js";
 
 export const createNewOrder = async (req, res) => {
@@ -134,3 +136,30 @@ export const getUserStoreOrderDetails = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+/**
+ * ORDER CHAT METHODS
+ */
+
+export const getOrderMessageList = async (req,res) => {
+  try {
+    const {orderId} = req.params;
+    const response = await getOrderMessagesById(orderId);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    console.log(error.message);
+  }
+}
+
+export const sendMessage = async (req,res) => {
+  try {
+    const {orderId} = req.params;
+    const {message, userId, role} = req.body;
+    const response = await postMessage(orderId, userId, role, message);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    console.log(error.message);
+  }
+}

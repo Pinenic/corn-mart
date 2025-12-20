@@ -24,6 +24,9 @@ export default function OrdersClient({ initialOrder = {} }) {
   const loadOrders = async () => {
     try {
       setLoading(true);
+      if (!user) {
+        init();
+      }
       const data = await getBuyerOrder(user.id);
       if (data) toast.success("fetched orders");
       setOrder(data || {});
@@ -36,9 +39,6 @@ export default function OrdersClient({ initialOrder = {} }) {
   };
 
   useEffect(() => {
-    if (!user) {
-      init();
-    }
     loadOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -99,7 +99,7 @@ export default function OrdersClient({ initialOrder = {} }) {
               loading={loading}
             />
           </div>
-          <div className="flex">order History</div>
+          {/* <div className="flex">order History</div> */}
         </div>
       </div>
 
@@ -112,12 +112,12 @@ export default function OrdersClient({ initialOrder = {} }) {
             onClick={() => setModalOpen(false)}
           />
           {/* modal panel */}
-          <div className="relative w-full max-h-[90vh] overflow-auto bg-white rounded-t-xl p-4 shadow-lg">
+          <div className="relative w-full max-h-[90vh] overflow-auto bg-background rounded-t-xl p-4 shadow-lg">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-medium">Order Details</h3>
               <button
                 onClick={() => setModalOpen(false)}
-                className="ml-2 p-2 rounded bg-gray-100 text-sm"
+                className="ml-2 p-2 rounded bg- text-sm"
                 aria-label="Close"
               >
                 Close

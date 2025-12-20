@@ -16,7 +16,6 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 
-// Single-file Store Onboarding component
 export default function StoreOnboarding() {
   const [step, setStep] = useState(1);
   const totalSteps = 3;
@@ -68,9 +67,7 @@ export default function StoreOnboarding() {
     setStep((s) => Math.max(1, s - 1));
   }
 
-  // Final submit (placeholder)
   async function handleSubmit() {
-    // Replace with API call to create a store
     const payload = {
       name: storeName,
       description: storeDescription,
@@ -105,7 +102,7 @@ export default function StoreOnboarding() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-white p-6 sm:p-12">
+      <div className="min-h-screen bg-background p-6 sm:p-12">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left: Wizard */}
@@ -442,7 +439,7 @@ export default function StoreOnboarding() {
                     Back
                   </Button>
                   <Button onClick={step === totalSteps ? handleSubmit : next}>
-                    {step === totalSteps ? "Create" : "Next"}
+                    {step === totalSteps ? "Create" : step === totalSteps && loading ? "Making your store" : "Next"}
                   </Button>
                 </div>
               </div>
@@ -456,7 +453,7 @@ export default function StoreOnboarding() {
                     <div className="flex items-center gap-3">
                       <Avatar>
                         <div className="w-10 h-10 bg-gradient-to-tr from-primary-foreground to-primary flex items-center justify-center text-white font-bold">
-                          C
+                          CM
                         </div>
                       </Avatar>
 

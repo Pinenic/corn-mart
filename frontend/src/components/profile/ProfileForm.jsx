@@ -67,7 +67,7 @@ export default function ProfileForm({ user }) {
         />
       </div>
 
-      <div className="pt-4 border-t space-y-4">
+      {/* <div className="pt-4 border-t space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">
             Receive Email Notifications
@@ -85,7 +85,7 @@ export default function ProfileForm({ user }) {
             onCheckedChange={() => handleToggle("darkMode")}
           />
         </div>
-      </div>
+      </div> */}
 
       <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
         Save Changes

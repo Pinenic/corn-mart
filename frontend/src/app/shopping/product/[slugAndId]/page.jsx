@@ -26,9 +26,9 @@ export async function generateMetadata(props) {
         ? [{ url: product.product_images[0].url }]
         : [],
     },
-    alternates: {
-      canonical: `https://yourdomain.com/product/${params.slugAndId}`,
-    },
+    // alternates: {
+    //   canonical: `https://yourdomain.com/product/${params.slugAndId}`,
+    // },
   };
 }
 
@@ -43,9 +43,6 @@ export default async function Page(props) {
   const product = res?.data?.[0];
 
   if (!product) return notFound();
-
-  // make sure URL slug matches product slug
-  // if (slug !== product.slug) return notFound();
 
   const hero = product.product_images?.[0];
 

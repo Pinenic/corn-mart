@@ -17,11 +17,17 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "api.dicebear.com/**",
+        hostname: "api.dicebear.com",
+        pathname: "/9.x/**",
       },
       {
         protocol: "https",
         hostname: "*.unsplash.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "example.com",
         pathname: "/**",
       },
       {

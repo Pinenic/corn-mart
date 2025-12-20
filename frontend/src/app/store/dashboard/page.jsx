@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { useProfile } from "@/store/useProfile";
 import { useStoreStore } from "@/store/useStore";
+import { useRouter } from "next/navigation";
 
 const statusColors = {
   received: "bg-green-100 text-green-700",
@@ -103,6 +104,7 @@ function OrdersTable({ orders, loading }) {
 }
 
 export default function Page() {
+  const router = useRouter();
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -110,7 +112,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const { profile } = useProfile();
-  const {store} = useStoreStore();
+  const { store, fetchStore } = useStoreStore();
   const storeId = store?.id;
 
   async function loadData() {
@@ -147,6 +149,24 @@ export default function Page() {
     }
   }
   useEffect(() => {
+    if (!profile?.id) return;
+
+    const run = async () => {
+      await fetchStore(profile.id);
+
+      const currentStore = useStoreStore.getState().store;
+      if (!currentStore) {
+        router.replace("/selling/onboarding");
+      }
+    };
+
+    run();
+  }, [profile?.id]);
+
+  useEffect(() => {
+    if(!storeId){
+      return;
+    }
     loadData();
   }, [storeId]);
 
