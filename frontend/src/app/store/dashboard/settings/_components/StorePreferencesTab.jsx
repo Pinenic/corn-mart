@@ -3,7 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-export default function PreferencesForm({ user }) {
+export default function StorePreferencesTab({ user }) {
   const [prefs, setPrefs] = useState({
     notifications: true,
     darkMode: false,

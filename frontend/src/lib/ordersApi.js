@@ -39,3 +39,18 @@ export async function getBuyerOrder(buyerId) {
 export async function getBuyerOrderDetails(orderId) {
   return fetchApi(`/api/orders/details/${orderId}`);
 }
+
+export async function getOrderMessages(orderId) {
+  return fetchApi(`/api/orders/${orderId}/messages`);
+}
+
+export async function sendOrderMessage(orderId, userId, role, message) {
+  return fetchApi(`/api/orders/${orderId}/messages`, {
+    method: "POST",
+    body: JSON.stringify({
+      userId,
+      role,
+      message,
+    }),
+  });
+}

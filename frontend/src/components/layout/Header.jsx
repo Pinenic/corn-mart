@@ -18,7 +18,7 @@ export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-  const { user, signOut , loading} = useAuthStore();
+  const {init, user, signOut , loading} = useAuthStore();
   const {profile} = useProfile()
   const {store, fetchStore} = useStoreStore();
 
@@ -28,13 +28,16 @@ export default function Header() {
   };
 
   const handleStoreDashboardNav = async () => {
-    await fetchStore(user.id);
-    // console.log(user)
-    console.log(store);
-    // console.log(profile.stores);
-    if(store){
-      router.push("/store/dashboard")
-    } else router.push("/");
+    console.log("navigating...")
+    await init();
+    router.push("/store/dashboard")
+    // await fetchStore(user.id);
+    // // console.log(user)
+    // console.log(store);
+    // // console.log(profile.stores);
+    // if(store){
+    //   router.push("/store/dashboard")
+    // } else router.push("/");
   }
 
   const navLinks = [
@@ -127,7 +130,7 @@ export default function Header() {
                   <DropdownMenuItem onClick={() => router.push("/myorders")}>
                     My Orders
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleStoreDashboardNav}>
+                  <DropdownMenuItem onClick={()=> handleStoreDashboardNav()}>
                     Store
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

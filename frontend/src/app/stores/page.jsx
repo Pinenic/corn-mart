@@ -68,7 +68,7 @@ export default function StoresPage() {
                 </p>
                 <div className="flex items-center text-nuted-foreground text-sm">
                   <Users size={16} className="mr-1" />
-                  {store.followers || 26} follows
+                  {store.followers_count} follows
                 </div>
               </div>
             </Card>

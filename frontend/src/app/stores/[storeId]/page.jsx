@@ -7,28 +7,58 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useParams } from "next/navigation";
-import { getStoreById } from "@/lib/storesApi";
+import { getFollowerCount, getStoreById } from "@/lib/storesApi";
 
 export default function StorePage({ params }) {
   const { storeId } = useParams();
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  
+  const [count, setCount] = useState("");
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState(["all"]);
 
   const getStore = async () => {
     setLoading(true);
     try {
       const res = await getStoreById(storeId);
 
-      if (!res) throw new Error(result.error || "Failed to create store");
-      console.log(res);
+      if (!res) throw new Error(result.error || "Failed to fetch store");
       setStores(res);
+      setProducts(res.products);
+      sortCategories(res.products);
+      getNumbOfFollowers(res.id);
     } catch (err) {
-      setError(`❌ ${err.message}`);
+      console.error(err)
     } finally {
       setLoading(false);
     }
+  };
+
+
+  const refreshStore = async () => {
+    try {
+      const res = await getStoreById(storeId);
+
+      if (!res) throw new Error(result.error || "Failed to fetch store");
+      setStores(res);
+      setProducts(res.products);
+      sortCategories(res.products);
+      getNumbOfFollowers(res.id);
+    } catch (err) {
+      console.error(err)
+    } 
+  };
+
+  const getNumbOfFollowers = async (store_id) => {
+    const count = await getFollowerCount(store_id);
+    count ? setCount(count.followers) : console.log("something went wrong");
+  };
+
+  const sortCategories = async (prods) => {
+    setCategories([
+      "all",
+      ...new Set(prods.map((p) => p.category.trim().toLowerCase())),
+    ]);
   };
 
   useEffect(() => {
@@ -37,30 +67,39 @@ export default function StorePage({ params }) {
 
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+
+  const filteredProducts =
+    activeCategory === "all"
+      ? products
+      : products.filter(
+          (p) =>
+            p.category.trim().toLowerCase() === activeCategory.toLowerCase()
+        );
   // mock data for the store
   const store = {
-    id: storeId,
+    id: stores?.id,
     name: stores?.name || "Mikas Cakery",
     bannerUrl: stores.banner || "/banners/bakery-banner.jpg",
     avatarUrl: stores.logo || "/avatars/mika.jpg",
     description:
       stores.description ||
       "Welcome to Mika’s Cakery! We bake with love and passion — from cupcakes to celebration cakes.",
-    followers: 1234,
+    followers: count,
     productsCount: stores.products?.length || 42,
     location: "Lusaka, Zambia",
     rating: 4.9,
-    joined: "2023",
+    joined: stores.created_at,
   };
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto">
       {/* Store header */}
-      <StoreHeader store={store} />
+      <StoreHeader store={store} refresh={refreshStore}/>
 
       {/* Category tabs */}
       <div className="sticky top-[54px] z-40">
         <CategoryTabs
+          categories={categories}
           active={activeCategory}
           onChange={(cat) => setActiveCategory(cat)}
         />
@@ -83,7 +122,12 @@ export default function StorePage({ params }) {
       </div>
 
       {/* Product Grid */}
-      <ProductGrid storeId={storeId} query={query} category={activeCategory} stores={stores} />
+      <ProductGrid
+        storeId={storeId}
+        query={query}
+        category={activeCategory}
+        products={filteredProducts}
+      />
     </div>
   );
 }

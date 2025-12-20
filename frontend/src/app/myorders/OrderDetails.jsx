@@ -5,10 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getBuyerOrderDetails } from "@/lib/ordersApi";
 import { useEffect, useState } from "react";
 import OrderDetailsStoreSection from "./_components/OrderDetailsStoreSection";
+import ChatTab from "./_components/OrderChatTab";
 
 export default function OrderDetails({ orderId, handleUpdate, loading }) {
   const [orders, setOrder] = useState([]);
   const [fetching, setFetching] = useState(false);
+  const [messages, setMessages] = useState([]);
 
   const fetchOrder = async () => {
     setFetching(true);
@@ -33,13 +35,14 @@ export default function OrderDetails({ orderId, handleUpdate, loading }) {
   }, [orderId]);
   return (
     <Card className="rounded-2xl shadow-none w-full">
-      <CardContent className="p-6">
+      <CardContent className="px-6">
         <Tabs defaultValue="details" className="flex-1 flex flex-col">
           <TabsList className="gap-4 px-2 py-2 bg-muted/20 w-fit">
             <TabsTrigger value="details" className="py-2">
               Details
             </TabsTrigger>
             <TabsTrigger value="status">Status</TabsTrigger>
+            <TabsTrigger value="chat">Chat</TabsTrigger>
           </TabsList>
 
           <div className="flex-1">
@@ -64,6 +67,9 @@ export default function OrderDetails({ orderId, handleUpdate, loading }) {
                 </TabsContent>
                 <TabsContent value="status">
                   <p>status tab</p>
+                </TabsContent>
+                <TabsContent value="chat">
+                  <ChatTab orders={orders} />
                 </TabsContent>
               </>
             ) : (
