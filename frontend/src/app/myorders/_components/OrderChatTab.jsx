@@ -17,81 +17,88 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-function ReceivedBubble({ avatar, text }) {
+/* ------------------ Message bubbles ------------------ */
+
+function ReceivedBubble({ avatar, message }) {
   return (
     <div className="flex gap-2">
       <Image
         src={avatar}
-        width={50}
-        height={50}
-        alt={"avatar"}
-        className="rounded-full w-9 h-9 bg-muted object-cover"
+        width={36}
+        height={36}
+        alt="avatar"
+        className="rounded-full bg-muted object-cover"
       />
-      <div className="flex-start border rounded-xl bg-muted max-w-64 md:max-w-72 p-2 text-sm">
-        {text.message}
+      <div className="border rounded-xl bg-muted max-w-72 p-2 text-sm">
+        {message}
       </div>
     </div>
   );
 }
 
-function SentBubble({ text }) {
+function SentBubble({ message }) {
   return (
-    <div className="flex justify-end gap-2">
-      <div className="align-end border rounded-xl bg-primary max-w-64 md:max-w-72 p-2 text-sm">
-        {text.message}
+    <div className="flex justify-end">
+      <div className="border rounded-xl bg-primary text-primary-foreground max-w-72 p-2 text-sm">
+        {message}
       </div>
     </div>
   );
 }
 
-export default function ChatTab({ orders }) {
-  const [selectedSto, setSelectedSto] = useState(orders[0]);
-  const [fetching, setFetching] = useState(false);
-  const [sending, setSending] = useState(false);
+/* ------------------ Main component ------------------ */
+
+export default function ChatTab({ orders = [] }) {
+  const [selectedSto, setSelectedSto] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const bottomRef = useRef();
+  const [fetching, setFetching] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const bottomRef = useRef(null);
+  const channelRef = useRef(null);
 
   const role = "buyer";
   const { init, user } = useAuthStore();
 
-  const fetchMessageList = async () => {
+  /* -------- Init auth once -------- */
+  useEffect(() => {
+    init();
+  }, [init]);
+
+  /* -------- Select first order -------- */
+  useEffect(() => {
+    if (orders.length > 0) {
+      setSelectedSto(orders[0]);
+    }
+  }, [orders]);
+
+  /* -------- Fetch messages -------- */
+  const fetchMessageList = async (orderId) => {
     try {
       setFetching(true);
-      const data = await getOrderMessages(selectedSto.id);
-      setMessages(data);
-      console.log(data);
+      const data = await getOrderMessages(orderId);
+      setMessages(data ?? []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load messages");
+    } finally {
       setFetching(false);
-    } catch (error) {
-      console.error(error.message);
     }
   };
 
-  const sendMessage = async () => {
-    try {
-      setSending(true);
-      await init();
-      if (text.trim()) {
-        const response = await sendOrderMessage(
-          selectedSto.id,
-          user.id,
-          role,
-          text
-        );
-        response
-          ? toast.success("Message sent")
-          : toast.error("Something went wrong");
-      } else console.log("text is empty");
-
-      setSending(false);
-      setText("");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
+  /* -------- Realtime subscription -------- */
   useEffect(() => {
-    fetchMessageList();
+    if (!selectedSto?.id) return;
+
+    setMessages([]);
+    fetchMessageList(selectedSto.id);
+
+    // Cleanup previous channel
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
     const channel = supabase
       .channel(`order-chat-${selectedSto.id}`)
       .on(
@@ -103,116 +110,118 @@ export default function ChatTab({ orders }) {
           filter: `order_id=eq.${selectedSto.id}`,
         },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new]);
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === payload.new.id)) return prev;
+            return [...prev, payload.new];
+          });
         }
       )
       .subscribe();
 
+    channelRef.current = channel;
+
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedSto]);
+  }, [selectedSto?.id]);
 
+  /* -------- Scroll to bottom -------- */
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  /* -------- Send message -------- */
+  const sendMessage = async () => {
+    if (!text.trim() || !user || !selectedSto) return;
+
+    try {
+      setSending(true);
+
+      const ok = await sendOrderMessage(
+        selectedSto.id,
+        user.id,
+        role,
+        text
+      );
+
+      if (!ok) throw new Error();
+      setText("");
+    } catch {
+      toast.error("Failed to send message");
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
-    <>
-      <div className="flex flex-col w-full h-3xl md:h-2xl">
-        <div className="flex justify-end gap-4">
-          {orders.map((sto) => (
-            <div
-              className="flex md:flex-col md:items-center"
-              key={sto.id}
-              onClick={() => setSelectedSto(sto)}
-            >
-              <Image
-                src={sto.stores.logo}
-                width={50}
-                height={50}
-                alt={sto.stores.name}
-                className="rounded-full w-9 h-9 bg-muted object-cover"
-              />
-              <p className="text-xs hidden md:flex">{sto.stores.name}</p>
-            </div>
-          ))}
-        </div>
-        <div className=" w-full h-88 space-y-4 overflow-y-scroll mt-5">
-          {fetching ? (
-            <p>Loading...</p>
-          ) : (
-            <>
-              {messages.length == 0 ? (
-                <p>No messages in this chat.</p>
-              ) : (
-                <>
-                  {messages.map((m) =>
-                    m.sender_role == "buyer" ? (
-                      <SentBubble text={m} />
-                    ) : (
-                      <ReceivedBubble
-                        avatar={selectedSto.stores.logo}
-                        text={m}
-                      />
-                    )
-                  )}
-                </>
-              )}
-            </>
-          )}
-          {/* Scroll anchor */}
-          <div ref={bottomRef} />
-        </div>
-        <>
-          <InputGroup>
-            <InputGroupTextarea
-              placeholder="Enter message..."
-              value={text}
-              onChange={(e) => {
-                setText(e.target.value);
-              }}
+    <div className="flex flex-col w-full h-full">
+      {/* -------- Order avatars -------- */}
+      <div className="flex gap-4 justify-end">
+        {orders.map((sto) => (
+          <button
+            key={sto.id}
+            onClick={() => setSelectedSto(sto)}
+            className="flex flex-col items-center"
+          >
+            <Image
+              src={sto.stores.logo}
+              width={36}
+              height={36}
+              alt={sto.stores.name}
+              className="rounded-full bg-muted object-cover"
             />
-            <InputGroupAddon align="block-end">
-              <InputGroupButton
-                variant="outline"
-                className="rounded-full"
-                size="icon-xs"
-              >
-                <IconPlus />
-              </InputGroupButton>
-              {/* <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <InputGroupButton variant="ghost">Auto</InputGroupButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  side="top"
-                  align="start"
-                  className="[--radius:0.95rem]"
-                >
-                  <DropdownMenuItem>Auto</DropdownMenuItem>
-                  <DropdownMenuItem>Agent</DropdownMenuItem>
-                  <DropdownMenuItem>Manual</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu> */}
-              <InputGroupText className="ml-auto"></InputGroupText>
-              <Separator orientation="vertical" className="!h-4" />
-              <InputGroupButton
-                variant="default"
-                className="rounded-full"
-                size="icon-xs"
-                disabled={sending}
-                onClick={() => sendMessage()}
-              >
-                <ArrowUpIcon />
-                <span className="sr-only">Send</span>
-              </InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
-        </>
+            <span className="text-xs hidden md:block">
+              {sto.stores.name}
+            </span>
+          </button>
+        ))}
       </div>
-    </>
+
+      {/* -------- Messages -------- */}
+      <div className="flex-1 overflow-y-auto space-y-4 mt-4">
+        {fetching ? (
+          <p>Loading…</p>
+        ) : messages.length === 0 ? (
+          <p>No messages yet.</p>
+        ) : (
+          messages.map((m) =>
+            m.sender_role === "buyer" ? (
+              <SentBubble key={m.id} message={m.message} />
+            ) : (
+              <ReceivedBubble
+                key={m.id}
+                avatar={selectedSto.stores.logo}
+                message={m.message}
+              />
+            )
+          )
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* -------- Input -------- */}
+      <InputGroup className="mt-3">
+        <InputGroupTextarea
+          placeholder="Enter message…"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <InputGroupAddon align="block-end">
+          <InputGroupButton variant="outline" size="icon-xs">
+            <IconPlus />
+          </InputGroupButton>
+          <InputGroupText />
+          <Separator orientation="vertical" className="!h-4" />
+          <InputGroupButton
+            variant="default"
+            size="icon-xs"
+            disabled={sending}
+            onClick={sendMessage}
+          >
+            <ArrowUpIcon />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+    </div>
   );
 }

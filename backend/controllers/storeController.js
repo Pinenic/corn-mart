@@ -131,45 +131,6 @@ export const createStoreLocation = async (req, res) => {
     res.status(400).json({ error: error.message });
     console.log(error);
   }
-
-  // const {
-  //   address,
-  //   city,
-  //   province,
-  //   country,
-  //   latitude,
-  //   longitude,
-  //   delivery_enabled,
-  //   delivery_radius_km,
-  //   delivery_fee,
-  //   delivery_methods,
-  // } = req.body;
-
-  // const { data, error } = await supabase
-  //   .from("store_locations")
-  //   .insert([
-  //     {
-  //       store_id: storeId,
-  //       address,
-  //       city,
-  //       province,
-  //       country,
-  //       latitude,
-  //       longitude,
-  //       delivery_enabled,
-  //       delivery_radius_km,
-  //       delivery_fee,
-  //       delivery_methods,
-  //     },
-  //   ])
-  //   .select()
-  //   .single();
-
-  // if (error) {
-  //   return res.status(400).json({ error: error.message });
-  // }
-
-  // res.status(201).json(data);
 };
 
 /**
@@ -184,19 +145,6 @@ export const getStoreLocation = async (req, res) => {
     res.status(400).json({ error: error.message });
     console.log(error);
   }
-  // const { storeId } = req.params;
-
-  // const { data, error } = await supabase
-  //   .from("store_locations")
-  //   .select("*")
-  //   .eq("store_id", storeId)
-  //   .single();
-
-  // if (error) {
-  //   return res.status(404).json({ error: "Location not found" });
-  // }
-
-  // res.json(data);
 };
 
 /**
@@ -211,20 +159,6 @@ export const updateStoreLocation = async (req, res) => {
     res.status(400).json({ error: error.message });
     console.log(error);
   }
-  // const { storeId } = req.params;
-
-  // const { data, error } = await supabase
-  //   .from("store_locations")
-  //   .update(req.body)
-  //   .eq("store_id", storeId)
-  //   .select()
-  //   .single();
-
-  // if (error) {
-  //   return res.status(400).json({ error: error.message });
-  // }
-
-  // res.json(data);
 };
 
 /**
@@ -239,16 +173,4 @@ export const deleteStoreLocation = async (req, res) => {
     res.status(400).json({ error: error.message });
     console.log(error);
   }
-  // const { storeId } = req.params;
-
-  // const { error } = await supabase
-  //   .from("store_locations")
-  //   .delete()
-  //   .eq("store_id", storeId);
-
-  // if (error) {
-  //   return res.status(400).json({ error: error.message });
-  // }
-
-  // res.status(204).send();
 };

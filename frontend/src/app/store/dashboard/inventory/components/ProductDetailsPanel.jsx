@@ -26,8 +26,8 @@ export default function ProductDetailsPanel({ product, reloadList, onClose }) {
   }, [product]);
 
   return (
-    <div className="h-full flex flex-col bg-background border-l">
-      <div className="flex items-center justify-between px-4 py-3 border-b">
+    <div className="h-full flex flex-col bg-card px-4 border-l">
+      <div className="flex items-center justify-between py-3 border-b">
         <h2 className="font-semibold text-lg">{details.name}</h2>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-4 w-4" />
@@ -41,7 +41,7 @@ export default function ProductDetailsPanel({ product, reloadList, onClose }) {
           <TabsTrigger value="media">Media</TabsTrigger>
         </TabsList>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto py-4">
           {/* {isLoading ? (
             <p className="text-sm text-muted-foreground">Loading product details...</p>
           ) : ( */}

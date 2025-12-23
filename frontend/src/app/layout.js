@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import ToasterProvider from "@/components/ToasterProvider";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
+
 import Header from "@/components/layout/Header";
 // import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme-provider";

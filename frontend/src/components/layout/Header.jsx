@@ -30,14 +30,7 @@ export default function Header() {
   const handleStoreDashboardNav = async () => {
     console.log("navigating...")
     await init();
-    router.push("/store/dashboard")
-    // await fetchStore(user.id);
-    // // console.log(user)
-    // console.log(store);
-    // // console.log(profile.stores);
-    // if(store){
-    //   router.push("/store/dashboard")
-    // } else router.push("/");
+    router.push("/store/dashboard");
   }
 
   const navLinks = [

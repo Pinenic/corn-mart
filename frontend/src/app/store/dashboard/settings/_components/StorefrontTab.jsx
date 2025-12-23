@@ -2,179 +2,150 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { PencilIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { PencilIcon } from "lucide-react";
 import ImageUpdateModal from "./ImageUpdateModal";
 
-export default function StorefrontTab({ user, handleUpdate, refreshing, loading }) {
+export default function StorefrontTab({
+  user,
+  handleUpdate,
+  refreshing,
+  loading,
+}) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
   });
-  const [errors, setErrors] = useState({});
-  const [openl, setOpenL] = useState(false);
-  const [openb, setOpenB] = useState(false);
-  // Uploads
-  const [logoFile, setLogoFile] = useState(null);
-//   const [logoPreview, setLogoPreview] = useState(null);
-  const [bannerFile, setBannerFile] = useState(null);
-//   const [bannerPreview, setBannerPreview] = useState(null);
 
+  const [openLogo, setOpenLogo] = useState(false);
+  const [openBanner, setOpenBanner] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  /* -------- Sync store data -------- */
+  useEffect(() => {
+    if (!user) return;
 
-  const handleSubmit = async () => {
-    console.log(logoFile);
-    const payload = {
+    setFormData({
+      name: user.name ?? "",
+      description: user.description ?? "",
+    });
+  }, [user]);
+
+  /* -------- Text update only -------- */
+  const handleTextUpdate = async () => {
+    await handleUpdate({
       name: formData.name,
       description: formData.description,
-      logo: logoFile,
-      banner: bannerFile,
-    };
-    await handleUpdate(payload)
-
+    });
   };
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name,
-        description: user.description,
-      });
-      setErrors({});
-    }
-  }, [user]);
+  /* -------- Image update only -------- */
+  const handleImageUpdate = async (type, file) => {
+    if (!file) return;
+
+    await handleUpdate({
+      [type]: file, // logo OR banner
+    });
+  };
 
   return (
     <>
+      {/* -------- Banner -------- */}
       <div className="mt-2 border rounded-lg overflow-hidden lg:w-3xl">
-        <div className="relative w-full h-56 bg-zinc-50 flex items-center justify-center">
+        <div className="relative w-full h-56 bg-muted">
           {user?.banner ? (
             <img
-              src={user?.banner}
+              src={user.banner}
               alt="banner"
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="text-sm text-muted-foreground">Banner preview</div>
-          )}
-          <PencilIcon className="absolute top-1 right-1 bg-white/70 text-black text-xs rounded-full w-10 h-10 p-3 flex items-center justify-center hover:cursor-pointer" onClick={()=> setOpenB(true)}  />
-        </div>
-
-        <div className="p-3">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className=" w-15 h-15 rounded-full overflow-hidden border bg-white flex items-center justify-center">
-                {user?.logo ? (
-                  <img
-                    src={user?.logo}
-                    alt="logo"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="text-xs text-muted-foreground">Logo</div>
-                )}
-                <PencilIcon className="absolute -top-1 -right-3 bg-white border text-black text-xs rounded-full w-6 h-6 p-1 flex items-center justify-center hover:cursor-pointer" onClick={()=> setOpenL(true)} />
-              </div>
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+              Banner preview
             </div>
-            {/* <div className="flex-1">
-              <div className="text-sm font-medium">
-                {storeName || "Your store name"}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {category || "Category"}
-              </div>
-            </div> */}
+          )}
+
+          <PencilIcon
+            className="absolute top-2 right-2 bg-white text-black rounded-full w-8 h-8 p-2 cursor-pointer"
+            onClick={() => setOpenBanner(true)}
+          />
+        </div>
+
+        {/* -------- Logo -------- */}
+        <div className="p-3 flex items-center gap-3">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full overflow-hidden border bg-white">
+              {user?.logo ? (
+                <img
+                  src={user.logo}
+                  alt="logo"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                  Logo
+                </div>
+              )}
+            </div>
+
+            <PencilIcon
+              className="absolute -top-1 -right-3 bg-white text-black border rounded-full w-6 h-6 p-1 cursor-pointer"
+              onClick={() => setOpenLogo(true)}
+            />
           </div>
-
-          {/* <div className="mt-3 text-xs text-muted-foreground">
-            {storeDescription ||
-              "A short tagline or description will appear here."}
-          </div> */}
         </div>
       </div>
-      {/* <div className="flex items-center gap-4">
-        <img
-          src={user?.avatar_url || "/default-avatar.png"}
-          alt="User Avatar"
-          width={64}
-          height={64}
-          className="rounded-full object-cover"
-        />
-        <Button variant="outline">Change Avatar</Button>
-      </div> */}
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      {/* -------- Text fields -------- */}
+      <div className="grid gap-4 lg:w-3xl mt-4">
         <div>
-          <label className="text-sm font-medium text-gray-700">
-            Store Name
-          </label>
+          <label className="text-sm font-medium">Store Name</label>
           <Input
-            name="name"
             value={formData.name}
-            onChange={handleChange}
-            required
             disabled={loading}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, name: e.target.value }))
+            }
           />
         </div>
-      </div>
 
-      {/* <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm font-medium text-gray-700">
-            Category
-          </label>
-          <Input
-            name="name"
-            value={formData.category}
-            onChange={handleChange}
-            required
+          <label className="text-sm font-medium">Description</label>
+          <Textarea
+            value={formData.description}
+            disabled={loading}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, description: e.target.value }))
+            }
           />
         </div>
-      </div> */}
 
-      <div className="lg:w-3xl">
-        <label className="text-sm font-medium text-gray-700">Description</label>
-        <Textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
+        <Button
+          className="bg-primary text-white"
           disabled={loading}
-        />
+          onClick={handleTextUpdate}
+        >
+          {loading ? "Updating…" : "Save Changes"}
+        </Button>
+
+        {refreshing && <p className="text-sm">Refreshing…</p>}
       </div>
 
-      <Button
-        className="w-full lg:w-3xl bg-primary hover:primary/70 text-white mt-5"
-        onClick={()=> handleSubmit()}
-      >
-        {loading ? "Updating info...":"Save Changes"}
-      </Button>
-
-      {refreshing ? <p>Refreshing...</p> : "" }
-
-      <ImageUpdateModal 
-        open={openl}
-        onOpenChange={setOpenL}
-        submit={handleSubmit}
+      {/* -------- Modals -------- */}
+      <ImageUpdateModal
+        open={openLogo}
+        onOpenChange={setOpenLogo}
         image={user?.logo}
-        onFile={setLogoFile}
-        mainFile={logoFile}
-        title="logo update"
-        />
+        title="Update logo"
+        onSave={(file) => handleImageUpdate("logo", file)}
+      />
 
-        <ImageUpdateModal 
-        open={openb}
-        onOpenChange={setOpenB}
-        submit={handleSubmit}
+      <ImageUpdateModal
+        open={openBanner}
+        onOpenChange={setOpenBanner}
         image={user?.banner}
-        onFile={setBannerFile}
-        mainFile={bannerFile}
-        title="banner update"
-        />
+        title="Update banner"
+        onSave={(file) => handleImageUpdate("banner", file)}
+      />
     </>
   );
 }

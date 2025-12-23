@@ -115,7 +115,7 @@ export default function ProductsPage() {
       ) : (
         <ResizablePanelGroup
           direction="horizontal"
-          className="w-full h-full border rounded-lg overflow-hidden"
+          className="w-full h-full bg-card p-5 border rounded-lg overflow-hidden"
         >
           {/* Left: Products Table */}
           <ResizablePanel defaultSize={selectedProduct ? 60 : 100}>
