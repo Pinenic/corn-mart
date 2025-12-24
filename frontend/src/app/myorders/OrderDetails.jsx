@@ -6,6 +6,7 @@ import { getBuyerOrderDetails } from "@/lib/ordersApi";
 import { useEffect, useState } from "react";
 import OrderDetailsStoreSection from "./_components/OrderDetailsStoreSection";
 import ChatTab from "./_components/OrderChatTab";
+import OrderStatusTab from "./_components/OrderStatusTab";
 
 export default function OrderDetails({ orderId, handleUpdate, loading }) {
   const [orders, setOrder] = useState([]);
@@ -31,6 +32,9 @@ export default function OrderDetails({ orderId, handleUpdate, loading }) {
     }
   };
   useEffect(() => {
+    if(!orderId){
+      return;
+    }
     fetchOrder();
   }, [orderId]);
   return (
@@ -66,7 +70,7 @@ export default function OrderDetails({ orderId, handleUpdate, loading }) {
                   )}
                 </TabsContent>
                 <TabsContent value="status">
-                  <p>status tab</p>
+                  <OrderStatusTab orders={orders} />
                 </TabsContent>
                 <TabsContent value="chat">
                   <ChatTab orders={orders} />

@@ -168,7 +168,7 @@ export default function ChatTab({ orders = [] }) {
               width={36}
               height={36}
               alt={sto.stores.name}
-              className="rounded-full bg-muted object-cover"
+              className="w-10 h-10 rounded-full bg-muted object-cover"
             />
             <span className="text-xs hidden md:block">
               {sto.stores.name}
@@ -178,7 +178,7 @@ export default function ChatTab({ orders = [] }) {
       </div>
 
       {/* -------- Messages -------- */}
-      <div className="flex-1 overflow-y-auto space-y-4 mt-4">
+      <div className="h-96 overflow-y-auto space-y-4 mt-4">
         {fetching ? (
           <p>Loading…</p>
         ) : messages.length === 0 ? (

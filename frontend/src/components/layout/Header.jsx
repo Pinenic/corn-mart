@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { ShoppingCart, User, Bell } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -19,9 +19,10 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const {init, user, signOut , loading} = useAuthStore();
-  const {profile} = useProfile()
+  const {profile, fetchProfile} = useProfile()
   const {store, fetchStore} = useStoreStore();
 
+  // console.log(profile)
   const handleLogout = async () => {
     await signOut();
     router.push("/auth/login");
