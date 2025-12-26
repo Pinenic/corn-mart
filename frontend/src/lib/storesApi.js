@@ -19,8 +19,8 @@ export async function createStore(userId, payload) {
 
 export async function updateStore(storeId, payload) {
   const formData = new FormData();
-  formData.append("name", payload.name);
-  formData.append("description", payload.description);
+  if(payload.name) formData.append("name", payload.name);
+  if(payload.description) formData.append("description", payload.description);
   if(payload.logo) formData.append("logo", payload.logo);
   if(payload.banner) formData.append("banner", payload.banner);
 
@@ -61,3 +61,62 @@ export async function getFollowerCount(storeId) {
 }
 
 // STORE LOCATION
+
+export async function addLocation(storeId, locationData) {
+  const body = buildLocationFormData(locationData);
+  return fetchApi(`/api/stores/${storeId}/location`, {
+    method: "POST",
+    body,
+  });
+}
+
+export async function getLocation(storeId) {
+  return fetchApi(`/api/stores/${storeId}/location`);
+}
+
+export async function updateLocation(storeId, data) {
+  return fetchApi(`/api/stores/${storeId}/location`, {
+    method: "PUT",
+    body: JSON.stringify(data)
+  });
+}
+
+export async function updatePreferences(storeId, data) {
+  return fetchApi(`/api/stores/${storeId}/location`, {
+    method: "PUT",
+    body: data
+  });
+}
+
+// helper formdata builder function
+
+export function buildLocationFormData(data) {
+  const form = new FormData();
+
+  Object.entries(data).forEach(([key, value]) => {
+    // Skip undefined or null
+    if (value === undefined || value === null) return;
+
+    // Skip empty strings
+    if (typeof value === "string" && value.trim() === "") return;
+
+    // Handle arrays (e.g. delivery_methods)
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        form.append(`${key}[]`, item);
+      });
+      return;
+    }
+
+    // Handle booleans
+    if (typeof value === "boolean") {
+      form.append(key, value ? "true" : "false");
+      return;
+    }
+
+    // Numbers & everything else
+    form.append(key, value);
+  });
+
+  return form;
+}

@@ -165,7 +165,7 @@ export const createLocation = async (storeId, locationData) => {
     throw new Error(error.message);
   }
 
-  res.status(201).json(data);
+  return(data);
 };
 
 /**
@@ -177,7 +177,7 @@ export const getLocation = async (storeId) => {
     .from("store_locations")
     .select("*")
     .eq("store_id", storeId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);

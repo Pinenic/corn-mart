@@ -28,7 +28,7 @@ export default function OrdersClient({ initialOrder = {} }) {
         init();
       }
       const data = await getBuyerOrder(user.id);
-      if (data) toast.success("fetched orders");
+      // if (data) toast.success("fetched orders");
       setOrder(data || {});
     } catch (err) {
       console.error(err);
@@ -39,7 +39,11 @@ export default function OrdersClient({ initialOrder = {} }) {
   };
 
   useEffect(() => {
-    loadOrders();
+    if (user) {
+      loadOrders();
+      return;
+    }
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 

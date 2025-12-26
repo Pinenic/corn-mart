@@ -28,7 +28,7 @@ export async function SellerConfirmOrder(storeOrderId, sellerId) {
 export async function SellerCancelOrder(storeOrderId, sellerId) {
   const { data, error } = await supabase.rpc("seller_update_store_order", {
     p_store_order_id: storeOrderId,
-    p_action: "confirm",
+    p_action: "cancel",
     p_seller_id: sellerId,
   });
   if (error) throw new Error(`${error}`);
@@ -40,61 +40,26 @@ export async function updateStoreOrderStatus(
   storeOrderId,
   storeId,
   newStatus,
-  metadata = {}
+  metadata = null,
+  comment = "Updated"
 ) {
-  // Validate state transition
-  const { data: current, error: fetchError } = await supabase
-    .from("store_orders")
-    .select("status")
-    .eq("id", storeOrderId)
-    .eq("store_id", storeId)
-    .single();
+  const { data, error } = await supabase.rpc(
+    "update_store_order_status",
+    {
+      p_store_order_id: storeOrderId,
+      p_store_id: storeId,
+      p_new_status: newStatus,
+      p_actor_id: null,
+      p_comment: comment,
+      p_metadata: metadata,
+    }
+  );
 
-  if (fetchError) {
-    throw new Error(`Store order not found: ${fetchError.message}`);
-  }
-
-  if (!isValidTransition(current.status, newStatus)) {
-    throw new Error(`Invalid transition: ${current.status} → ${newStatus}`);
-  }
-
-  // Update status (triggers will handle the rest)
-
-  if (Object.keys(metadata).length === 0) {
-    const { data, error } = await supabase
-      .from("store_orders")
-      .update({
-        status: newStatus,
-        updated_at: new Date(),
-      })
-      .eq("id", storeOrderId)
-      .eq("store_id", storeId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data;
-  }
-
-  const { data, error } = await supabase
-    .from("store_orders")
-    .update({
-      status: newStatus,
-      shipping_info: metadata,
-      updated_at: new Date(),
-    })
-    .eq("id", storeOrderId)
-    .eq("store_id", storeId)
-    .select()
-    .single();
-
-  // Trigger notifications asynchronously
-  // await notifyStatusChange(data);
   if (error) throw error;
 
   return data;
 }
+
 
 function isValidTransition(currentStatus, newStatus) {
   const validTransitions = {
@@ -127,7 +92,7 @@ export async function getBuyerOrderDetails(orderId) {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "*,store_orders(*,stores(name, logo), order_items(*, products(name, thumbnail_url), product_variants(name, price)))"
+      "*,store_orders(*,stores(name, logo), history:store_order_status_history(*), order_items(*, products(name, thumbnail_url), product_variants(name, price)))"
     )
     .eq("id", orderId)
     .single();
@@ -198,7 +163,7 @@ export async function postMessage(orderId, userId, role, message) {
     .select()
     .single();
 
-  if(error) throw new Error(`Error posting the message, ${error.message}`);
+  if (error) throw new Error(`Error posting the message, ${error.message}`);
 
   return data;
 }

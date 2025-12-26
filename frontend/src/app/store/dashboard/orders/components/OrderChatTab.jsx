@@ -40,7 +40,7 @@ function ReceivedBubble({ avatar, text }) {
 function SentBubble({ text }) {
   return (
     <div className="flex justify-end">
-      <div className="border rounded-xl bg-primary text-primary-foreground max-w-64 md:max-w-72 p-2 text-sm">
+      <div className="border rounded-xl bg-primary text-white max-w-64 md:max-w-72 p-2 text-sm">
         {text.message}
       </div>
     </div>
