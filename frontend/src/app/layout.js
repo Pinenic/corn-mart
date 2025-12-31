@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import ToasterProvider from "@/components/ToasterProvider";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
+import {Analytics} from '@vercel/analytics';
 
 import Header from "@/components/layout/Header";
 // import Footer from "@/components/layout/Footer";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
           <Header />
           <ToasterProvider />
           <main className="flex-1">{children}</main>
+          <Analytics />
           {/* <Footer /> */}
         </ThemeProvider>
       </body>
