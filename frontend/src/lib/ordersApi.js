@@ -54,3 +54,16 @@ export async function sendOrderMessage(orderId, userId, role, message) {
     }),
   });
 }
+
+export async function markChatAsRead(orderId, userId) {
+  return fetchApi(`/api/orders/${orderId}/messages/read`, {
+    method: "POST",
+    body: JSON.stringify({
+      userId,
+    }),
+  });
+}
+
+export async function getLastRead(orderId, userId) {
+  return fetchApi(`/api/orders/${orderId}/${userId}/messages/read`);
+}

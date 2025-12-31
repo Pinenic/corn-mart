@@ -7,7 +7,7 @@ router.get("/", getProducts);
 router.get("/categories", getCategories);
 router.get("/search", searchMarket);
 router.get("/categories/:category", getCategory);
-router.get("/categories/:subcat/subcategory", getSingleSubCategory);
+router.get("/categories/:category/:subcat", getSingleSubCategory);
 router.get("/:category/products", getAllCategoryProducts);
 router.get("/:id", getSingleProductById);
 

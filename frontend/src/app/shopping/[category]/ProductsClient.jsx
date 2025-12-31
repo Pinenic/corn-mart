@@ -116,7 +116,7 @@ export default function ProductsClient({ initialProducts = [], category }) {
                 <Spinner className="size-8 text-blue-500" />
               </div>
             </>
-          ) : (
+          ) : products.length == 0 ? <p> No products yet </p> : (
             products.map((product) => (
               <div key={product.id}>
                 <ProductCard product={product} view={view} />

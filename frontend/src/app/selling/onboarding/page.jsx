@@ -34,7 +34,7 @@ export default function StoreOnboarding() {
   const [bannerFile, setBannerFile] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(null);
 
-  const {init} = useAuthStore()
+  const { init } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -82,7 +82,6 @@ export default function StoreOnboarding() {
       res?.store
         ? toast.success(`Success, ${res.message}`)
         : toast.error(`Failure, ${res.message}`);
-      
 
       setLoading(false);
       await init();
@@ -416,8 +415,18 @@ export default function StoreOnboarding() {
                                       >
                                         Open Preview
                                       </Button>
-                                      <Button onClick={handleSubmit}>
-                                        Create Store
+                                      <Button
+                                        onClick={
+                                          step === totalSteps
+                                            ? handleSubmit
+                                            : next
+                                        }
+                                      >
+                                        {step === totalSteps
+                                          ? "Create"
+                                          : step === totalSteps && loading
+                                          ? "Making your store"
+                                          : "Next"}
                                       </Button>
                                     </div>
                                   </div>
@@ -439,7 +448,11 @@ export default function StoreOnboarding() {
                     Back
                   </Button>
                   <Button onClick={step === totalSteps ? handleSubmit : next}>
-                    {step === totalSteps ? "Create" : step === totalSteps && loading ? "Making your store" : "Next"}
+                    {step === totalSteps
+                      ? "Create"
+                      : step === totalSteps && loading
+                      ? "Making your store"
+                      : "Next"}
                   </Button>
                 </div>
               </div>

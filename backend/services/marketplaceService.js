@@ -7,12 +7,20 @@ export const getAllProducts = async ({ offset = 0, limit = 12 }) => {
   const { data: products, error: prodError } = await supabase
     .from("products")
     .select("*")
+    .eq("is_active", true)
     .range(from, to)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false });
   if (prodError) throw new Error(`Error fetching products,`, prodError);
 
-  if(products.length < limit) hasMore = false;
-  return {products, hasMore};
+  if (products.length < limit) hasMore = false;
+
+  const productsWithlocation = await Promise.all(
+    products.map(async (product) => {
+      const location = await productLocationHelper(product.store_id);
+      return { ...product, location };
+    })
+  );
+  return { productsWithlocation, hasMore };
 };
 
 export const getProductById = async (id) => {
@@ -29,7 +37,8 @@ export const getProductById = async (id) => {
 export const getAllCategories = async () => {
   const { data, error } = await supabase
     .from("categories")
-    .select("*, subcategories(*)");
+    .select("*, subcategories(*)")
+    .order("name", {ascending: true});
   if (error) throw new Error(`Error fetching categories, ${error}`);
   return data;
 };
@@ -41,6 +50,8 @@ export const getSingleCategory = async (category) => {
     .eq("slug", category);
 
   if (error) throw new Error("Error fetching the category", error);
+
+  // console.log("maincat: ",category, "data: ",data); for debugging
   return data;
 };
 
@@ -53,17 +64,47 @@ export const getProductsByCategory = async (category) => {
   if (error) throw new Error("Error fetching the category", error);
 
   const organizedProducts = organizeProducts(data[0].subcategories);
-  return organizedProducts;
+  const productsWithlocation = await Promise.all(
+    organizedProducts.map(async (product) => {
+      const location = await productLocationHelper(product.store_id);
+      return { ...product, location };
+    })
+  );
+  return productsWithlocation;
 };
 
-export const getSubCategory = async (category) => {
+export const getSubCategory = async (maincat, category) => {
+  const Category = await getSingleCategory(maincat);
   const { data, error } = await supabase
     .from("subcategories")
     .select("*, products(*)")
+    .eq("category_id", Category[0].id)
     .eq("slug", category);
 
-  if (error) throw new Error("Error fetching the category", error);
-  return data;
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const revisedData = await Promise.all(
+    data.map(async (subcat) => {
+      const productsWithLocation = await Promise.all(
+        (subcat.products || []).map(async (product) => {
+          const location = await productLocationHelper(product.store_id);
+          return {
+            ...product,
+            location,
+          };
+        })
+      );
+
+      return {
+        ...subcat,
+        products: productsWithLocation,
+      };
+    })
+  );
+
+  return revisedData;
 };
 
 export const searchDb = async (query) => {
@@ -90,8 +131,15 @@ async function searchHelper(query) {
     .select("*")
     .ilike("name", `%${query}%`);
 
+    const productsWithlocation = await Promise.all(
+    products.map(async (product) => {
+      const location = await productLocationHelper(product.store_id);
+      return { ...product, location };
+    })
+  );
+
   try {
-    const results = Promise.all([categories, subcategories, products]);
+    const results = Promise.all([categories, subcategories, productsWithlocation]);
     return results;
   } catch (error) {
     console.log("Error fetching results", error);
@@ -104,4 +152,16 @@ function organizeProducts(arr) {
     products = [...products, ...arr[index].products];
   }
   return products;
+}
+
+async function productLocationHelper(storeId) {
+  const { data, error } = await supabase
+    .from("store_locations")
+    .select("city, province")
+    .eq("store_id", storeId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data;
 }

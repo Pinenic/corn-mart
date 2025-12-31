@@ -138,7 +138,7 @@ export function Info({ prod, reload }) {
       </div>
 
       <Button
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full border-2 bg-transparent hover:bg-primary/80 hover:text-white text-primary"
         onClick={handleSubmit}
       >
         {Loading ? "Saving..." : "Save changes"}
@@ -147,7 +147,7 @@ export function Info({ prod, reload }) {
   );
 }
 
-export function Variants({ prodId, reload}) {
+export function Variants({ prodId, reload }) {
   const [varis, setVaris] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -189,6 +189,7 @@ export function Variants({ prodId, reload}) {
 
   const handleCreateVariant = async ({
     name,
+    description,
     stock,
     price,
     low_stock_threshold,
@@ -198,6 +199,7 @@ export function Variants({ prodId, reload}) {
       const res = await createVariant({
         productId: prodId,
         name,
+        description,
         price,
         stock,
         lowStockThreshold: low_stock_threshold,
@@ -216,6 +218,7 @@ export function Variants({ prodId, reload}) {
 
   const handleEditVariant = async ({
     name,
+    description,
     stock,
     price,
     low_stock_threshold,
@@ -224,6 +227,7 @@ export function Variants({ prodId, reload}) {
       setLoading(true);
       const res = await updateVariant(selectedVariant.id, {
         name,
+        description,
         price,
         stock,
         low_stock_threshold,
@@ -297,11 +301,11 @@ export function Variants({ prodId, reload}) {
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-end space-x-2">
                   {/* <Label htmlFor="active">Active</Label> */}
-                  <Switch
+                  {/* <Switch
                     id="active"
                     // checked={formData.is_active}
                     // onCheckedChange={() => toggle("is_active")}
-                  />
+                  /> */}
                 </div>
                 <div className="flex gap-4 justify-end">
                   <PencilIcon
@@ -373,60 +377,56 @@ export function Media({ prodId, maxFiles = 4, maxSizeMB = 5 }) {
   const onUpload = useCallback(async (newImages) => {
     const newFiles = newImages.map((img) => img.file);
     console.log("onUpload fired with", newImages.length, "images", newFiles);
-  
+
     if (newFiles.length > 0) {
-      const { data } = await uploadProductImages(
-        userId,
-        prodId,
-        newFiles,
-        0
-      );
+      const { data } = await uploadProductImages(userId, prodId, newFiles, 0);
       console.log("Uploaded:", data);
     }
   });
-  
 
   const isUploadingRef = useRef(false);
 
-const processFiles = useCallback((files) => {
-  console.log("processFiles fired");
-  const fileArray = Array.from(files);
-  const readers = [];
-  const newImages = [];
+  const processFiles = useCallback(
+    (files) => {
+      console.log("processFiles fired");
+      const fileArray = Array.from(files);
+      const readers = [];
+      const newImages = [];
 
-  fileArray.forEach((file) => {
-    const reader = new FileReader();
-    readers.push(
-      new Promise((resolve) => {
-        reader.onload = (e) => {
-          newImages.push({
-            id: Date.now() + Math.random(),
-            url: e.target.result,
-            name: file.name,
-            file,
-          });
-          resolve();
-        };
-      })
-    );
-    reader.readAsDataURL(file);
-  });
+      fileArray.forEach((file) => {
+        const reader = new FileReader();
+        readers.push(
+          new Promise((resolve) => {
+            reader.onload = (e) => {
+              newImages.push({
+                id: Date.now() + Math.random(),
+                url: e.target.result,
+                name: file.name,
+                file,
+              });
+              resolve();
+            };
+          })
+        );
+        reader.readAsDataURL(file);
+      });
 
-  Promise.all(readers).then(async () => {
-    if (isUploadingRef.current) {
-      console.warn("Skipped duplicate upload");
-      return;
-    }
+      Promise.all(readers).then(async () => {
+        if (isUploadingRef.current) {
+          console.warn("Skipped duplicate upload");
+          return;
+        }
 
-    isUploadingRef.current = true;
-    console.log("onUpload fired once with", newImages.length, "images");
+        isUploadingRef.current = true;
+        console.log("onUpload fired once with", newImages.length, "images");
 
-    setImages((prev) => [...prev, ...newImages]);
-    await onUpload?.(newImages);
-    isUploadingRef.current = false;
-  });
-}, [onUpload]);
-  
+        setImages((prev) => [...prev, ...newImages]);
+        await onUpload?.(newImages);
+        isUploadingRef.current = false;
+      });
+    },
+    [onUpload]
+  );
 
   const handleDragEnter = (e) => {
     e.preventDefault();
@@ -463,10 +463,10 @@ const processFiles = useCallback((files) => {
     }
   };
 
-  const removeImage = async(id) => {
+  const removeImage = async (id) => {
     const res = await deleteImage(id);
-    if(!res?.success) toast("failed to delete image", res.message);
-    if(res?.success) loadImages();
+    if (!res?.success) toast("failed to delete image", res.message);
+    if (res?.success) loadImages();
     toast.success("image deleted", res.message);
   };
 
@@ -536,7 +536,7 @@ const processFiles = useCallback((files) => {
           onDrop={handleDrop}
           onClick={openFileDialog}
           className={`
-            relative border-2 border-dashed rounded-lg p-12 text-center cursor-pointer
+            relative border-2 border-dashed rounded-lg px-12 text-center cursor-pointer
             transition-all duration-200 ease-in-out
             ${
               isDragging
@@ -588,12 +588,11 @@ const processFiles = useCallback((files) => {
           </div>
         )}
 
-        <LoadingOverlay show={loading}/>
+        <LoadingOverlay show={loading} />
       </div>
     </div>
   );
 }
-
 
 export function InfoTab({ prod }) {
   const [activeCategory, setActiveCategory] = useState("info");

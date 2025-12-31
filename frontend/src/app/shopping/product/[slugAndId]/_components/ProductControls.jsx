@@ -1,4 +1,3 @@
-// app/product/[slugAndId]/_components/ProductControls.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { VariantSelector } from "./VariantSelector";
 import { QuantitySelector } from "./QuantitySelector";
 import { useCart } from "@/store/useCart";
-import { toast } from "sonner"; // or your toast lib
+import { toast } from "sonner"; 
 
 export default function ProductControls({ product }) {
   const { addItem } = useCart();
@@ -48,7 +47,7 @@ export default function ProductControls({ product }) {
       </p>
       <hr className="my-6" />
 
-      <p className="text-gray-700">{product.description}</p>
+      <p className="text-gray-700 whitespace-pre-line">{selectedVariant.description || product.description}</p>
 
       <hr className="my-6" />
       <VariantSelector

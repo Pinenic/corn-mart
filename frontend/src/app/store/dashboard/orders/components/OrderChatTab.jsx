@@ -8,11 +8,16 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
-import { getOrderMessages, sendOrderMessage } from "@/lib/ordersApi";
+import {
+  getLastRead,
+  getOrderMessages,
+  markChatAsRead,
+  sendOrderMessage,
+} from "@/lib/ordersApi";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthStore } from "@/store/useAuthStore";
 import { IconPlus } from "@tabler/icons-react";
-import { ArrowUpIcon } from "lucide-react";
+import { ArrowUpIcon, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -37,11 +42,17 @@ function ReceivedBubble({ avatar, text }) {
   );
 }
 
-function SentBubble({ text }) {
+function SentBubble({ text, createdAt, readAt  }) {
+  const isRead = 
+  new Date(createdAt).getTime() <=
+  new Date(readAt).getTime();
   return (
     <div className="flex justify-end">
-      <div className="border rounded-xl bg-primary text-white max-w-64 md:max-w-72 p-2 text-sm">
-        {text.message}
+      <div className="relative">
+        <div className="border rounded-xl bg-primary text-primary-foreground max-w-72 p-2 text-sm">
+          {text.message}
+        </div>
+        <CheckCircle className={isRead ?"text-primary absolute w-3 right-1" : "text-text absolute w-3 right-1"} />
       </div>
     </div>
   );
@@ -55,6 +66,7 @@ export default function ChatTab({ orders, avatar }) {
   const [sending, setSending] = useState(false);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const [lastRead, setLastRead] = useState(null);
   const bottomRef = useRef(null);
 
   const role = "seller";
@@ -133,6 +145,7 @@ export default function ChatTab({ orders, avatar }) {
         }
       )
       .subscribe();
+      markAsRead();
 
     return () => {
       supabase.removeChannel(channel);
@@ -143,7 +156,22 @@ export default function ChatTab({ orders, avatar }) {
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
     });
+    markAsRead();
   }, [messages]);
+
+   useEffect(() => {
+      if (selectedSto === null) {
+        return;
+      }
+      markAsRead();
+    }, [selectedSto]);
+  
+    const markAsRead = async () => {
+      await markChatAsRead(selectedSto.id, user.id)
+      const res = await getLastRead(selectedSto.id, selectedSto.buyer_id);
+      setLastRead(res.last_read_at);
+      console.log(res)
+    };
 
   /* -------- Guard render -------- */
   if (!selectedSto) {
@@ -159,7 +187,7 @@ export default function ChatTab({ orders, avatar }) {
   return (
     <div className="flex flex-col w-full h-3xl md:h-2xl">
       {/* Messages */}
-      <div className="w-full h-88 space-y-4 overflow-y-scroll mt-5">
+      <div className="w-full h-88 space-y-7 overflow-y-scroll mt-5">
         {fetching ? (
           <p>Loading...</p>
         ) : messages.length === 0 ? (
@@ -167,7 +195,7 @@ export default function ChatTab({ orders, avatar }) {
         ) : (
           messages.map((m) =>
             m.sender_role === "seller" ? (
-              <SentBubble key={m.id} text={m} />
+              <SentBubble key={m.id} text={m} createdAt={m.created_at} readAt={lastRead} />
             ) : (
               <ReceivedBubble key={m.id} avatar={avatar} text={m} />
             )

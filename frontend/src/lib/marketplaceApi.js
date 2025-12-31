@@ -24,6 +24,6 @@ export async function getSingleCategoryWP(slug) {
     return fetchApi(`/api/marketplace/categories/${slug}`)
 }
 
-export async function getSubcatProducts(slug) {
-    return fetchApi(`/api/marketplace/categories/${slug}/subcategory`)
+export async function getSubcatProducts(maincat, slug) {
+    return fetchApi(`/api/marketplace/categories/${maincat}/${slug}`)
 }

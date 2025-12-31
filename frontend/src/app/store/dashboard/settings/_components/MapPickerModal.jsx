@@ -42,6 +42,9 @@ export default function MapPickerModal({
   const [position, setPosition] = useState(initialPosition);
   
   useEffect(()=>{
+    if(initialPosition == null){
+      return
+    }
     if(initialPosition[0] === 0 && initialPosition[0] === 0 ){
       return
     }

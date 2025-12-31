@@ -10,6 +10,8 @@ import {
   cancelOrder,
   getOrderMessageList,
   sendMessage,
+  readChat,
+  getRead,
 } from "../controllers/orderController.js";
 
 const router = express.Router();
@@ -24,5 +26,7 @@ router.get("/store/order/:orderId", getUserStoreOrderDetails);
 router.put("/update/store-order/:storeOrderId", updateStoreOrder);
 router.get("/:orderId/messages",getOrderMessageList);
 router.post("/:orderId/messages", sendMessage);
+router.post("/:orderId/messages/read", readChat);
+router.get("/:orderId/:userId/messages/read", getRead);
 
 export default router;

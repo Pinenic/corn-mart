@@ -1,10 +1,7 @@
 "use client";
-
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export function QuantitySelector() {
-  const [qty, setQty] = useState(1);
+export function QuantitySelector({setQuantity, quantity}) {
 
   return (
     <div className="flex items-center gap-2">
@@ -14,8 +11,8 @@ export function QuantitySelector() {
       >
         -
       </Button>
-      <span className="w-8 text-center">{qty}</span>
-      <Button variant="outline" onClick={() => setQty((n) => n + 1)}>
+      <span className="w-8 text-center">{quantity}</span>
+      <Button variant="outline" onClick={() => setQuantity((n) => n + 1)}>
         +
       </Button>
     </div>

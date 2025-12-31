@@ -114,6 +114,7 @@ export async function deleteAProduct(productId) {
 export async function createVariant({
   product_id,
   name,
+  description,
   price = null,
   stock = 0,
   sku = null,
@@ -121,7 +122,7 @@ export async function createVariant({
 }) {
   const { data, error } = await supabase
     .from("product_variants")
-    .insert([{ product_id, name, price, stock, sku, low_stock_threshold }])
+    .insert([{ product_id, name,description, price, stock, sku, low_stock_threshold }])
     .select()
     .single();
 

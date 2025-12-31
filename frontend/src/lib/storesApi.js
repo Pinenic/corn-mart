@@ -19,10 +19,10 @@ export async function createStore(userId, payload) {
 
 export async function updateStore(storeId, payload) {
   const formData = new FormData();
-  if(payload.name) formData.append("name", payload.name);
-  if(payload.description) formData.append("description", payload.description);
-  if(payload.logo) formData.append("logo", payload.logo);
-  if(payload.banner) formData.append("banner", payload.banner);
+  if (payload.name) formData.append("name", payload.name);
+  if (payload.description) formData.append("description", payload.description);
+  if (payload.logo) formData.append("logo", payload.logo);
+  if (payload.banner) formData.append("banner", payload.banner);
 
   return fetchApi(`/api/stores/${storeId}`, {
     method: "PUT",
@@ -77,14 +77,14 @@ export async function getLocation(storeId) {
 export async function updateLocation(storeId, data) {
   return fetchApi(`/api/stores/${storeId}/location`, {
     method: "PUT",
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
 }
 
 export async function updatePreferences(storeId, data) {
   return fetchApi(`/api/stores/${storeId}/location`, {
     method: "PUT",
-    body: data
+    body: data,
   });
 }
 

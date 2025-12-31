@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import LoadingOverlay from "@/components/loading-overlay";
+import RedirectIfAuthed from "@/components/auth/RedirectIfAuthed";
 
 export default function SignupPage() {
   const { signUp, signIn } = useAuthStore();
@@ -20,18 +21,22 @@ export default function SignupPage() {
     if (user) {
       await createUserFolder(user.id);
       await createProfile(user, url, phone);
-      toast.success("Signup successful! Folder created. Now loggin in.");
+      // toast.success("Signup successful! Folder created. Now loggin in.");
       setLoading(true);
       setTimeout(async () => {
         const logged_in_user = await signIn(email, password);
         setLoading(false);
-        alert("Welcome back!");
+        // alert("Welcome back!");
         logged_in_user ? router.push("/") : router.push("/auth/login");
       }, 5000);
       // router.push("/");
     }
   }
-  if(userLoading) return <LoadingOverlay show={userLoading} />
+  if (userLoading) return <LoadingOverlay show={userLoading} />;
 
-  return <AuthForm mode="signup" onSubmit={handleSignup} />;
+  return (
+    <RedirectIfAuthed>
+      <AuthForm mode="signup" onSubmit={handleSignup} />
+    </RedirectIfAuthed>
+  );
 }

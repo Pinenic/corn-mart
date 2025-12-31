@@ -8,11 +8,16 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
-import { getOrderMessages, sendOrderMessage } from "@/lib/ordersApi";
+import {
+  getLastRead,
+  getOrderMessages,
+  markChatAsRead,
+  sendOrderMessage,
+} from "@/lib/ordersApi";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthStore } from "@/store/useAuthStore";
 import { IconPlus } from "@tabler/icons-react";
-import { ArrowUpIcon } from "lucide-react";
+import { ArrowUpIcon, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -36,11 +41,25 @@ function ReceivedBubble({ avatar, message }) {
   );
 }
 
-function SentBubble({ message }) {
+function SentBubble({ message, createdAt, readAt }) {
+  const [isRead, setIsRead] = useState(false);
+  useEffect(() => {
+    setIsRead(new Date(createdAt).getTime() <= new Date(readAt).getTime());
+  }, [readAt]);
+
   return (
     <div className="flex justify-end">
-      <div className="border rounded-xl bg-primary text-primary-foreground max-w-72 p-2 text-sm">
-        {message}
+      <div className="relative">
+        <div className="border rounded-xl bg-primary text-primary-foreground max-w-72 p-2 text-sm">
+          {message}
+        </div>
+        <CheckCircle
+          className={
+            isRead
+              ? "text-primary absolute w-3 right-1"
+              : "text-text absolute w-3 right-1"
+          }
+        />
       </div>
     </div>
   );
@@ -52,12 +71,14 @@ export default function ChatTab({ orders = [] }) {
   const [selectedSto, setSelectedSto] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const [lastRead, setLastRead] = useState(null);
   const [fetching, setFetching] = useState(false);
   const [sending, setSending] = useState(false);
 
   const bottomRef = useRef(null);
   const channelRef = useRef(null);
 
+  const seller_id = selectedSto?.stores.owner_id;
   const role = "buyer";
   const { init, user } = useAuthStore();
 
@@ -119,6 +140,7 @@ export default function ChatTab({ orders = [] }) {
       .subscribe();
 
     channelRef.current = channel;
+    markAsRead();
 
     return () => {
       supabase.removeChannel(channel);
@@ -128,7 +150,25 @@ export default function ChatTab({ orders = [] }) {
   /* -------- Scroll to bottom -------- */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (selectedSto === null) {
+      return;
+    }
+    markAsRead();
   }, [messages]);
+
+  useEffect(() => {
+    if (selectedSto === null) {
+      return;
+    }
+    markAsRead();
+  }, [selectedSto]);
+
+  const markAsRead = async () => {
+    await markChatAsRead(selectedSto.id, user.id);
+    const res = await getLastRead(selectedSto.id, seller_id);
+    setLastRead(res.last_read_at);
+    console.log(res);
+  };
 
   /* -------- Send message -------- */
   const sendMessage = async () => {
@@ -137,12 +177,7 @@ export default function ChatTab({ orders = [] }) {
     try {
       setSending(true);
 
-      const ok = await sendOrderMessage(
-        selectedSto.id,
-        user.id,
-        role,
-        text
-      );
+      const ok = await sendOrderMessage(selectedSto.id, user.id, role, text);
 
       if (!ok) throw new Error();
       setText("");
@@ -170,15 +205,13 @@ export default function ChatTab({ orders = [] }) {
               alt={sto.stores.name}
               className="w-10 h-10 rounded-full bg-muted object-cover"
             />
-            <span className="text-xs hidden md:block">
-              {sto.stores.name}
-            </span>
+            <span className="text-xs hidden md:block">{sto.stores.name}</span>
           </button>
         ))}
       </div>
 
       {/* -------- Messages -------- */}
-      <div className="h-96 overflow-y-auto space-y-4 mt-4">
+      <div className="h-96 overflow-y-auto space-y-7 mt-4">
         {fetching ? (
           <p>Loading…</p>
         ) : messages.length === 0 ? (
@@ -186,7 +219,12 @@ export default function ChatTab({ orders = [] }) {
         ) : (
           messages.map((m) =>
             m.sender_role === "buyer" ? (
-              <SentBubble key={m.id} message={m.message} />
+              <SentBubble
+                key={m.id}
+                message={m.message}
+                createdAt={m.created_at}
+                readAt={lastRead}
+              />
             ) : (
               <ReceivedBubble
                 key={m.id}

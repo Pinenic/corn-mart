@@ -7,21 +7,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { ChevronDown, Search, LayoutDashboard, List } from "lucide-react";
 import { useEffect, useState } from "react";
 // import data from "./data.json";
 import ProductCard from "../../components/ProductCard";
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  IconChevronsLeft,
-  IconChevronsRight,
-} from "@tabler/icons-react";
+// import {
+//   IconChevronLeft,
+//   IconChevronRight,
+//   IconChevronsLeft,
+//   IconChevronsRight,
+// } from "@tabler/icons-react";
 import { AutoBreadcrumb } from "../../components/AutoBreadcrumb";
 // import SearchBar from "./components/SearchBar";
 import { getSubcatProducts, searchMarket } from "@/lib/marketplaceApi";
 import { Spinner } from "@/components/ui/spinner";
+import { generateSlug } from "@/utils/slug";
 
 const Categories = [
   "Electronics",
@@ -33,7 +33,7 @@ const Categories = [
 ];
 
 export default function Page() {
-  const {subcat} = useParams();
+  const {category, subcat} = useParams();
   const [searchQ, setSearchQ] = useState("");
   const [view, setView] = useState("Grid");
   const [products, setProducts] = useState([]);
@@ -50,11 +50,12 @@ export default function Page() {
   ];
   const [page, setPage] = useState(1);
   const totalPages = 10;
+  const decodedCat = decodeURIComponent(category)
 
   async function fetchProducts() {
     try {
       setLoading(true);
-      const res = await getSubcatProducts(decodeURIComponent(subcat));
+      const res = await getSubcatProducts(decodedCat, decodeURIComponent(subcat));
       setProducts(res.data[0].products);
       setLoading(false);
     } catch (error) {
@@ -134,7 +135,7 @@ export default function Page() {
                 <Spinner className="size-8 text-blue-500" />
               </div>
             </>
-          ) : (
+          ) : products.length == 0 ? <p> No products yet </p> : (
             products.map((product) => (
               <div key={product.id}>
                 <ProductCard product={product} view={view} />

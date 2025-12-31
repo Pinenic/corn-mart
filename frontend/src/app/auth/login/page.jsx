@@ -10,7 +10,6 @@ export default function LoginPage() {
 
   async function handleLogin({ email, password }) {
     const user = await signIn(email, password);
-    alert("Welcome back!");
     user ? router.push('/') : router.push('/auth/login')
   }
 

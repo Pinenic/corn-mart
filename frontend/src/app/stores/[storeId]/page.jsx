@@ -28,12 +28,11 @@ export default function StorePage({ params }) {
       sortCategories(res.products);
       getNumbOfFollowers(res.id);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
 
   const refreshStore = async () => {
     try {
@@ -45,8 +44,8 @@ export default function StorePage({ params }) {
       sortCategories(res.products);
       getNumbOfFollowers(res.id);
     } catch (err) {
-      console.error(err)
-    } 
+      console.error(err);
+    }
   };
 
   const getNumbOfFollowers = async (store_id) => {
@@ -85,7 +84,7 @@ export default function StorePage({ params }) {
       stores.description ||
       "Welcome to Mika’s Cakery! We bake with love and passion — from cupcakes to celebration cakes.",
     followers: count,
-    productsCount: stores.products?.length || 42,
+    productsCount: stores.products?.length,
     location: "Lusaka, Zambia",
     rating: 4.9,
     joined: stores.created_at,
@@ -94,7 +93,7 @@ export default function StorePage({ params }) {
   return (
     <div className="min-h-screen max-w-7xl mx-auto">
       {/* Store header */}
-      <StoreHeader store={store} refresh={refreshStore}/>
+      <StoreHeader store={store} refresh={refreshStore} />
 
       {/* Category tabs */}
       <div className="sticky top-[54px] z-40">
