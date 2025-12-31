@@ -30,6 +30,9 @@ export default function StoresPage() {
     fetchStores();
   }, []);
 
+  console.log("Spinner:", Spinner);
+
+
   if(loading) return (<div className="flex items-center justify-center min-h-screen">
         {/* <p className="text-gray-600 animate-pulse">Loading session...</p> */}
         <Spinner className="size-8 text-blue-500"/>

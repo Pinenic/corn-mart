@@ -137,7 +137,7 @@ export default function StoreOnboarding() {
                   </div>
 
                   <div className="mt-6">
-                    <AnimatePresence exitBeforeEnter>
+                    <AnimatePresence mode="wait">
                       {step === 1 && (
                         <motion.div
                           key="step-1"
