@@ -17,8 +17,6 @@ export const useProfile = create(
           .eq("id", userId)
           .single();
 
-          console.log("the data",data, "the id ", userId);
-
         if (error) {
           set({ error: error.message, loading: false });
         } else {

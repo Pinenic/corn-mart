@@ -9,6 +9,8 @@ import {
   SellerCancelOrder,
   getOrderMessagesById,
   postMessage,
+  markChatasRead,
+  getLastRead,
 } from "../services/orderService.js";
 
 export const createNewOrder = async (req, res) => {
@@ -157,6 +159,29 @@ export const sendMessage = async (req,res) => {
     const {orderId} = req.params;
     const {message, userId, role} = req.body;
     const response = await postMessage(orderId, userId, role, message);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    console.log(error.message);
+  }
+}
+
+export const readChat = async (req, res) => {
+  try {
+    const {orderId} = req.params;
+    const {userId} = req.body;
+    const response = await markChatasRead(orderId, userId);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    console.log(error.message);
+  }
+}
+
+export const getRead = async (req, res) => {
+  try {
+    const {orderId, userId} = req.params;
+    const response = await getLastRead(orderId, userId);
     res.json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });

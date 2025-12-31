@@ -12,11 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { description } from "@/components/chart-area-interactive";
 
 // Reusable dialog component
 export function CreateVariantDialog({ open, onOpenChange, onCreate, loading }) {
   const [formData, setFormData] = useState({
     name: "",
+    description: "",
     stock: 0,
     price: 0,
     low_stock_threshold: 0,
@@ -45,6 +47,10 @@ export function CreateVariantDialog({ open, onOpenChange, onCreate, loading }) {
       newErrors.name = "Name is required";
     }
 
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+
     if (formData.stock < 0) {
       newErrors.stock = "Stock cannot be negative";
     }
@@ -68,12 +74,14 @@ export function CreateVariantDialog({ open, onOpenChange, onCreate, loading }) {
     if (validate()) {
       onCreate({
         name: formData.name,
+        description: formData.description,
         stock: Number(formData.stock),
         price: Number(formData.price),
         low_stock_threshold: Number(formData.low_stock_threshold),
       });
       setFormData({
         name: "",
+        description: "",
         stock: 0,
         price: 0,
         low_stock_threshold: 0,
@@ -103,6 +111,19 @@ export function CreateVariantDialog({ open, onOpenChange, onCreate, loading }) {
             />
             {errors.name && (
               <p className="text-sm text-red-500">{errors.name}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="name">Variant Description</Label>
+            <Input
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              placeholder="Enter Variant description"
+            />
+            {errors.description && (
+              <p className="text-sm text-red-500">{errors.description}</p>
             )}
           </div>
 

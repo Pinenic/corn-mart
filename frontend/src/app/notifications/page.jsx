@@ -52,6 +52,7 @@ export default function NotificationsPage() {
   useEffect(()=>{
     if(!user){
       init();
+      return;
     }
     fetchNotifications()
   },[user])
@@ -66,7 +67,7 @@ export default function NotificationsPage() {
       </div>
 
       <div>
-        {notificationz.length ? (
+        {fetching ? <p>loading...</p> : notificationz.length ? (
           notificationz.map((item) => (
             <NotificationCard
               key={item.id}

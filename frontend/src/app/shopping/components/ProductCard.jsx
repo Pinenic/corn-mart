@@ -56,7 +56,8 @@ export default function ProductCard({ product, view = "Grid" }) {
             <h3 className="text-sm line-clamp-2">{product?.name}</h3>
 
             <div className="mt-3 text-xs text-muted-foreground flex items-center justify-between">
-              <div>{product?.shipping || "Free shipping"}</div>
+              {/* <div>{product?.shipping || "Free shipping"}</div> */}
+              <div>{product?.location === null ? "Zambia" : ( <p>{product?.location.city}, {product?.location.province}</p>) }</div>
               <div className="text-rose-600 font-medium">
                 {product?.sold && `${product.sold} sold`}
               </div>

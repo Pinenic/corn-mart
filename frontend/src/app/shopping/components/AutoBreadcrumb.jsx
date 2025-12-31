@@ -16,7 +16,7 @@ export function AutoBreadcrumb() {
   const segments = pathname.split("/").filter(Boolean);
 
   const paths = segments.map((seg, index) => ({
-    label: seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " "),
+    label: seg.charAt(0).toUpperCase() + decodeURIComponent(seg.slice(1).replace(/-/g, " ")),
     href: "/" + segments.slice(0, index + 1).join("/"),
   }));
 

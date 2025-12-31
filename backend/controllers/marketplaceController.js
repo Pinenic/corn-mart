@@ -57,8 +57,8 @@ export const getCategory = async (req, res) => {
 
 export const getSingleSubCategory = async (req, res) => {
     try {
-        const {subcat} = req.params;
-        const response = await getSubCategory(subcat);
+        const {category, subcat} = req.params;
+        const response = await getSubCategory(category, subcat);
         res.status(201).json({success:true, data:response})
     } catch (error) {
         res.status(500).json({success:false, message:error.message});

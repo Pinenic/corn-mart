@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
+import { generateSlug } from "@/utils/slug";
 
 export default function SearchBar({ onQuery, onSearch }) {
   const [query, setQuery] = useState("");
@@ -140,7 +141,7 @@ export default function SearchBar({ onQuery, onSearch }) {
                   results?.map((item, index) => (
                     <Link
                       key={item.id}
-                      href={`/product/${item.name}`}
+                      href={`/shopping/product/${generateSlug(item.name)}-${item.id}`}
                       ref={(el) => (listRef.current[index] = el)}
                       className={`py-2 px-2 text-sm rounded-lg transition flex items-center gap-3 ${
                         index === activeIndex ? "bg-accent" : "hover:bg-accent"

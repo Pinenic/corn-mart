@@ -18,11 +18,6 @@ export default function StoresPage() {
     setLoading(true);
     try {
       const res = await getStores();
-
-      // const result = await res.json();
-
-      // if (!res.ok) throw new Error(result.error || "Failed to fetch stores");
-
       setStores(res);
     } catch (err) {
       setError(`❌ ${err.message}`);
@@ -42,7 +37,7 @@ export default function StoresPage() {
 
   return (
     <div className="px-6 py-10 bg-background min-h-screen">
-      <h1 className="text-3xl font-bold text-blue-700 text-center mb-8">
+      <h1 className="text-3xl font-bold text-text text-center mb-8">
         Explore Stores
       </h1>
 

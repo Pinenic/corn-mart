@@ -7,24 +7,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { ChevronDown, Search, LayoutDashboard, List } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 // import data from "./data.json";
 import ProductCard from "./ProductCard";
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  IconChevronsLeft,
-  IconChevronsRight,
-} from "@tabler/icons-react";
 // import CategorySidebar from "./components/CategorySidebar";
 import { AutoBreadcrumb } from "./AutoBreadcrumb";
-import SearchBar from "./SearchBar";
 import { getAllProducts, searchMarket } from "@/lib/marketplaceApi";
-import { Spinner } from "@/components/ui/spinner";
-import PageTop from "./pageTop";
 
 const Categories = [
   "Electronics",
@@ -55,7 +45,7 @@ export default function ProductGrid({ initialProducts, loading, title }) {
       setLoadingMore(true);
       const res = await getAllProducts(page + 1-1);
 
-      setProducts((prev) => [...prev, ...res.data.products]);
+      setProducts((prev) => [...prev, ...res.data.productsWithlocation]);
       setPage((prev) => prev + 1);
       setHasMore(res.data.hasMore);
     } catch (error) {

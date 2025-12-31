@@ -6,7 +6,12 @@ import { useProfile } from "@/store/useProfile";
 import StorefrontTab from "./_components/StorefrontTab";
 import StorePreferencesTab from "./_components/StorePreferencesTab";
 import { useStoreStore } from "@/store/useStore";
-import { addLocation, getLocation, updateLocation, updateStore } from "@/lib/storesApi";
+import {
+  addLocation,
+  getLocation,
+  updateLocation,
+  updateStore,
+} from "@/lib/storesApi";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 

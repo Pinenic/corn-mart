@@ -18,7 +18,7 @@ export default function ImageUpdateModal({
   onSave,
 }) {
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(image);
+  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     if (!file) {

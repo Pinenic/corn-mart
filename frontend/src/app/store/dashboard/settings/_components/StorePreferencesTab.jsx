@@ -33,25 +33,34 @@ export default function StorePreferencesTab({
     city: "",
     province: "",
     country: "Zambia",
-    latitude: "",
-    longitude: "",
+    latitude: 0,
+    longitude: 0,
     delivery_enabled: false,
-    delivery_radius_km: "",
-    delivery_fee: "",
+    delivery_radius_km: 0,
+    delivery_fee: 0,
     delivery_methods: [],
   });
   const [mapOpen, setMapOpen] = useState(false);
 
   /* -------- Sync external value -------- */
   useEffect(() => {
-    if (value) setForm((prev) => ({ ...prev, ...value }));
+    if (!value) return;
+
+    const sanitized = Object.fromEntries(
+      Object.entries(value).map(([key, val]) => [key, val ?? ""])
+    );
+
+    setForm((prev) => ({
+      ...prev,
+      ...sanitized,
+    }));
   }, [value]);
 
   const update = (key, val) => {
     setForm((prev) => {
       const updated = { ...prev, [key]: val };
       onChange?.(updated);
-      console.log(update);
+      console.log(updated);
       return updated;
     });
   };
@@ -142,9 +151,9 @@ export default function StorePreferencesTab({
           open={mapOpen}
           onOpenChange={setMapOpen}
           initialPosition={
-            form.latitude != null && form.longitude != null
+            (form.latitude != null && form.longitude != null)
               ? [Number(form.latitude), Number(form.longitude)]
-              : null
+              : [-15.4167, 28.2833]
           }
           onSelect={(pos) => {
             update("latitude", pos.lat.toFixed(6));

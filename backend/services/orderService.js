@@ -43,23 +43,19 @@ export async function updateStoreOrderStatus(
   metadata = null,
   comment = "Updated"
 ) {
-  const { data, error } = await supabase.rpc(
-    "update_store_order_status",
-    {
-      p_store_order_id: storeOrderId,
-      p_store_id: storeId,
-      p_new_status: newStatus,
-      p_actor_id: null,
-      p_comment: comment,
-      p_metadata: metadata,
-    }
-  );
+  const { data, error } = await supabase.rpc("update_store_order_status", {
+    p_store_order_id: storeOrderId,
+    p_store_id: storeId,
+    p_new_status: newStatus,
+    p_actor_id: null,
+    p_comment: comment,
+    p_metadata: metadata,
+  });
 
   if (error) throw error;
 
   return data;
 }
-
 
 function isValidTransition(currentStatus, newStatus) {
   const validTransitions = {
@@ -82,7 +78,8 @@ export async function getBuyerOrders(buyer_id) {
   const { data: orders, error: ordersError } = await supabase
     .from("orders")
     .select("*,store_orders(*, order_items(*))")
-    .eq("buyer_id", buyer_id);
+    .eq("buyer_id", buyer_id)
+    .order("created_at", { ascending: false });
 
   if (ordersError) throw new Error(`Error fetching order, ${ordersError}`);
   return orders;
@@ -92,7 +89,7 @@ export async function getBuyerOrderDetails(orderId) {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "*,store_orders(*,stores(name, logo), history:store_order_status_history(*), order_items(*, products(name, thumbnail_url), product_variants(name, price)))"
+      "*,store_orders(*,stores(name, owner_id, logo), history:store_order_status_history(*), order_items(*, products(name, thumbnail_url), product_variants(name, price)))"
     )
     .eq("id", orderId)
     .single();
@@ -109,7 +106,7 @@ export async function getStoreOrders(storeId) {
 
   if (ordersError) throw new Error(`Error fetching order, ${ordersError}`);
 
-  // 2️⃣ For each order, fetch customer info and merge it
+  // For each order, fetch customer info and merge it
   const ordersWithCustomer = await Promise.all(
     orders.map(async (order) => {
       const customer = await getCustomerInfo(order.order_id);
@@ -117,7 +114,7 @@ export async function getStoreOrders(storeId) {
     })
   );
 
-  // 3️⃣ Return enriched results
+  // Return enriched results
   return ordersWithCustomer;
 }
 
@@ -168,9 +165,43 @@ export async function postMessage(orderId, userId, role, message) {
   return data;
 }
 
+export async function markChatasRead(orderId, userId) {
+  const { data, error } = await supabase
+    .from("order_chat_reads")
+    .upsert({
+      order_id: orderId,
+      user_id: userId,
+      last_read_at: new Date().toISOString(),
+    })
+    .select("last_read_at")
+    .single();
+
+  if (error) {
+    throw new Error(`Error posting the message, ${error.message}`);
+  }
+
+  return { success: true};
+}
+
+export async function getLastRead(orderId, userId) {
+  const { data, error } = await supabase
+    .from("order_chat_reads")
+    .select("*")
+    .eq("order_id", orderId)
+    .eq("user_id", userId)
+    .single();
+
+    if (error) {
+    throw new Error(`Error posting the message, ${error.message}`);
+  }
+
+  return { last_read_at: data.last_read_at };
+}
+
 /**
  * HELPER FUNCTIONS
  */
+
 //profile helper
 async function getCustomerInfo(oId) {
   const { data, error } = await supabase

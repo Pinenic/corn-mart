@@ -131,10 +131,11 @@ export const getVariantById = async (req, res) => {
 
 export const createNewVariant = async (req, res) => {
   try {
-    const { productId, name, price, stock, lowStockThreshold } = req.body;
+    const { productId, name, description, price, stock, lowStockThreshold } = req.body;
     const variant = await createVariant({
       product_id: productId,
       name,
+      description,
       price,
       stock,
       low_stock_threshold: lowStockThreshold,

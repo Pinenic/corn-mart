@@ -80,6 +80,7 @@ export async function getVariantById(variantId) {
 export async function createVariant({
   productId,
   name,
+  description,
   price,
   stock,
   lowStockThreshold,
@@ -89,6 +90,7 @@ export async function createVariant({
     body: JSON.stringify({
       productId,
       name,
+      description,
       price,
       stock,
       lowStockThreshold,

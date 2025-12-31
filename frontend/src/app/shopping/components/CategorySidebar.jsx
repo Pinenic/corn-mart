@@ -13,7 +13,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getCategories, getSingleCategoryWP } from "@/lib/marketplaceApi";
 
-
 export default function CategorySidebar() {
   const { category } = useParams();
   const [categories, setCategories] = useState([]);
