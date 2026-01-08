@@ -14,7 +14,7 @@ export default function Home() {
   const { user, signOut } = useAuthStore();
 
   return (
-      <div className="text-center">
+      <div className="text-center bg-gradient-to-b from-blue-50 dark:from-background dark:to-muted to-white">
         <Hero />
         <HowItWorks />
         <FeaturedProducts />

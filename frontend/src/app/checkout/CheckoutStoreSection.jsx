@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNumber } from "@/utils/numberFormatter";
 import Image from "next/image";
 
 export default function CheckoutStoreSection({ storeId, items, storeName }) {
@@ -18,7 +19,7 @@ export default function CheckoutStoreSection({ storeId, items, storeName }) {
           >
             {item.products?.thumbnail_url && (
               <Image
-                src={item.products.thumbnail_url}
+                src={item.product_variants.images[0]?.image_url || item.products.thumbnail_url}
                 width={70}
                 height={70}
                 alt={item.products?.name ?? "product"}
@@ -38,7 +39,7 @@ export default function CheckoutStoreSection({ storeId, items, storeName }) {
               )}
 
               <p className="text-sm mt-1 font-semibold">
-                ZMW {item.price}
+                ZMW {formatNumber(item.price)}
               </p>
             </div>
 

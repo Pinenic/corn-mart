@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNumber } from "@/utils/numberFormatter";
 import { generateSlug } from "@/utils/slug";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -39,7 +40,7 @@ export default function ProductCard({ product, view = "Grid" }) {
             <div className="mt-1 flex items-baseline justify-between">
               <div>
                 <div className="text-lg font-medium">
-                  K{product?.price.toFixed(2)}
+                  K{formatNumber(product?.price.toFixed(2))}
                 </div>
                 {product?.oldPrice && (
                   <div className="text-xs text-muted-foreground line-through">

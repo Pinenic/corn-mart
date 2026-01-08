@@ -87,6 +87,7 @@ export default function OrdersClient({ initialOrder = {} }) {
           <OrderList
             orders={order}
             loading={loading}
+            soid={selectedOrderId}
             onSelect={(id) => {
               setSelectedId(id);
               setModalOpen(true); // open modal on mobile when an order is selected

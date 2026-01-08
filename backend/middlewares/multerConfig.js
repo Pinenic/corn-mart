@@ -1,4 +1,3 @@
-// middlewares/multerConfig.js
 import multer from "multer";
 
 // Memory storage means files are kept in RAM as Buffers (not saved to disk)

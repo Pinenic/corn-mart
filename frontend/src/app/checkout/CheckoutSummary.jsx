@@ -2,6 +2,7 @@
 
 import { createOrder } from "@/lib/ordersApi";
 import { useCart } from "@/store/useCart";
+import { formatNumber } from "@/utils/numberFormatter";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -20,7 +21,7 @@ export default function CheckoutSummary({ subtotal, itemCount }) {
       }
       toast.success("Order placed successfully", { id: res.order_id });
       getCart(user);
-      router.push("/shopping");
+      router.push("/checkout/success");
       setPlacing(false);
     } catch (error) {
       console.error(error);
@@ -42,7 +43,7 @@ export default function CheckoutSummary({ subtotal, itemCount }) {
 
       <div className="flex justify-between mb-3 text-sm">
         <p>Subtotal</p>
-        <p className="font-medium">ZMW {subtotal}</p>
+        <p className="font-medium">ZMW {formatNumber(subtotal)}</p>
       </div>
 
       <button

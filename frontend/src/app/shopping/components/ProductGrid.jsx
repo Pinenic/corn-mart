@@ -147,7 +147,7 @@ export default function ProductGrid({ initialProducts, loading, title }) {
 
 /* ---------------- Skeleton Loader Component ---------------- */
 
-function SkeletonProductCard() {
+export function SkeletonProductCard() {
   return (
     <div className="animate-pulse">
       <div className="bg-gray-300 dark:bg-gray-700 h-36 w-full rounded-md"></div>

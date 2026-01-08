@@ -77,7 +77,7 @@ export default function OrderDetails({ orderId, handleUpdate, loading }) {
                 </TabsContent>
               </>
             ) : (
-              <p>No selected order</p>
+              <p className="text-center p-4 text-muted-foreground">Select an order to view details</p>
             )}
           </div>
         </Tabs>

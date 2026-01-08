@@ -8,11 +8,14 @@ import { randomUUID } from "crypto";
  */
 export async function uploadSingleImage(userId, productId, file) {
   console.log(file);
-  const fileName = `${userId}/${productId}/${randomUUID()}-${file.originalname}`;
+    const ext = file.mimetype.split("/")[1];
+    const filename = `${randomUUID()}.${ext}`;
+    const filePath = `${userId}/products/${productId}/${filename}`;
+  // const fileName = `${userId}/${productId}/${randomUUID()}-${file.originalname}`;
   
   const { error: uploadErr } = await supabase.storage
     .from("user_uploads")
-    .upload(fileName, file.buffer, {
+    .upload(filePath, file.buffer, {
       contentType: file.mimetype,
     });
   
@@ -20,9 +23,9 @@ export async function uploadSingleImage(userId, productId, file) {
   
   const {
     data: { publicUrl },
-  } = supabase.storage.from("user_uploads").getPublicUrl(fileName);
+  } = supabase.storage.from("user_uploads").getPublicUrl(filePath);
   
-  return { fileName, publicUrl };
+  return { filePath, publicUrl };
 }
 
 /**

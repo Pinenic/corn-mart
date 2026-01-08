@@ -6,7 +6,7 @@ import StoreInfoCard from "./StoreInfoCard";
 import FollowButton from "./FollowButton";
 import { useEffect, useState } from "react";
 
-export function StoreHeader({ store, refresh }) {
+export function StoreHeader({ store, storeLoc, refresh }) {
   const [storeData, setStoreData] = useState({})
 
   useEffect(()=>{

@@ -20,9 +20,28 @@ export async function getProductsByStore(storeId) {
 export async function getProductByID(productId) {
   const { data, error } = await supabase
     .from("products")
-    .select("*, product_variants(*), product_images(*)")
+    .select(`
+      *,
+      product_images (
+        id,
+        image_url,
+        is_thumbnail,
+        sort_order,
+        variant_id
+      ),
+      product_variants (
+        *,
+        product_images (
+          id,
+          image_url,
+          is_thumbnail,
+          sort_order
+        )
+      )
+    `)
     .eq("id", productId)
     .single();
+
 
   if (error) throw error;
   return data;
@@ -122,7 +141,9 @@ export async function createVariant({
 }) {
   const { data, error } = await supabase
     .from("product_variants")
-    .insert([{ product_id, name,description, price, stock, sku, low_stock_threshold }])
+    .insert([
+      { product_id, name, description, price, stock, sku, low_stock_threshold },
+    ])
     .select()
     .single();
 
@@ -152,7 +173,8 @@ export async function getAllVariants(productId) {
   const { data, error } = await supabase
     .from("product_variants")
     .select("*")
-    .eq("product_id", productId);
+    .eq("product_id", productId)
+    .order("created_at", {ascending: true});
 
   if (error) throw error;
   return data;

@@ -55,6 +55,18 @@ export async function sendOrderMessage(orderId, userId, role, message) {
   });
 }
 
+export async function sendOrderMessageImages(orderId, data) {
+  
+  // const formData = new FormData();
+  // formData.append("userId", userId);
+  // formData.append("role", role)
+  // images.forEach((file) => formData.append("images", file));
+  return fetchApi(`/api/orders/${orderId}/messages/images`, {
+    method: "POST",
+    body: data,
+  });
+}
+
 export async function markChatAsRead(orderId, userId) {
   return fetchApi(`/api/orders/${orderId}/messages/read`, {
     method: "POST",

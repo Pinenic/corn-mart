@@ -18,6 +18,7 @@ import { deleteProduct, getProductsByStore } from "@/lib/inventoryApi";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { ProductDeleteDialog } from "./DeleteDialog";
+import { formatNumber } from "@/utils/numberFormatter";
 
 export default function ProductTable({
   onSelectProduct,
@@ -90,7 +91,7 @@ export default function ProductTable({
                   {product.category}
                 </TableCell>
                 <TableCell onClick={() => onSelectProduct(product)}>
-                  K{product.price}
+                  K{formatNumber(product.price)}
                 </TableCell>
                 <TableCell onClick={() => onSelectProduct(product)}>
                   {product.product_variants.reduce(

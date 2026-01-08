@@ -43,7 +43,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/70 dark:bg-muted/40 backdrop-blur-md border-b border-gray-100 dark:border-none shadow-sm">
-      <div className="mx-auto flex justify-between items-center px-4 py-3 lg:py-4">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3 lg:py-4">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold text-primary">
           Corn<span className="text-corn-500">Mart</span>

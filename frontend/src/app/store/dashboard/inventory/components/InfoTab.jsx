@@ -1,23 +1,16 @@
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableHeader,
-//   TableRow,
-// } from "@/components/ui/table";
-// import { Badge } from "@/components/ui/badge";
-// import Image from "next/image";
-// import { CategoryTabs } from "./CategoryTabs";
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+
 import {
+  addProductImages,
+  addProductVariantImages,
   createVariant,
   deleteVariant,
   getAllVariants,
@@ -31,6 +24,7 @@ import {
   Upload,
   Image as ImageIcon,
 } from "lucide-react";
+import VariantImageRow from "./VariantImageRow";
 import { ProductEditDialog } from "./ProductEditDialog";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 import { ProductDeleteDialog } from "./DeleteDialog";
@@ -43,13 +37,22 @@ import {
   setImageAsThumbnail,
 } from "@/lib/inventoryApi";
 import LoadingOverlay from "./loading-overlay";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export function Info({ prod, reload }) {
   const [formData, setFormData] = useState({});
   const [Loading, setLoading] = useState(false);
   const [message, setMeassage] = useState("");
 
-  const userId = "fa31a398-aaa8-4bc3-aeb4-4332684f116c";
+  // const userId = "fa31a398-aaa8-4bc3-aeb4-4332684f116c";
+  const { init, user } = useAuthStore();
+
+  useEffect(() => {
+    if (user) {
+      return;
+    }
+    init();
+  }, [user]);
 
   useEffect(() => {
     setFormData({
@@ -74,7 +77,7 @@ export function Info({ prod, reload }) {
     try {
       setLoading(true);
       const res = await updateProduct(prod.id, {
-        userId,
+        userId: user.id,
         updates: formData,
         newImages: [],
         removedImageIds: [],
@@ -265,7 +268,8 @@ export function Variants({ prodId, reload }) {
   return (
     <>
       <div className="flex justify-end mb-4">
-        <Button onClick={() => setIsOpen(true)}>
+        <Button onClick={() => setIsOpen(true)}
+          disabled={(varis.length > 3)}>
           <IconCirclePlusFilled />
           <span>Create</span>
         </Button>
@@ -280,9 +284,9 @@ export function Variants({ prodId, reload }) {
 
       {variloading ? (
         <>
-          <div className="flex items-center justify-center min-h-[20vh]">
+          <div className="flex items-center justify-center">
             {/* <p className="text-gray-600 animate-pulse">Loading session...</p> */}
-            <Spinner className="size-8 text-blue-500" />
+            <Spinner className="size-8 text-primary" />
           </div>
         </>
       ) : (
@@ -340,286 +344,97 @@ export function Variants({ prodId, reload }) {
   );
 }
 
-export function Media({ prodId, maxFiles = 4, maxSizeMB = 5 }) {
+export function Media({ prodId }) {
   const [images, setImages] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [error, setError] = useState("");
-  const fileInputRef = useRef(null);
-  const [imgloading, setImgLoading] = useState(false);
+  const [variants, setVariants] = useState([]);
   const [loading, setLoading] = useState(false);
-  const userId = "fa31a398-aaa8-4bc3-aeb4-4332684f116c";
+  const { init, user } = useAuthStore();
 
-  async function loadImages() {
-    try {
-      setImgLoading(true);
-      const data = await getProductImages(prodId);
-      console.log(data);
-      setImages(data.data);
-      setImgLoading(false);
-    } catch (err) {
-      console.error(err.message);
-    }
-  }
   useEffect(() => {
-    loadImages();
+    if (!user) init();
+  }, [user]);
+
+  async function loadData() {
+    console.log("fetching...");
+    setLoading(true);
+
+    const imgRes = await getProductImages(prodId);
+    const varRes = await getAllVariants(prodId);
+
+    setImages(imgRes.data || []);
+    setVariants(varRes || []);
+    setLoading(false);
+  }
+
+    async function refreshData() {
+
+    const imgRes = await getProductImages(prodId);
+    const varRes = await getAllVariants(prodId);
+
+    setImages(imgRes.data || []);
+    setVariants(varRes || []);
+  }
+
+  useEffect(() => {
+    if (prodId) loadData();
   }, [prodId]);
 
-  const validateFile = (file) => {
-    if (!file.type.startsWith("image/")) {
-      return "File must be an image";
-    }
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      return `File size must be less than ${maxSizeMB}MB`;
-    }
-    return null;
-  };
+  const groupedImages = useMemo(() => {
+    const map = { default: [] };
 
-  const onUpload = useCallback(async (newImages) => {
-    const newFiles = newImages.map((img) => img.file);
-    console.log("onUpload fired with", newImages.length, "images", newFiles);
+    images.forEach((img) => {
+      if (img.variant_id) {
+        if (!map[img.variant_id]) map[img.variant_id] = [];
+        map[img.variant_id].push(img);
+      } else {
+        map.default.push(img);
+      }
+    });
 
-    if (newFiles.length > 0) {
-      const { data } = await uploadProductImages(userId, prodId, newFiles, 0);
-      console.log("Uploaded:", data);
-    }
-  });
+    return map;
+  }, [images]);
 
-  const isUploadingRef = useRef(false);
-
-  const processFiles = useCallback(
-    (files) => {
-      console.log("processFiles fired");
-      const fileArray = Array.from(files);
-      const readers = [];
-      const newImages = [];
-
-      fileArray.forEach((file) => {
-        const reader = new FileReader();
-        readers.push(
-          new Promise((resolve) => {
-            reader.onload = (e) => {
-              newImages.push({
-                id: Date.now() + Math.random(),
-                url: e.target.result,
-                name: file.name,
-                file,
-              });
-              resolve();
-            };
-          })
-        );
-        reader.readAsDataURL(file);
-      });
-
-      Promise.all(readers).then(async () => {
-        if (isUploadingRef.current) {
-          console.warn("Skipped duplicate upload");
-          return;
-        }
-
-        isUploadingRef.current = true;
-        console.log("onUpload fired once with", newImages.length, "images");
-
-        setImages((prev) => [...prev, ...newImages]);
-        await onUpload?.(newImages);
-        isUploadingRef.current = false;
-      });
-    },
-    [onUpload]
-  );
-
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      processFiles(files);
-    }
-  };
-
-  const handleFileInput = (e) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      processFiles(files);
-    }
-  };
-
-  const removeImage = async (id) => {
-    const res = await deleteImage(id);
-    if (!res?.success) toast("failed to delete image", res.message);
-    if (res?.success) loadImages();
-    toast.success("image deleted", res.message);
-  };
-
-  const openFileDialog = () => {
-    fileInputRef.current?.click();
-  };
-
-  return (
-    <div className="w-full max-w-4xl mx-auto p-6">
-      <div className="space-y-4">
-        {/* Image Grid */}
-        {imgloading ? (
-          <>
-            <div className="flex items-center justify-center min-h-[20vh]">
-              {/* <p className="text-gray-600 animate-pulse">Loading session...</p> */}
-              <Spinner className="size-8 text-blue-500" />
-            </div>
-          </>
-        ) : (
-          <div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images?.map((image) => (
-                <div
-                  key={image.id}
-                  className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
-                >
-                  <img
-                    src={image.image_url}
-                    alt={image.name || "Uploaded image"}
-                    className="w-full h-full object-cover"
-                  />
-
-                  <div className="absolute inset-0 bg-transparent bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200">
-                    <button
-                      onClick={() => removeImage(image.id)}
-                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                      aria-label="Remove image"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-700 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-white text-xs truncate">
-                      {image.name || "Untitled"}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {images.length === 0 && !error && (
-          <div className="text-center py-8">
-            <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No images uploaded yet</p>
-          </div>
-        )}
-
-        {/* Upload Area */}
-        <div
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={openFileDialog}
-          className={`
-            relative border-2 border-dashed rounded-lg px-12 text-center cursor-pointer
-            transition-all duration-200 ease-in-out
-            ${
-              isDragging
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300 hover:border-gray-400 bg-gray-50"
-            }
-          `}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleFileInput}
-            className="hidden"
-          />
-
-          <div className="flex flex-col items-center space-y-4">
-            <div
-              className={`
-              p-4 rounded-full transition-colors
-              ${isDragging ? "bg-blue-100" : "bg-gray-200"}
-            `}
-            >
-              <Upload
-                className={`w-8 h-8 ${
-                  isDragging ? "text-blue-500" : "text-gray-500"
-                }`}
-              />
-            </div>
-
-            <div>
-              <p className="text-lg font-medium text-gray-700">
-                {isDragging ? "Drop images here" : "Drag & drop images here"}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">or click to browse</p>
-            </div>
-
-            <p className="text-xs text-gray-400">
-              Maximum {maxFiles} files, up to {maxSizeMB}MB each
-            </p>
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        <LoadingOverlay show={loading} />
-      </div>
-    </div>
-  );
-}
-
-export function InfoTab({ prod }) {
-  const [activeCategory, setActiveCategory] = useState("info");
-  if (prod == {})
+  if (loading) {
     return (
-      <div className="w-full overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-        <p>No product selected</p>
-      </div>
-    );
-  return (
-    <div className="w-full overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
-      <div className="gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            {prod?.name || "No product selected"}
-          </h3>
+      <>
+        <div className="flex items-center justify-center min-h-[20vh]">
+          {/* <p className="text-gray-600 animate-pulse">Loading session...</p> */}
+          <Spinner className="size-8 text-primary" />
         </div>
-      </div>
-      <div className="max-w-full overflow-x-auto">
-        {activeCategory == "info" ? (
-          <Info prod={prod} />
-        ) : activeCategory == "variants" ? (
-          <Variants prod={prod} />
+      </>
+    );
+  }
+
+  return (
+    <div className="h-96 overflow-y-auto space-y-7 mt-4">
+      {/* Default product images */}
+      <VariantImageRow
+        title="Product Images (Default)"
+        images={groupedImages.default}
+        onAdd={(files) =>
+          addProductImages(user.id, prodId, files, null).then(refreshData)
+        }
+        onDelete={(id) => deleteImage(id).then(refreshData)}
+      />
+
+      {/* Variant images */}
+      {variants.map((variant) =>
+        variant.name === "Default" ? (
+          <p className="hidden"></p>
         ) : (
-          <Media prod={prod} />
-        )}
-      </div>
+          <VariantImageRow
+            key={variant.id}
+            title={variant.name}
+            images={groupedImages[variant.id] || []}
+            onAdd={(files) =>
+              addProductVariantImages(user.id, prodId, variant.id, files).then(
+                loadData
+              )
+            }
+            onDelete={(id) => deleteImage(id).then(loadData)}
+          />
+        )
+      )}
     </div>
   );
 }

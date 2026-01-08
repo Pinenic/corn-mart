@@ -1,10 +1,10 @@
-// app/product/[slugAndId]/page.jsx
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ProductControls from "./_components/ProductControls";
 import { getProductById } from "@/lib/marketplaceApi";
 import { parseSlugAndId } from "./_utils/parseSlugAndId";
 import { ProductImages } from "./_components/ProductImages";
+import ProductClientWrapper from "./ProductClientWrapper";
 
 export async function generateMetadata(props) {
   const params = await props.params;
@@ -48,19 +48,20 @@ export default async function Page(props) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* LEFT: HERO IMAGE */}
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+       
         <div className="space-y-4">
           <ProductImages images={product?.product_images} />
         </div>
 
-        {/* RIGHT: PRODUCT INFO */}
+        
         <div>
           <h1 className="text-2xl font-semibold">{product.name}</h1>
 
           <ProductControls product={product} />
         </div>
-      </div>
+      </div> */}
+      <ProductClientWrapper product={product} />
 
       {/* SEO: JSON-LD */}
       <script

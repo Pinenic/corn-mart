@@ -22,6 +22,7 @@ import { AutoBreadcrumb } from "../../components/AutoBreadcrumb";
 import { getSubcatProducts, searchMarket } from "@/lib/marketplaceApi";
 import { Spinner } from "@/components/ui/spinner";
 import { generateSlug } from "@/utils/slug";
+import { SkeletonProductCard } from "../../components/ProductGrid";
 
 const Categories = [
   "Electronics",
@@ -33,7 +34,7 @@ const Categories = [
 ];
 
 export default function Page() {
-  const {category, subcat} = useParams();
+  const { category, subcat } = useParams();
   const [searchQ, setSearchQ] = useState("");
   const [view, setView] = useState("Grid");
   const [products, setProducts] = useState([]);
@@ -50,12 +51,15 @@ export default function Page() {
   ];
   const [page, setPage] = useState(1);
   const totalPages = 10;
-  const decodedCat = decodeURIComponent(category)
+  const decodedCat = decodeURIComponent(category);
 
   async function fetchProducts() {
     try {
       setLoading(true);
-      const res = await getSubcatProducts(decodedCat, decodeURIComponent(subcat));
+      const res = await getSubcatProducts(
+        decodedCat,
+        decodeURIComponent(subcat)
+      );
       setProducts(res.data[0].products);
       setLoading(false);
     } catch (error) {
@@ -66,7 +70,7 @@ export default function Page() {
   async function search(q) {
     try {
       const res = await searchMarket(q);
-      return res.data
+      return res.data;
     } catch (error) {
       return error.message;
     }
@@ -129,13 +133,10 @@ export default function Page() {
             </div>
           ))} */}
           {loading ? (
-            <>
-              <div className="flex w-full items-center justify-center min-h-[50vh]">
-                {/* <p className="text-gray-600 animate-pulse">Loading session...</p> */}
-                <Spinner className="size-8 text-blue-500" />
-              </div>
-            </>
-          ) : products.length == 0 ? <p> No products yet </p> : (
+            [...Array(4)].map((_, i) => <SkeletonProductCard key={i} />)
+          ) : products.length == 0 ? (
+            <p> No products yet </p>
+          ) : (
             products.map((product) => (
               <div key={product.id}>
                 <ProductCard product={product} view={view} />
@@ -193,4 +194,3 @@ export default function Page() {
     </div>
   );
 }
-

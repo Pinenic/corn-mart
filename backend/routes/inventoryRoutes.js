@@ -15,6 +15,7 @@ import {
 } from "../controllers/inventoryController.js";
 import * as imageController from "../controllers/prodImageController.js";
 import { upload } from "../middlewares/multerConfig.js";
+import { deleteImageController, uploadProductImagesController, uploadVariantImagesController } from "../controllers/images.controller.js";
 
 const router = express.Router();
 
@@ -33,28 +34,41 @@ router.put("/restock/variant/:variantId", restockVariant);
 
 // Product image routes
 router.post(
-  "/products/:productId/images",
-  upload.array("images", 4), // Max 10 images
+  "/products/:productId/thumbnail",
+  upload.array("images", 2), // Max 2 images
   imageController.uploadProductImages
 );
 
-router.get("/products/:productId/images", imageController.getProductImages);
-
-router.delete(
+router.post(
   "/products/:productId/images",
-  imageController.deleteAllProductImages
+  upload.array("images", 4), // Max 4 images
+  uploadProductImagesController
 );
+
+// Product variant image route
+router.post(
+  "/products/variants/:variantId/images",
+  upload.array("images", 4), // Max 4 images
+  uploadVariantImagesController
+);
+
+ router.get("/products/:productId/images", imageController.getProductImages);
+
+// router.delete(
+//   "/products/:productId/images",
+//   imageController.deleteAllProductImages
+// );
 
 // Individual image routes
-router.delete("/images/:imageId", imageController.deleteImage);
+router.delete("/images/:imageId", deleteImageController);
 
-router.delete("/images/batch", imageController.deleteMultipleImages);
+// router.delete("/images/batch", imageController.deleteMultipleImages);
 
-router.put(
-  "/images/:imageId",
-  upload.single("image"),
-  imageController.replaceImage
-);
+// router.put(
+//   "/images/:imageId",
+//   upload.single("image"),
+//   imageController.replaceImage
+// );
 
 router.patch("/images/:imageId/thumbnail", imageController.setThumbnail);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 // shadcn/ui components (adjust the import paths to match your project)
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { createStore } from "@/lib/storesApi";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function StoreOnboarding() {
   const [step, setStep] = useState(1);
@@ -36,6 +37,8 @@ export default function StoreOnboarding() {
 
   const { init } = useAuthStore();
   const router = useRouter();
+  const fileRef = useRef(null);
+  const bannerFileRef = useRef(null);
 
   useEffect(() => {
     if (logoFile) {
@@ -183,14 +186,14 @@ export default function StoreOnboarding() {
                             </div>
 
                             <div className="flex items-center justify-end gap-2 mt-4">
-                              <Button
+                              {/* <Button
                                 variant="ghost"
                                 onClick={() =>
                                   alert("You can skip this now (demo)")
                                 }
                               >
                                 Skip
-                              </Button>
+                              </Button> */}
                               <Button onClick={next} disabled={!canProceedInfo}>
                                 Next
                               </Button>
@@ -227,12 +230,18 @@ export default function StoreOnboarding() {
                                   )}
                                 </div>
 
+                                <Button onClick={() => fileRef.current.click()}>
+                                  Upload logo
+                                </Button>
+
                                 <input
+                                  ref={fileRef}
                                   type="file"
                                   accept="image/*"
                                   onChange={(e) =>
                                     setLogoFile(e.target.files?.[0] ?? null)
                                   }
+                                  className="hidden"
                                 />
                                 <div className="text-xs text-muted-foreground">
                                   Recommended: square (500x500)
@@ -257,12 +266,20 @@ export default function StoreOnboarding() {
                                   )}
                                 </div>
 
+                                <Button
+                                  onClick={() => bannerFileRef.current.click()}
+                                >
+                                  Upload banner
+                                </Button>
+
                                 <input
+                                  ref={bannerFileRef}
                                   type="file"
                                   accept="image/*"
                                   onChange={(e) =>
                                     setBannerFile(e.target.files?.[0] ?? null)
                                   }
+                                  className="hidden"
                                 />
                                 <div className="text-xs text-muted-foreground">
                                   Recommended: 1200x400 for best results
@@ -415,7 +432,11 @@ export default function StoreOnboarding() {
                                       >
                                         Open Preview
                                       </Button>
-                                      <Button
+                                      {loading ? <Button
+                                        disabled
+                                      >
+                                        Creating store <Spinner />
+                                      </Button>  :<Button
                                         onClick={
                                           step === totalSteps
                                             ? handleSubmit
@@ -424,10 +445,10 @@ export default function StoreOnboarding() {
                                       >
                                         {step === totalSteps
                                           ? "Create"
-                                          : step === totalSteps && loading
+                                          : loading
                                           ? "Making your store"
                                           : "Next"}
-                                      </Button>
+                                      </Button>}
                                     </div>
                                   </div>
                                 </div>
@@ -442,7 +463,7 @@ export default function StoreOnboarding() {
               </Card>
 
               {/* Mobile actions bar */}
-              <div className="mt-6 block md:hidden">
+              <div className="mt-6 block hidden">
                 <div className="flex items-center justify-between gap-2">
                   <Button variant="ghost" onClick={back} disabled={step === 1}>
                     Back
