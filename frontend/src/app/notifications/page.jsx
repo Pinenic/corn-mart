@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import NotificationCard from "@/components/notifications/NotificationCard";
-import { sampleNotifications } from "@/lib/sampleNotifications";
 import { Button } from "@/components/ui/button";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { getBuyerNotifications, readAll, readOne } from "@/lib/notificationsApi";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(sampleNotifications);
+  const [notifications, setNotifications] = useState([]);
   const { init, user } = useAuthStore();
   const userId = user?.id;
   const [notificationz, setNotificationz] = useState([]);
