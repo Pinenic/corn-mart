@@ -16,7 +16,7 @@ import BackButton from "@/components/BackButton";
 
 export default function Layout({ children }) {
   return (
-    <section className="flex flex-col lg:flex-row gap-4 w-full">
+    <section className="flex flex-col lg:flex-row gap-4 max-w-7xl m-auto">
 
       {/* === MOBILE/TABLET DRAWER BUTTON === */}
       <div className="flex justify-between lg:hidden px-3 pt-3">

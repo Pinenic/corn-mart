@@ -7,15 +7,16 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CartClient() {
-  const { items, subtotal, removeItem, updateItem, clearCart, cartId } = useCart();
-    const router = useRouter();
-    const handleNav = () => {
-      router.push(`/checkout`)
-    }
+  const { items, loading, subtotal, removeItem, updateItem, clearCart, cartId } =
+    useCart();
+  const router = useRouter();
+  const handleNav = () => {
+    router.push(`/checkout`);
+  };
 
   useEffect(() => {
     document.title = "Corn Mart | Cart";
-    console.log(cartId, items)
+    console.log(cartId, items);
   }, []);
 
   function updateQuantity(id, quantity) {
@@ -26,7 +27,7 @@ export default function CartClient() {
     // updateItem expects (id, updates) or similar; adapt to your hook API
     // If updateItem signature is different, adjust accordingly.
     try {
-      updateItem(id, quantity );
+      updateItem(id, quantity);
     } catch (err) {
       // fallback: if updateItem is a function that accepts (id, qty)
       try {
@@ -37,13 +38,22 @@ export default function CartClient() {
     }
   }
 
-  const total = typeof subtotal === "number" ? subtotal : (items || []).reduce((s, it) => s + (it.price || 0) * (it.quantity || 1), 0);
+  const total =
+    typeof subtotal === "number"
+      ? subtotal
+      : (items || []).reduce(
+          (s, it) => s + (it.price || 0) * (it.quantity || 1),
+          0
+        );
 
   if (!items || items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h2 className="text-xl font-semibold mb-4">Your cart is empty</h2>
-        <Link href="/shopping" className="text-primary font-medium hover:underline">
+        <Link
+          href="/shopping"
+          className="text-primary font-medium hover:underline"
+        >
           Continue Shopping
         </Link>
       </div>
@@ -57,20 +67,27 @@ export default function CartClient() {
         {items.map((item) => (
           <div key={item.id} className="flex items-center gap-4 border-b pb-4">
             <Image
-              src={item.products.thumbnail_url}
+              src={
+                item.product_variants.images[0]?.image_url ||
+                item.products.thumbnail_url
+              }
               alt={item.products.name}
               width={100}
               height={100}
               className="rounded-lg border"
             />
             <div className="flex-1">
-              <h3 className="font-semibold text-sm">{item.products.name}{" "}{item.product_variants.name}</h3>
+              <h3 className="font-semibold text-sm">
+                {item.products.name} {item.product_variants.name}
+              </h3>
               <p className="text-gray-600">K{item.price.toFixed(2)}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => updateQuantity(item.id, ((item.quantity || 1) - 1))}
+                  onClick={() =>
+                    updateQuantity(item.id, (item.quantity || 1) - 1)
+                  }
                 >
                   -
                 </Button>
@@ -78,13 +95,19 @@ export default function CartClient() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => updateQuantity(item.id, ((item.quantity || 1) + 1))}
+                  onClick={() =>
+                    updateQuantity(item.id, (item.quantity || 1) + 1)
+                  }
                 >
                   +
                 </Button>
               </div>
             </div>
-            <Button variant="ghost" onClick={() => removeItem(item.id)} className="text-destructive">
+            <Button
+              variant="ghost"
+              onClick={() => removeItem(item.id)}
+              className="text-destructive"
+            >
               Remove
             </Button>
           </div>
@@ -106,10 +129,17 @@ export default function CartClient() {
           <span>Total</span>
           <span>K{(total + 2.5).toFixed(2)}</span>
         </div>
-        <Button className="w-full mt-4 bg-primary hover:bg-primary/90" onClick={() => handleNav()}>
+        <Button
+          className="w-full mt-4 bg-primary hover:bg-primary/90"
+          onClick={() => handleNav()}
+        >
           Proceed to Checkout
         </Button>
-        <Button variant="ghost" className="w-full mt-2 text-destructive" onClick={() => clearCart()}>
+        <Button
+          variant="ghost"
+          className="w-full mt-2 text-destructive"
+          onClick={() => clearCart()}
+        >
           Clear Cart
         </Button>
       </div>

@@ -15,7 +15,7 @@ export const getAllStores = async () => {
 export const getStore = async (id) => {
   const { data, error } = await supabase
     .from("stores")
-    .select("*, products(*)")
+    .select("*, products(*), location:store_locations(city, province)")
     .eq("id", id)
     .single();
 

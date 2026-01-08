@@ -12,6 +12,7 @@ import { getFollowerCount, getStoreById } from "@/lib/storesApi";
 export default function StorePage({ params }) {
   const { storeId } = useParams();
   const [stores, setStores] = useState([]);
+  const [storeLoc, setStoreLoc] = useState(null);
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState("");
   const [products, setProducts] = useState([]);
@@ -24,6 +25,7 @@ export default function StorePage({ params }) {
 
       if (!res) throw new Error(result.error || "Failed to fetch store");
       setStores(res);
+      setStoreLoc(res.location[0]);
       setProducts(res.products);
       sortCategories(res.products);
       getNumbOfFollowers(res.id);
@@ -77,7 +79,7 @@ export default function StorePage({ params }) {
   // mock data for the store
   const store = {
     id: stores?.id,
-    name: stores?.name || "Mikas Cakery",
+    name: stores?.name || "Store Name",
     bannerUrl: stores.banner || "/banners/bakery-banner.jpg",
     avatarUrl: stores.logo || "/avatars/mika.jpg",
     description:
@@ -85,7 +87,7 @@ export default function StorePage({ params }) {
       "Welcome to Mika’s Cakery! We bake with love and passion — from cupcakes to celebration cakes.",
     followers: count,
     productsCount: stores.products?.length,
-    location: "Lusaka, Zambia",
+    location: `${storeLoc?.city || "lusaka"}, ${storeLoc?.province || "lusaka"}`,
     rating: 4.9,
     joined: stores.created_at,
   };
@@ -93,7 +95,7 @@ export default function StorePage({ params }) {
   return (
     <div className="min-h-screen max-w-7xl mx-auto">
       {/* Store header */}
-      <StoreHeader store={store} refresh={refreshStore} />
+      <StoreHeader store={store} storeLoc={stores?.location} refresh={refreshStore} />
 
       {/* Category tabs */}
       <div className="sticky top-[54px] z-40">

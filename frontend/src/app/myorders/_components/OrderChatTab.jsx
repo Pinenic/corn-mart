@@ -13,6 +13,7 @@ import {
   getOrderMessages,
   markChatAsRead,
   sendOrderMessage,
+  sendOrderMessageImages,
 } from "@/lib/ordersApi";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -51,7 +52,14 @@ function SentBubble({ message, createdAt, readAt }) {
     <div className="flex justify-end">
       <div className="relative">
         <div className="border rounded-xl bg-primary text-primary-foreground max-w-72 p-2 text-sm">
-          {message}
+          {message.message_type == "image" ? <Image
+                      src={message.file_url}
+                      alt="product image"
+                      width={800}
+                      height={800}
+                      priority
+                      className="object-cover w-full"
+                    /> : message.message}
         </div>
         <CheckCircle
           className={
@@ -77,6 +85,7 @@ export default function ChatTab({ orders = [] }) {
 
   const bottomRef = useRef(null);
   const channelRef = useRef(null);
+  const fileRef = useRef(null);
 
   const seller_id = selectedSto?.stores.owner_id;
   const role = "buyer";
@@ -188,6 +197,66 @@ export default function ChatTab({ orders = [] }) {
     }
   };
 
+  /* ---------File handler -------- */
+  const handleFiles = async (e) => {
+  const files = Array.from(e.target.files).slice(0, 5); // max 5
+
+  if (files.length === 0) return;
+
+  try {
+    const tempMessages = files.map((file) => ({
+      id: crypto.randomUUID(),
+      sender_role: role,
+      message_type: file.type.startsWith("image") ? "image" : "file",
+      file_name: file.name,
+      file_url: URL.createObjectURL(file), // preview
+      created_at: new Date().toISOString(),
+      _optimistic: true,
+    }));
+
+    // 1️⃣ Add optimistic placeholders
+    setMessages((prev) => [...prev, ...tempMessages]);
+
+    // 2️⃣ Upload to server using FormData
+    const formData = new FormData();
+    files.forEach((f) => formData.append("images", f));
+    formData.append("userId", user.id);
+    formData.append("role", role);
+    try {
+      setSending(true);
+
+      const res = await sendOrderMessageImages(selectedSto.id, formData);
+
+      if (!res) throw new Error();
+    } catch(err) {
+      console.log(err);
+      toast.error("Failed to send message", err);
+    } finally {
+      setSending(false);
+    }
+
+    
+
+    const uploadedMessages = await res.json();
+
+    // 3️⃣ Replace optimistic placeholders
+    setMessages((prev) => {
+      const newPrev = [...prev];
+      tempMessages.forEach((temp, index) => {
+        const realMessage = uploadedMessages[index];
+        const idx = newPrev.findIndex((m) => m.id === temp.id);
+        if (idx !== -1) newPrev[idx] = realMessage;
+      });
+      return newPrev;
+    });
+  } catch (err) {
+    toast.error("Failed to upload files");
+  } finally {
+    fileRef.current.value = null;
+  }
+};
+
+
   return (
     <div className="flex flex-col w-full h-full">
       {/* -------- Order avatars -------- */}
@@ -221,7 +290,7 @@ export default function ChatTab({ orders = [] }) {
             m.sender_role === "buyer" ? (
               <SentBubble
                 key={m.id}
-                message={m.message}
+                message={m}
                 createdAt={m.created_at}
                 readAt={lastRead}
               />
@@ -245,9 +314,22 @@ export default function ChatTab({ orders = [] }) {
           onChange={(e) => setText(e.target.value)}
         />
         <InputGroupAddon align="block-end">
-          <InputGroupButton variant="outline" size="icon-xs">
+          <InputGroupButton
+            variant="outline"
+            size="icon-xs"
+            onClick={() => fileRef.current.click()}
+          >
             <IconPlus />
           </InputGroupButton>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            ref={fileRef}
+            className="hidden"
+            onChange={handleFiles}
+          />
+
           <InputGroupText />
           <Separator orientation="vertical" className="!h-4" />
           <InputGroupButton

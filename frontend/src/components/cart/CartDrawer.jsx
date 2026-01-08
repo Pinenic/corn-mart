@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/store/useCart";
 import CartBadge from "./CartBadgeCounter";
+import { formatNumber } from "@/utils/numberFormatter";
 
 export default function CartDrawer() {
   const [open, setOpen] = useState(false);
@@ -47,7 +48,7 @@ export default function CartDrawer() {
                 className="flex items-center gap-4 border-b pb-4"
               >
                 <Image
-                  src={item.products?.thumbnail_url}
+                  src={item.product_variants?.images[0]?.image_url || item.products?.thumbnail_url}
                   alt={item.products?.name}
                   width={100}
                   height={100}
@@ -57,7 +58,7 @@ export default function CartDrawer() {
                   <h3 className="font-semibold md:text-lg line-clamp-1">
                     {item.products?.name}{" "}{item.product_variants?.name}
                   </h3>
-                  <p className="text-gray-600">K{item.price?.toFixed(2)}</p>
+                  <p className="text-gray-600">K{formatNumber(item.price?.toFixed(2))}</p>
                   <p>x {item.quantity}</p>
                 </div>
                 <Button
@@ -75,7 +76,7 @@ export default function CartDrawer() {
         <div className="mt-6 space-y-3">
           <div className="flex justify-between font-semibold">
             <span>Subtotal:</span>
-            {/* <span>${total?.toFixed(2)}</span> */}
+            K{formatNumber(subtotal.toFixed(2))}
           </div>
           <div className="flex gap-2">
             <Button

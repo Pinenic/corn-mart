@@ -7,7 +7,7 @@ export function QuantitySelector({setQuantity, quantity}) {
     <div className="flex items-center gap-2">
       <Button
         variant="outline"
-        onClick={() => setQty((n) => Math.max(1, n - 1))}
+        onClick={() => setQuantity((n) => Math.max(1, n - 1))}
       >
         -
       </Button>

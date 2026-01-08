@@ -35,7 +35,7 @@ export async function uploadProductImages(
     });
   }
 
-  // 1️⃣ Insert into product_images table
+  // Insert into product_images table
   const { error: dbErr } = await supabase.from("product_images").insert(
     uploadedUrls.map((urlObj) => ({
       product_id: productId,
@@ -45,7 +45,7 @@ export async function uploadProductImages(
   );
   if (dbErr) throw dbErr;
 
-  // 2️⃣ Update products table thumbnail_url
+  // Update products table thumbnail_url
   const thumbnailUrl = uploadedUrls.find((u) => u.is_thumbnail)?.image_url;
   if (thumbnailUrl) {
     const { error: thumbErr } = await supabase
@@ -66,7 +66,7 @@ export async function updateProductImages(
   productId,
   { newFiles = [], removedImageIds = [] }
 ) {
-  // 1️⃣ Delete removed images
+  // Delete removed images
   if (removedImageIds.length) {
     const { data: oldImages, error: fetchErr } = await supabase
       .from("product_images")
@@ -93,7 +93,7 @@ export async function updateProductImages(
     if (deleteErr) throw deleteErr;
   }
 
-  // 2️⃣ Upload new images
+  // Upload new images
   // Needs reveiw on setting the thumbnai url
   if (newFiles.length) {
     await uploadProductImages(userId, productId, newFiles);

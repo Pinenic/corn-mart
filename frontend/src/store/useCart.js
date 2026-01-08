@@ -50,14 +50,14 @@ export const useCart = create(
           price,
           store_id,
           products ( name, thumbnail_url ),
-          product_variants (name, price ),
+          product_variants (name, price, images:product_images(*) ),
           stores (name)
         )
         `
         )
         .eq("user_id", userId)
         .maybeSingle();
-      // console.log(cart);
+       console.log(cart);
 
       if (error) {
         console.error("Error fetching cart", error);

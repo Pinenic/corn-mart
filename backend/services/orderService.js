@@ -165,6 +165,46 @@ export async function postMessage(orderId, userId, role, message) {
   return data;
 }
 
+export async function postImagesMessage(orderId, userId, role, files) {
+   const messages = [];
+  for (const file of files) {
+    const ext = file.mimetype.split("/")[1];
+    const filename = `${crypto.randomUUID()}.${ext}`;
+      const path = `${orderId}/${crypto.randomUUID()}-${filename}`;
+
+      const { data, error } = await supabase.storage
+        .from("order-chat-attachments")
+        .upload(path, file.buffer, { contentType: file.mimetype });
+
+      if (error) throw new Error(`Upload eror, ${error}`);
+
+      const { data: urlData } = supabase.storage
+        .from("order-chat-attachments")
+        .getPublicUrl(path);
+
+      const { data: msg } = await supabase
+        .from("order_messages")
+        .insert({
+          order_id: orderId,
+          sender_id: userId,
+          sender_role: role,
+          message: filename,
+          message_type: file.mimetype.startsWith("image")
+            ? "image"
+            : "file",
+          file_url: urlData.publicUrl,
+          file_name: file.originalname,
+          file_size: file.size,
+        })
+        .select()
+        .single();
+
+      messages.push(msg);
+    }
+
+    return (messages);
+}
+
 export async function markChatasRead(orderId, userId) {
   const { data, error } = await supabase
     .from("order_chat_reads")
@@ -180,7 +220,7 @@ export async function markChatasRead(orderId, userId) {
     throw new Error(`Error posting the message, ${error.message}`);
   }
 
-  return { success: true};
+  return { success: true };
 }
 
 export async function getLastRead(orderId, userId) {
@@ -191,7 +231,7 @@ export async function getLastRead(orderId, userId) {
     .eq("user_id", userId)
     .single();
 
-    if (error) {
+  if (error) {
     throw new Error(`Error posting the message, ${error.message}`);
   }
 

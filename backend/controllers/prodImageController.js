@@ -11,7 +11,7 @@ export async function uploadProductImages(req, res) {
   try {
     const { productId } = req.params;
     const { thumbnailIndex = 0 } = req.body;
-    const {userId} = req.body; // Assuming auth middleware sets req.user
+    const { userId } = req.body; // Assuming auth middleware sets req.user
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({

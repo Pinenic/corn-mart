@@ -17,6 +17,7 @@ export async function createProduct({
   price,
   store_id,
   category,
+  brand,
   images = [],
   subcat
 }) {
@@ -27,6 +28,7 @@ export async function createProduct({
   formData.append("price", price);
   formData.append("store_id", store_id);
   formData.append("category", category);
+  formData.append("brand", brand);
   formData.append("subcat", JSON.stringify(subcat));
 
   images.forEach((file) => formData.append("images", file));
@@ -155,6 +157,31 @@ export async function uploadProductImages(
   // Append user Id
   formData.append("userId", userId);
 
+  return fetchApi(`/api/inventory/products/${productId}/thumbnail`, {
+    method: "POST",
+    body: formData,
+    // Don't set Content-Type header - browser will set it with boundary
+    headers: {
+      // Remove Content-Type from default headers if fetchApi sets it
+    },
+  });
+}
+
+export async function addProductImages(
+  userId,
+  productId,
+  files
+) {
+  const formData = new FormData();
+
+  // Append all files
+  files.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  // Append user Id
+  formData.append("userId", userId);
+
   return fetchApi(`/api/inventory/products/${productId}/images`, {
     method: "POST",
     body: formData,
@@ -164,6 +191,34 @@ export async function uploadProductImages(
     },
   });
 }
+
+export async function addProductVariantImages(
+  userId,
+  productId,
+  variantId,
+  files
+) {
+  const formData = new FormData();
+
+  // Append all files
+  files.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  // Append user Id
+  formData.append("userId", userId);
+  formData.append("product_id", productId);
+
+  return fetchApi(`/api/inventory/products/variants/${variantId}/images`, {
+    method: "POST",
+    body: formData,
+    // Don't set Content-Type header - browser will set it with boundary
+    headers: {
+      // Remove Content-Type from default headers if fetchApi sets it
+    },
+  });
+}
+
 
 /**
  * Delete a single image

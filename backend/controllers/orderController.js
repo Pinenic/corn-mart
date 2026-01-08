@@ -11,6 +11,7 @@ import {
   postMessage,
   markChatasRead,
   getLastRead,
+  postImagesMessage,
 } from "../services/orderService.js";
 
 export const createNewOrder = async (req, res) => {
@@ -143,48 +144,63 @@ export const getUserStoreOrderDetails = async (req, res) => {
  * ORDER CHAT METHODS
  */
 
-export const getOrderMessageList = async (req,res) => {
+export const getOrderMessageList = async (req, res) => {
   try {
-    const {orderId} = req.params;
+    const { orderId } = req.params;
     const response = await getOrderMessagesById(orderId);
     res.json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
     console.log(error.message);
   }
-}
+};
 
-export const sendMessage = async (req,res) => {
+export const sendMessage = async (req, res) => {
   try {
-    const {orderId} = req.params;
-    const {message, userId, role} = req.body;
+    const { orderId } = req.params;
+    const { message, userId, role } = req.body;
     const response = await postMessage(orderId, userId, role, message);
     res.json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
     console.log(error.message);
   }
-}
+};
+
+export const sendImageMessage = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { userId, role } = req.body;
+    const { files } = req.files;
+    if (!req.files|| req.files.length === 0)
+      return res.status(400).json({ error: "No files uploaded" });
+    const response = await postImagesMessage(orderId, userId, role, req.files);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    console.log(error.message);
+  }
+};
 
 export const readChat = async (req, res) => {
   try {
-    const {orderId} = req.params;
-    const {userId} = req.body;
+    const { orderId } = req.params;
+    const { userId } = req.body;
     const response = await markChatasRead(orderId, userId);
     res.json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
     console.log(error.message);
   }
-}
+};
 
 export const getRead = async (req, res) => {
   try {
-    const {orderId, userId} = req.params;
+    const { orderId, userId } = req.params;
     const response = await getLastRead(orderId, userId);
     res.json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
     console.log(error.message);
   }
-}
+};

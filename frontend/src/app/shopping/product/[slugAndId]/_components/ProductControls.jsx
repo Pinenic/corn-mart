@@ -5,21 +5,19 @@ import { Button } from "@/components/ui/button";
 import { VariantSelector } from "./VariantSelector";
 import { QuantitySelector } from "./QuantitySelector";
 import { useCart } from "@/store/useCart";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
+import { formatNumber } from "@/utils/numberFormatter";
+import { Spinner } from "@/components/ui/spinner";
 
-export default function ProductControls({ product }) {
-  const { addItem } = useCart();
-
+export default function ProductControls({
+  product,
+  selectedVariant,
+  setSelectedVariant,
+}) {
+  const { addItem, loading } = useCart();
   const variants = product?.product_variants || [];
-  const [selectedVariant, setSelectedVariant] = useState(variants[0] || null);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
-
-  // Set default variant after mount
-  useEffect(() => {
-    console.log(variants);
-    if (variants.length > 0) setSelectedVariant(variants[0]);
-  }, [product.id]);
 
   async function handleAdd() {
     if (!selectedVariant) {
@@ -28,13 +26,8 @@ export default function ProductControls({ product }) {
     }
 
     setAdding(true);
-
-    // Optimistic update
     try {
       addItem(product.id, selectedVariant.id, quantity);
-      console.log("Added to cart");
-    } catch (e) {
-      console.log("Failed to add to cart", e);
     } finally {
       setAdding(false);
     }
@@ -43,13 +36,13 @@ export default function ProductControls({ product }) {
   return (
     <div className="mt-4 space-y-6">
       <p className="text-3xl font-bold mt-2">
-        ZMW {selectedVariant.price.toFixed(2)}
+        ZMW {formatNumber(selectedVariant?.price?.toFixed(2))}
       </p>
-      <hr className="my-6" />
 
-      <p className="text-gray-700 whitespace-pre-line">{selectedVariant.description || product.description}</p>
+      <p className="text-gray-700 whitespace-pre-line">
+        {selectedVariant?.description || product.description}
+      </p>
 
-      <hr className="my-6" />
       <VariantSelector
         variants={variants}
         sv={selectedVariant}
@@ -64,7 +57,7 @@ export default function ProductControls({ product }) {
         onClick={handleAdd}
         disabled={adding}
       >
-        {adding ? "Adding…" : "Add to Cart"}
+        {loading ? <p className="flex gap-3">Adding <Spinner /> </p> : "Add to Cart"}
       </Button>
     </div>
   );

@@ -7,7 +7,7 @@ import {
   searchMarket,
 } from "@/lib/marketplaceApi";
 import { Spinner } from "@/components/ui/spinner";
-import ProductGrid from "./components/ProductGrid";
+import ProductGrid, { SkeletonProductCard } from "./components/ProductGrid";
 import PageTop from "./components/pageTop";
 import SearchResultsGrid from "./components/SearchResultsGrid";
 
@@ -25,7 +25,7 @@ export default function Page() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchResults, setResults] = useState([]);
-  const [searchLoading, setSearchLoadin] = useState(false);
+  // const [searchLoading, setSearchLoadin] = useState(false);
 
   async function fetchProducts() {
     try {
@@ -58,12 +58,15 @@ export default function Page() {
         onResults={setResults}
       />
       {loading ? (
-        <>
-          <div className="flex w-full items-center justify-center min-h-[100vh]">
-            {/* <p className="text-gray-600 animate-pulse">Loading session...</p> */}
-            <Spinner className="size-8 text-blue-500" />
-          </div>
-        </>
+        <div
+          className={
+            "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 mt-4"
+          }
+        >
+          {[...Array(4)].map((_, i) => (
+            <SkeletonProductCard key={i} />
+          ))}
+        </div>
       ) : (
         <>
           {searchResults.length > 0 ? (
