@@ -15,17 +15,19 @@ export async function createProduct({
   name,
   description,
   price,
+  stock,
   store_id,
   category,
   brand,
   images = [],
-  subcat
+  subcat,
 }) {
   const formData = new FormData();
   formData.append("userId", userId);
   formData.append("name", name);
   formData.append("description", description);
   formData.append("price", price);
+  formData.append("stock", stock);
   formData.append("store_id", store_id);
   formData.append("category", category);
   formData.append("brand", brand);
@@ -167,11 +169,7 @@ export async function uploadProductImages(
   });
 }
 
-export async function addProductImages(
-  userId,
-  productId,
-  files
-) {
+export async function addProductImages(userId, productId, files) {
   const formData = new FormData();
 
   // Append all files
@@ -218,7 +216,6 @@ export async function addProductVariantImages(
     },
   });
 }
-
 
 /**
  * Delete a single image

@@ -15,7 +15,11 @@ import {
 } from "../controllers/inventoryController.js";
 import * as imageController from "../controllers/prodImageController.js";
 import { upload } from "../middlewares/multerConfig.js";
-import { deleteImageController, uploadProductImagesController, uploadVariantImagesController } from "../controllers/images.controller.js";
+import {
+  deleteImageController,
+  uploadProductImagesController,
+  uploadVariantImagesController,
+} from "../controllers/images.controller.js";
 
 const router = express.Router();
 
@@ -52,7 +56,7 @@ router.post(
   uploadVariantImagesController
 );
 
- router.get("/products/:productId/images", imageController.getProductImages);
+router.get("/products/:productId/images", imageController.getProductImages);
 
 // router.delete(
 //   "/products/:productId/images",

@@ -30,7 +30,7 @@ export default function OrderCard({ order, selectedId }) {
     <>
       <div className={order.id == selectedId ?"bg-muted rounded-xl mb-4 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:shadow-md transition-all" : " rounded-xl mb-4 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:shadow-md transition-all"}>
         <div className="flex-1 space-y-2">
-          <div className="flex items-center md:justify-between sm:justify-start sm:gap-4">
+          <div className="flex items-center justify-between sm:gap-4">
             <h3 className="font-semibold text-muted-foreground">
               Order - {id.slice(0, 4).toUpperCase()}
             </h3>

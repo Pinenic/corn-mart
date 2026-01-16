@@ -14,10 +14,10 @@ export async function createOrder(cart_id, buyer_id) {
  * STATUS UPDATE METHODS FOR ORDERS
  */
 
-export async function SellerConfirmOrder(storeOrderId, sellerId) {
+export async function SellerShipOrder(storeOrderId, sellerId) {
   const { data, error } = await supabase.rpc("seller_update_store_order", {
     p_store_order_id: storeOrderId,
-    p_action: "confirm",
+    p_action: "ship",
     p_seller_id: sellerId,
   });
   if (error) throw new Error(`${error}`);
@@ -39,15 +39,17 @@ export async function SellerCancelOrder(storeOrderId, sellerId) {
 export async function updateStoreOrderStatus(
   storeOrderId,
   storeId,
-  newStatus,
+  action,
+  actor_id,
+  actorRole,
   metadata = null,
   comment = "Updated"
 ) {
   const { data, error } = await supabase.rpc("update_store_order_status", {
     p_store_order_id: storeOrderId,
-    p_store_id: storeId,
-    p_new_status: newStatus,
-    p_actor_id: null,
+    p_actor_id: actor_id,
+    p_actor_role: actorRole,
+    p_action: action,
     p_comment: comment,
     p_metadata: metadata,
   });
@@ -102,7 +104,8 @@ export async function getStoreOrders(storeId) {
   const { data: orders, error: ordersError } = await supabase
     .from("store_orders")
     .select("*, order_items(*,products(name, thumbnail_url))")
-    .eq("store_id", storeId);
+    .eq("store_id", storeId)
+    .order("created_at", { ascending: false });
 
   if (ordersError) throw new Error(`Error fetching order, ${ordersError}`);
 
@@ -166,43 +169,41 @@ export async function postMessage(orderId, userId, role, message) {
 }
 
 export async function postImagesMessage(orderId, userId, role, files) {
-   const messages = [];
+  const messages = [];
   for (const file of files) {
     const ext = file.mimetype.split("/")[1];
     const filename = `${crypto.randomUUID()}.${ext}`;
-      const path = `${orderId}/${crypto.randomUUID()}-${filename}`;
+    const path = `${orderId}/${crypto.randomUUID()}-${filename}`;
 
-      const { data, error } = await supabase.storage
-        .from("order-chat-attachments")
-        .upload(path, file.buffer, { contentType: file.mimetype });
+    const { data, error } = await supabase.storage
+      .from("order-chat-attachments")
+      .upload(path, file.buffer, { contentType: file.mimetype });
 
-      if (error) throw new Error(`Upload eror, ${error}`);
+    if (error) throw new Error(`Upload eror, ${error}`);
 
-      const { data: urlData } = supabase.storage
-        .from("order-chat-attachments")
-        .getPublicUrl(path);
+    const { data: urlData } = supabase.storage
+      .from("order-chat-attachments")
+      .getPublicUrl(path);
 
-      const { data: msg } = await supabase
-        .from("order_messages")
-        .insert({
-          order_id: orderId,
-          sender_id: userId,
-          sender_role: role,
-          message: filename,
-          message_type: file.mimetype.startsWith("image")
-            ? "image"
-            : "file",
-          file_url: urlData.publicUrl,
-          file_name: file.originalname,
-          file_size: file.size,
-        })
-        .select()
-        .single();
+    const { data: msg } = await supabase
+      .from("order_messages")
+      .insert({
+        order_id: orderId,
+        sender_id: userId,
+        sender_role: role,
+        message: filename,
+        message_type: file.mimetype.startsWith("image") ? "image" : "file",
+        file_url: urlData.publicUrl,
+        file_name: file.originalname,
+        file_size: file.size,
+      })
+      .select()
+      .single();
 
-      messages.push(msg);
-    }
+    messages.push(msg);
+  }
 
-    return (messages);
+  return messages;
 }
 
 export async function markChatasRead(orderId, userId) {

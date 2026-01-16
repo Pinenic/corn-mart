@@ -33,6 +33,7 @@ export default function AddProductPage() {
     brand: "",
     description: "",
     price: "",
+    stock: "",
   });
 
   const [thumbnail, setThumbnail] = useState(null);
@@ -74,6 +75,7 @@ export default function AddProductPage() {
         name: product.name,
         description: product.description,
         price: product.price,
+        stock: product.stock,
         brand: product.brand,
         // category_id: category?.id,
         category: category?.name,
@@ -93,10 +95,13 @@ export default function AddProductPage() {
   };
 
   const addSubcategory = (subcat) => {
+    console.log(subcat);
     setCategory((prev) => ({
       ...prev,
       subcategories: [...(prev.subcategories || []), subcat],
     }));
+     console.log(category)
+    
     setTag(subcat);
   };
 
@@ -171,15 +176,27 @@ export default function AddProductPage() {
       {/* ---------- Pricing ---------- */}
       <Card>
         <CardHeader>
-          <CardTitle>Pricing</CardTitle>
+          <CardTitle>Pricing & Availability</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Input
-            type="number"
-            placeholder="0"
-            value={product.price}
-            onChange={(e) => handleChange("price", e.target.value)}
-          />
+        <CardContent className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+            <label>Price</label>
+            <Input
+              type="number"
+              placeholder="0"
+              value={product.price}
+              onChange={(e) => handleChange("price", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label>Stock</label>
+            <Input
+              type="number"
+              placeholder="0"
+              value={product.stock}
+              onChange={(e) => handleChange("stock", e.target.value)}
+            />
+          </div>
         </CardContent>
       </Card>
 

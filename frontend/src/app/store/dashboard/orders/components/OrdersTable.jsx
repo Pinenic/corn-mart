@@ -19,7 +19,7 @@ export default function OrdersTable({ orders, loading }) {
         router.push(`/store/dashboard/orders/${id}`)
     }
   return (
-    <Card className="rounded-2xl shadow-none">
+    <Card className="rounded-2xl shadow-none mb-4">
       <CardContent className="p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <div>
@@ -44,8 +44,8 @@ export default function OrdersTable({ orders, loading }) {
             </div>
           </>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm rounded-lg">
+          <div className="flex max-h-[50vh] overflow-y-scroll overflow-x-auto">
+            <table className="w-full h-full text-sm rounded-lg">
               <thead className="border-b text-muted-foreground bg-muted sticky top-0 z-10">
                 <tr>
                   <th className="text-left py-3 px-2 font-medium">Order ID</th>

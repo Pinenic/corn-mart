@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 function getStoreOrderStats(orders) {
   const totalOrders = orders.length;
 
-  const pendingOrders = orders.filter(o => o.status === "pending").length;
+  const pendingOrders = orders.filter((o) => o.status === "pending").length;
 
-  const completedOrders = orders.filter(o =>
+  const completedOrders = orders.filter((o) =>
     ["confirmed", "completed", "delivered"].includes(o.status)
   ).length;
 
@@ -17,7 +17,7 @@ function getStoreOrderStats(orders) {
 
   // You can replace subtotal with net_amount when you start calculating payout rules
   const potentialPayout = orders
-    .filter(o => ["confirmed", "completed", "delivered"].includes(o.status))
+    .filter((o) => ["confirmed", "completed", "delivered"].includes(o.status))
     .reduce((sum, o) => sum + o.subtotal, 0);
 
   return {
@@ -25,12 +25,12 @@ function getStoreOrderStats(orders) {
     pendingOrders,
     completedOrders,
     completionRate,
-    potentialPayout
+    potentialPayout,
   };
 }
 
 export default function OrdersOverview({ orders, loading }) {
-    const stats = getStoreOrderStats(orders);
+  const stats = getStoreOrderStats(orders);
   return (
     <Card className="rounded-2xl shadow-none mb-4">
       <CardContent className="p-2 px-4">
@@ -39,22 +39,46 @@ export default function OrdersOverview({ orders, loading }) {
           <div></div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-muted/30 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">Orders</p>
-            <h3 className="text-2xl font-semibold mt-1">{orders?.length || "0"}</h3>
+            <h3 className="text-2xl font-semibold mt-1">
+              {loading ? (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
+              </div>
+            )  : orders?.length || "0"}
+            </h3>
           </div>
           <div className="bg-muted/30 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">Pending orders</p>
-            <h3 className="text-2xl font-semibold mt-1">{stats.pendingOrders}</h3>
+            <h3 className="text-2xl font-semibold mt-1">
+              {loading ? (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
+              </div>
+            )  : stats.pendingOrders}
+            </h3>
           </div>
           <div className="bg-muted/30 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">Completion </p>
-            <h3 className="text-2xl font-semibold mt-1">{stats.completionRate.toFixed(2)}%</h3>
+            <h3 className="text-2xl font-semibold mt-1">
+              {loading ? (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
+              </div>
+            )  : <span>{stats.completionRate.toFixed(2)}%</span> }
+            </h3>
           </div>
           <div className="bg-muted/30 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">Potential Payout</p>
-            <h3 className="text-2xl font-semibold mt-1">K{stats.potentialPayout}</h3>
+            <h3 className="text-2xl font-semibold mt-1">
+              {loading ? (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
+              </div>
+            )  : <span>K {stats.potentialPayout}</span>}
+            </h3>
           </div>
         </div>
       </CardContent>

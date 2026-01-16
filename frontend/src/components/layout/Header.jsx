@@ -125,7 +125,7 @@ export default function Header() {
                     My Orders
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={()=> handleStoreDashboardNav()}>
-                    Store
+                    My Store
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

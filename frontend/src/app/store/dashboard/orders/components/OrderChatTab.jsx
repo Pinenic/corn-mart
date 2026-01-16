@@ -13,6 +13,7 @@ import {
   getOrderMessages,
   markChatAsRead,
   sendOrderMessage,
+  sendOrderMessageImages,
 } from "@/lib/ordersApi";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -35,24 +36,53 @@ function ReceivedBubble({ avatar, text }) {
         className="rounded-full w-9 h-9 bg-muted object-cover"
         unoptimized
       />
-      <div className="border rounded-xl bg-muted max-w-64 md:max-w-72 p-2 text-sm">
-        {text.message}
+      <div className="border rounded-xl bg-muted max-w-64 md:max-w-72 text-sm">
+        {text.message_type == "image" ? (
+          <Image
+            src={text.file_url}
+            alt="product image"
+            width={800}
+            height={800}
+            priority
+            className="object-cover w-48 rounded-xl"
+          />
+        ) : (
+          <p className="p-2">{text.message}</p>
+        )}
       </div>
     </div>
   );
 }
 
-function SentBubble({ text, createdAt, readAt  }) {
-  const isRead = 
-  new Date(createdAt).getTime() <=
-  new Date(readAt).getTime();
+function SentBubble({ text, createdAt, readAt }) {
+  const [isRead, setIsRead] = useState(false);
+  useEffect(() => {
+    setIsRead(new Date(createdAt).getTime() <= new Date(readAt).getTime());
+  }, [readAt]);
   return (
     <div className="flex justify-end">
       <div className="relative">
-        <div className="border rounded-xl bg-primary text-primary-foreground max-w-72 p-2 text-sm">
-          {text.message}
+        <div className="border rounded-xl bg-primary text-primary-foreground max-w-72 text-sm">
+          {text.message_type == "image" ? (
+            <Image
+              src={text.file_url}
+              alt="product image"
+              width={800}
+              height={800}
+              priority
+              className="object-cover w-48 rounded-xl"
+            />
+          ) : (
+            <p className="p-2">{text.message}</p>
+          )}
         </div>
-        <CheckCircle className={isRead ?"text-primary absolute w-3 right-1" : "text-text absolute w-3 right-1"} />
+        <CheckCircle
+          className={
+            isRead
+              ? "text-primary absolute w-3 right-1"
+              : "text-text absolute w-3 right-1"
+          }
+        />
       </div>
     </div>
   );
@@ -68,6 +98,8 @@ export default function ChatTab({ orders, avatar }) {
   const [text, setText] = useState("");
   const [lastRead, setLastRead] = useState(null);
   const bottomRef = useRef(null);
+  const fileRef = useRef(null);
+  const abortRef = useRef(null);
 
   const role = "seller";
   const { init, user } = useAuthStore();
@@ -120,6 +152,75 @@ export default function ChatTab({ orders, avatar }) {
     }
   };
 
+  /* ---------File handler -------- */
+  const handleFiles = async (e) => {
+    const files = Array.from(e.target.files).slice(0, 5);
+
+    if (files.length === 0) return;
+
+    if (files.some((f) => !f.type.startsWith("image"))) {
+      toast.error("Only image files are allowed");
+      return;
+    }
+
+    // 1️⃣ Show uploading placeholder
+    const uploadPlaceholder = {
+      id: "__uploading__",
+      sender_role: role,
+      message_type: "uploading",
+      created_at: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, uploadPlaceholder]);
+
+    // Prepare formData
+    const formData = new FormData();
+    files.forEach((file) => formData.append("images", file));
+    formData.append("userId", user.id);
+    formData.append("role", role);
+
+    abortRef.current = new AbortController();
+
+    let response;
+
+    try {
+      setSending(true);
+
+      response = await sendOrderMessageImages(
+        selectedSto.id,
+        formData,
+        abortRef.current.signal
+      );
+
+      if (!response) throw new Error("Upload failed");
+    } catch (err) {
+      if (err.name === "AbortError") {
+        toast.error("Upload cancelled due to network issue");
+      } else {
+        toast.error("Failed to upload image(s)");
+      }
+
+      // Remove placeholder
+      setMessages((prev) => prev.filter((msg) => msg.id !== "__uploading__"));
+
+      fileRef.current.value = null;
+      setSending(false);
+      return;
+    }
+
+    // const uploadedMessages = await response.json();
+    console.log("now removing placeholder");
+
+    // 2️⃣ Remove placeholder after success
+    setMessages((prev) => prev.filter((msg) => msg.id !== "__uploading__"));
+
+    console.log("placeholder removed");
+    setSending(false);
+    fileRef.current.value = null;
+
+    // Realtime listener will append the uploaded messages normally
+  };
+
   /* -------- Realtime + initial fetch -------- */
   useEffect(() => {
     if (!selectedSto?.id) return;
@@ -145,7 +246,7 @@ export default function ChatTab({ orders, avatar }) {
         }
       )
       .subscribe();
-      markAsRead();
+    markAsRead();
 
     return () => {
       supabase.removeChannel(channel);
@@ -159,19 +260,19 @@ export default function ChatTab({ orders, avatar }) {
     markAsRead();
   }, [messages]);
 
-   useEffect(() => {
-      if (selectedSto === null) {
-        return;
-      }
-      markAsRead();
-    }, [selectedSto]);
-  
-    const markAsRead = async () => {
-      await markChatAsRead(selectedSto.id, user.id)
-      const res = await getLastRead(selectedSto.id, selectedSto.buyer_id);
-      setLastRead(res.last_read_at);
-      console.log(res)
-    };
+  useEffect(() => {
+    if (selectedSto === null) {
+      return;
+    }
+    markAsRead();
+  }, [selectedSto]);
+
+  const markAsRead = async () => {
+    await markChatAsRead(selectedSto.id, user.id);
+    const res = await getLastRead(selectedSto.id, selectedSto.buyer_id);
+    setLastRead(res.last_read_at);
+    console.log(res);
+  };
 
   /* -------- Guard render -------- */
   if (!selectedSto) {
@@ -194,8 +295,19 @@ export default function ChatTab({ orders, avatar }) {
           <p>No messages in this chat.</p>
         ) : (
           messages.map((m) =>
-            m.sender_role === "seller" ? (
-              <SentBubble key={m.id} text={m} createdAt={m.created_at} readAt={lastRead} />
+            m.id === "__uploading__" ? (
+              <div key="uploading" className="flex justify-end px-4 opacity-70">
+                <div className="border rounded-xl bg-primary text-primary-foreground p-2 text-sm">
+                  Uploading images…
+                </div>
+              </div>
+            ) : m.sender_role === "seller" ? (
+              <SentBubble
+                key={m.id}
+                text={m}
+                createdAt={m.created_at}
+                readAt={lastRead}
+              />
             ) : (
               <ReceivedBubble key={m.id} avatar={avatar} text={m} />
             )
@@ -217,9 +329,18 @@ export default function ChatTab({ orders, avatar }) {
             variant="outline"
             className="rounded-full"
             size="icon-xs"
+            onClick={() => fileRef.current.click()}
           >
             <IconPlus />
           </InputGroupButton>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            ref={fileRef}
+            className="hidden"
+            onChange={handleFiles}
+          />
 
           <InputGroupText className="ml-auto" />
           <Separator orientation="vertical" className="!h-4" />
