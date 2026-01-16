@@ -39,9 +39,9 @@ export const getProductById = async (req, res) => {
 
 export const createNewProduct = async (req, res) => {
   try {
-    const { userId, name, description, price, store_id, category, subcat } = req.body;
+    const { userId, name, description, price, stock, store_id, category, subcat } = req.body;
     const subcategory = await createSubcategory(JSON.parse(subcat));
-    const payload = { name, description, price, store_id, category, subcat_id:subcategory.id };
+    const payload = { name, description, price, stock, store_id, category, subcat_id:subcategory.id };
     const product = await createAProduct(payload);
 
     // Handle image upload if files were sent

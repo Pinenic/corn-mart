@@ -5,13 +5,13 @@ import {
   getStoreOrders,
   getStoreOrderDetails,
   createOrder,
-  SellerConfirmOrder,
   SellerCancelOrder,
   getOrderMessagesById,
   postMessage,
   markChatasRead,
   getLastRead,
   postImagesMessage,
+  SellerShipOrder,
 } from "../services/orderService.js";
 
 export const createNewOrder = async (req, res) => {
@@ -34,7 +34,7 @@ export const createNewOrder = async (req, res) => {
   }
 };
 
-export const confirmOrder = async (req, res) => {
+export const shipOrder = async (req, res) => {
   try {
     const { storeOrderId, sellerId } = req.body;
     if (!storeOrderId || !sellerId)
@@ -42,7 +42,7 @@ export const confirmOrder = async (req, res) => {
         .status(400)
         .json({ error: "storeOrderId and sellerId required" });
 
-    const response = await SellerConfirmOrder(storeOrderId, sellerId);
+    const response = await SellerShipOrder(storeOrderId, sellerId);
 
     if (!response) {
       // If exception in DB function, Supabase returns error
@@ -85,11 +85,13 @@ export const updateStoreOrder = async (req, res) => {
   try {
     const { storeOrderId } = req.params;
     console.log(storeOrderId);
-    const { storeId, newStatus, metadata } = req.body;
+    const { storeId, action, actor_id, actorRole, metadata } = req.body;
     const response = await updateStoreOrderStatus(
       storeOrderId,
       storeId,
-      newStatus,
+      action,
+      actor_id,
+      actorRole,
       metadata
     );
     response

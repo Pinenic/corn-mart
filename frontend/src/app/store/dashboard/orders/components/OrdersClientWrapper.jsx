@@ -26,6 +26,21 @@ export default function OrdersClientWrapper({ initialOrder = {}, id }) {
     }
   };
 
+  const refetchOrder = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/orders/store/order/${id}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(res.statusText || "Failed to fetch order");
+      const data = await res.json();
+      setOrder(data);
+      return data;
+    } catch (err) {
+      console.error("OrdersClientWrapper: fetchOrder error", err?.message || err);
+      return null;
+    } finally {
+      return;
+    }
+  };
+
   // In case server rendered initialOrder is empty (or stale), fetch once on mount
   useEffect(() => {
     if (!initialOrder || !initialOrder.id) {
@@ -35,7 +50,7 @@ export default function OrdersClientWrapper({ initialOrder = {}, id }) {
 
   return (
     <>
-      <TopRow order={order} loading={loading} soId={id} reload={fetchOrder} />
+      <TopRow order={order} loading={loading} soId={id} reload={refetchOrder} />
 
       <div className="flex flex-col lg:flex-row">
         <div className="flex w-full lg:w-2/3 p-2">

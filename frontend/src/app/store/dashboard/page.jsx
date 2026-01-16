@@ -16,6 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useProfile } from "@/store/useProfile";
 import { useStoreStore } from "@/store/useStore";
 import { useRouter } from "next/navigation";
+import { SiteHeader } from "@/components/site-header";
 
 const statusColors = {
   received: "bg-green-100 text-green-700",
@@ -172,6 +173,7 @@ export default function Page() {
 
   return (
     <>
+    <SiteHeader title={"Overview"} storeId={storeId} />
       <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -187,7 +189,7 @@ export default function Page() {
             </div>
 
             <div className="px-4 lg:px-6">
-              <OrdersTable orders={orders} loading={loading} />
+              <OrdersTable orders={orders.slice(0,4)} loading={loading} />
             </div>
           </div>
         </div>

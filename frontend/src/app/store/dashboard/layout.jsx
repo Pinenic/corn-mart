@@ -8,13 +8,13 @@ import { useStoreStore } from "@/store/useStore";
 export default function Layout({ children }) {
   const {store} = useStoreStore();
   return (
-    <div className="min-h-[100vh] md:flex">
+    <div className="h-[90vh] sticky top-20 md:flex">
       {/* Sidebar and Backdrop */}
-      <AppSidebar variant="inset" store_name={store?.name} id={store?.id}/>
+      <AppSidebar store_name={store?.name} id={store?.id}/>
       {/* Main Content Area */}
-      <div className={`flex-1`}>
+      <div className={`grow`}>
         {/* Header */}
-        <SiteHeader />
+        {/* <SiteHeader /> */}
         {/* Page Content */}
         <div className="p-1 mx-auto max-w-(--breakpoint-2xl) md:p-6">
           {children}

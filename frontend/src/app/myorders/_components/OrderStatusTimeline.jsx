@@ -71,7 +71,7 @@ export default function OrderStatusTimeline({ history }) {
   return (
     <TooltipProvider>
       <div className="w-full overflow-x-auto">
-        <div className="flex md:flex-row flex-col md:items-center gap-6 min-w-max md:min-w-0">
+        <div className="flex md:flex-row flex-row md:items-center gap-6 min-w-max md:min-w-0">
           {checkpoints.map((status, idx) => {
             const { label, icon: Icon } = STATUS_CONFIG[status];
 

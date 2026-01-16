@@ -14,6 +14,7 @@ import {
 } from "@/lib/storesApi";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import { SiteHeader } from "@/components/site-header";
 
 export default function Page() {
   const { profile } = useProfile();
@@ -87,34 +88,37 @@ export default function Page() {
     // res ? toast.success("updated!") : toast.error("failed to update");
   };
   return (
-    <div className="max-w-full mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-muted-foreground mb-6">
-        Settings
-      </h1>
+    <>
+    <SiteHeader title={"Settings"} storeId={store?.id} />
+      <div className="max-w-full mx-auto px-4 py-10">
+        {/* <h1 className="text-3xl font-bold text-muted-foreground mb-6">
+          Settings
+        </h1> */}
 
-      <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="flex flex-wrap gap-2 border-b">
-          <TabsTrigger value="profile">Profile Info</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-        </TabsList>
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="flex flex-wrap gap-2 border-b">
+            <TabsTrigger value="profile">Profile Info</TabsTrigger>
+            <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="profile">
-          <StorefrontTab
-            user={store}
-            handleUpdate={updateStoreInfo}
-            refreshing={loading}
-            loading={updating}
-          />
-        </TabsContent>
+          <TabsContent value="profile">
+            <StorefrontTab
+              user={store}
+              handleUpdate={updateStoreInfo}
+              refreshing={loading}
+              loading={updating}
+            />
+          </TabsContent>
 
-        <TabsContent value="preferences">
-          <StorePreferencesTab
-            value={storeLocation}
-            onSubmit={handleSubmit}
-            loading={submitting}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+          <TabsContent value="preferences">
+            <StorePreferencesTab
+              value={storeLocation}
+              onSubmit={handleSubmit}
+              loading={submitting}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
   );
 }

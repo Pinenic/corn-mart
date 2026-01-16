@@ -6,20 +6,20 @@ import {
   getUserStoreOrders,
   getUserStoreOrderDetails,
   createNewOrder,
-  confirmOrder,
   cancelOrder,
   getOrderMessageList,
   sendMessage,
   readChat,
   getRead,
   sendImageMessage,
+  shipOrder,
 } from "../controllers/orderController.js";
 import { upload } from "../middlewares/multerConfig.js";
 
 const router = express.Router();
 
 router.post("/create", createNewOrder);
-router.post("/confirm", confirmOrder);
+router.post("/ship", shipOrder);
 router.post("/cancel", cancelOrder);
 router.get("/buyer/:buyerId", getOrders);
 router.get("/details/:orderId", getOrderDetails);

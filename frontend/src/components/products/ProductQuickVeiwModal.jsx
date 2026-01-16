@@ -21,6 +21,7 @@ export default function ProductQuickViewModal({
   if (!product) return null;
 
   const [fullProd, setFullProd] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const fetchFullProd = async () => {
@@ -28,15 +29,17 @@ export default function ProductQuickViewModal({
       setLoading(true);
       const res = await getProductById(product.id);
       setFullProd(res.data[0]);
+      setSelectedVariant(res.data[0].product_variants[0]);
+      console.log(res.data[0]);
       setLoading(false);
     } catch (error) {
       console.error(error);
     }
   };
 
-  useEffect(()=>{
-    fetchFullProd()
-  },[product])
+  useEffect(() => {
+    fetchFullProd();
+  }, [product]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -74,7 +77,11 @@ export default function ProductQuickViewModal({
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <ProductControls product={fullProd} />
+              <ProductControls
+                product={fullProd}
+                setSelectedVariant={setSelectedVariant}
+                selectedVariant={selectedVariant}
+              />
             )}
           </div>
         </div>

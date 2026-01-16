@@ -14,14 +14,36 @@ import { useAuthStore } from "@/store/useAuthStore";
 export default function OrdersClient({ initialOrder = {} }) {
   // const { profile } = useProfile();
   const { init, user } = useAuthStore();
-  // const userId = profile?.id;
+  const actorRole = "buyer";
+  const statusActionMap = {
+    pending: "buyer_cancel",
+    shipped: "buyer_receive",
+  };
   const [order, setOrder] = useState([]);
   const [loading, setLoading] = useState(
     !initialOrder || Object.keys(initialOrder).length === 0
   );
+  const [updating, setUpdating] = useState(false);
   const [selectedOrderId, setSelectedId] = useState(null);
 
   const loadOrders = async () => {
+    try {
+      setLoading(true);
+      if (!user) {
+        init();
+      }
+      const data = await getBuyerOrder(user.id);
+      // if (data) toast.success("fetched orders");
+      setOrder(data || {});
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load initial orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const reloadOrders = async () => {
     try {
       setLoading(true);
       if (!user) {
@@ -48,32 +70,41 @@ export default function OrdersClient({ initialOrder = {} }) {
   }, [user]);
 
   async function handleUpdateStatus(soId, storeId, oldStatus, metadata = {}) {
-    const newStatus =
-      oldStatus == "pending"
-        ? "cancelled"
-        : oldStatus == "confirmed"
-        ? "cancelled"
-        : oldStatus == "processing"
-        ? "cancelled"
-        : "delivered";
+    // const newStatus =
+    //   oldStatus == "pending"
+    //     ? "confirmed"
+    //     : oldStatus == "confirmed"
+    //     ? "processing"
+    //     : oldStatus == "processing"
+    //     ? "shipped"
+    //     : "delivered";
+    const action = statusActionMap[oldStatus];
+
     try {
+      setUpdating(true);
       const res = await updateStoreOrderStatus(soId, {
         storeId,
-        newStatus,
+        action,
+        actor_id: user?.id,
+        actorRole,
         metadata,
       });
 
-      if (res?.success) {
-        toast.success("Order updated");
-        await loadOrders();
-        return true;
+      if (res?.success) toast.success("order updated");
+      else toast.error("failed to update order");
+
+      if (typeof reloadOrders === "function") {
+        try {
+          await reloadOrders();
+        } catch (err) {
+          console.error("reload failed:", err?.message || err);
+        }
       }
+    } catch (err) {
+      console.error("Failed to update order", err?.message || err);
       toast.error("Failed to update order");
-      return false;
-    } catch (error) {
-      console.error("Failed to update order", error?.message || error);
-      toast.error("Failed to update order");
-      return false;
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -82,11 +113,12 @@ export default function OrdersClient({ initialOrder = {} }) {
   return (
     <div>
       {/* Desktop / large screens layout */}
-      <div className="flex flex-col justify-center lg:flex-row p-4">
-        <div className="flex w-full lg:w-1/2 p-2">
+      <div className="flex flex-col justify-center lg:flex-row">
+        <div className="flex w-full lg:w-2/3 p-2">
           <OrderList
             orders={order}
             loading={loading}
+            updating={updating}
             soid={selectedOrderId}
             onSelect={(id) => {
               setSelectedId(id);

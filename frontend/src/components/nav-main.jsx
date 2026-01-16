@@ -38,6 +38,7 @@ export function NavMain({ items }) {
                       ? "bg-primary-foreground text-primary dark:bg-primary-foreground/10 dark:text-primary"
                       : "text-gray-600 hover:bg-transparent dark:text-gray-400 dark:hover:bg-transparent"
                   }`}
+                   onClick={() => toggleMobileNav()}
                 >
                   <SidebarMenuButton
                     tooltip={item.title}
@@ -48,7 +49,7 @@ export function NavMain({ items }) {
                     }`}
                   >
                     {item.icon && <item.icon />}
-                    <span onClick={() => toggleMobileNav()}>{item.title}</span>
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>

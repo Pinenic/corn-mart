@@ -26,11 +26,13 @@ export default function SubcategorySelector({
   // ✅ reacts correctly when category changes
   useEffect(() => {
     setSubCats(category?.subcategories ?? []);
-  }, [category?.id]);
+    console.log(category?.subcategories)
+  }, [category?.id, category?.subcategories]);
 
   const handleCreate = () => {
     if (!newName.trim()) return;
 
+    console.log(newName);
     onCreate({
       name: newName,
       slug: generateSlug(newName),

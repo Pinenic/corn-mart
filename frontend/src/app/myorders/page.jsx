@@ -16,7 +16,7 @@ export default async function Page({ params }) {
   // }
 
   return (
-    <div>
+    <div className=" max-w-7xl mx-auto">
       {/* OrdersClient is a client component that manages interactivity and updates */}
       <h1 className="text-center text-2xl py-2 px-4">Orders</h1>
       <OrdersClient />

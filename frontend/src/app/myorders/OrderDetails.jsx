@@ -8,7 +8,12 @@ import OrderDetailsStoreSection from "./_components/OrderDetailsStoreSection";
 import ChatTab from "./_components/OrderChatTab";
 import OrderStatusTab from "./_components/OrderStatusTab";
 
-export default function OrderDetails({ orderId, handleUpdate, loading }) {
+export default function OrderDetails({
+  orderId,
+  handleUpdate,
+  loading,
+  updating,
+}) {
   const [orders, setOrder] = useState([]);
   const [fetching, setFetching] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -32,7 +37,7 @@ export default function OrderDetails({ orderId, handleUpdate, loading }) {
     }
   };
   useEffect(() => {
-    if(!orderId){
+    if (!orderId) {
       return;
     }
     fetchOrder();
@@ -63,6 +68,7 @@ export default function OrderDetails({ orderId, handleUpdate, loading }) {
                           storeOrder={sto}
                           key={sto.id}
                           handleUpdate={handleUpdate}
+                          updating={updating}
                           refresh={refreshOrder}
                         />
                       ))}
@@ -77,7 +83,9 @@ export default function OrderDetails({ orderId, handleUpdate, loading }) {
                 </TabsContent>
               </>
             ) : (
-              <p className="text-center p-4 text-muted-foreground">Select an order to view details</p>
+              <p className="text-center p-4 text-muted-foreground">
+                Select an order to view details
+              </p>
             )}
           </div>
         </Tabs>

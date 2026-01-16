@@ -268,8 +268,7 @@ export function Variants({ prodId, reload }) {
   return (
     <>
       <div className="flex justify-end mb-4">
-        <Button onClick={() => setIsOpen(true)}
-          disabled={(varis.length > 3)}>
+        <Button onClick={() => setIsOpen(true)} disabled={varis.length > 3}>
           <IconCirclePlusFilled />
           <span>Create</span>
         </Button>
@@ -366,8 +365,7 @@ export function Media({ prodId }) {
     setLoading(false);
   }
 
-    async function refreshData() {
-
+  async function refreshData() {
     const imgRes = await getProductImages(prodId);
     const varRes = await getAllVariants(prodId);
 

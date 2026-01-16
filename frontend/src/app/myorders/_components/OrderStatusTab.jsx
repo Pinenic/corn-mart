@@ -9,7 +9,7 @@ export default function OrderStatusTab({ orders }) {
         <div>
           {sto.history.length > 0 ? (
             <>
-              <p>{sto.stores.name}</p>
+              <p className="mb-2">{sto.stores.name}</p>
               <OrderStatusTimeline history={sto.history} />
             </>
           ) : (

@@ -1,11 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 
 export default function OrderDetailsStoreSection({
   storeOrder,
   handleUpdate,
+  updating,
   refresh,
 }) {
   const onButtonClick = async () => {
@@ -55,17 +57,17 @@ export default function OrderDetailsStoreSection({
           <p>Cancelled</p>
         ) : storeOrder.status == "shipped" ? (
           <Button
-            variant="info"
+            variant="outline"
             size="sm"
             onClick={() =>
               onButtonClick()
             }
           >
-            Confirm
+            {updating ? <Spinner /> : "Confirm"}
           </Button>
         ) : storeOrder.status == "delivered" ? (
           <p>Delivered</p>
-        ) : (
+        ) : storeOrder.status == "pending" ? (
           <Button
             variant="destructive"
             size="sm"
@@ -75,7 +77,7 @@ export default function OrderDetailsStoreSection({
           >
             Cancel
           </Button>
-        )}
+        ) : <p className="text-sm mt-1">Orders is being processed</p>}
         {/* <Button
           variant="destructive"
           size="sm"

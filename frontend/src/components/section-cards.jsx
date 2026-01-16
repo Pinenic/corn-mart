@@ -20,12 +20,19 @@ export function SectionCards({
   loading,
 }) {
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Revenue</CardDescription>
+          <CardDescription>Revenue</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            K{loading ? "0" : revenue}
+            
+            {loading ? (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
+              </div>
+            ) : (
+              <span>K {revenue}</span>
+            )}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -50,7 +57,7 @@ export function SectionCards({
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {loading ? (
               <div className="flex items-center gap-3 animate-pulse">
-                <div className="flex-1 h-4 w-8 bg-muted rounded" />
+                <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
               </div>
             ) : (
               customers?.length
@@ -77,7 +84,13 @@ export function SectionCards({
         <CardHeader>
           <CardDescription>Orders</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {loading ? "0" : orders?.length}
+            {loading ? (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
+              </div>
+            ) : (
+              orders?.length
+            )}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -98,7 +111,13 @@ export function SectionCards({
         <CardHeader>
           <CardDescription>Products</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {loading ? "0" : products?.length}
+            {loading ? (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
+              </div>
+            ) : (
+              products?.length
+            )}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">

@@ -20,13 +20,15 @@ export async function getStoreOrderDetails(orderId) {
 
 export async function updateStoreOrderStatus(
   storeOrderId,
-  { storeId, newStatus, metadata }
+  { storeId, action, actor_id, actorRole, metadata }
 ) {
   return fetchApi(`/api/orders/update/store-order/${storeOrderId}`, {
     method: "PUT",
     body: JSON.stringify({
       storeId,
-      newStatus,
+      action,
+      actor_id,
+      actorRole,
       metadata,
     }),
   });
@@ -56,7 +58,6 @@ export async function sendOrderMessage(orderId, userId, role, message) {
 }
 
 export async function sendOrderMessageImages(orderId, data) {
-  
   // const formData = new FormData();
   // formData.append("userId", userId);
   // formData.append("role", role)
