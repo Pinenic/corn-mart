@@ -8,6 +8,9 @@ import { useRouter } from "next/navigation";
 import { getStores } from "@/lib/storesApi";
 
 export default function StoresPage() {
+  useEffect(() => {
+    document.title = 'Stores | Corn Mart';
+  }, []);
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

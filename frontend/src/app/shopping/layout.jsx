@@ -19,17 +19,17 @@ export default function Layout({ children }) {
     <section className="flex flex-col lg:flex-row gap-4 max-w-7xl m-auto">
 
       {/* === MOBILE/TABLET DRAWER BUTTON === */}
-      <div className="flex justify-between lg:hidden px-3 pt-3">
+      <div className="flex justify-between lg:hidden px-3 pt-3 ">
         <BackButton />
-        <Sheet>
+        <Sheet className="w-72 p-0">
           <SheetTrigger asChild>
             <Button variant="outline" size="sm" className="flex">
               <Sidebar size={18} />
             </Button>
           </SheetTrigger>
 
-          <SheetContent side="left" className="w-64 p-0">
-            <div className="px-4">
+          <SheetContent side="left" className="w-68 p-0">
+            <div className="px-0 pt-6">
               <CategorySidebar />
             </div>
           </SheetContent>

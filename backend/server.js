@@ -7,6 +7,7 @@ import productRoutes from './routes/productRoutes.js';
 import storeRoutes from './routes/storeRoutes.js';
 import invetoryRoutes from './routes/inventoryRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
+import analyticsRoutes from './routes/analytics.routes.js'
 import marketplaceRoutes from './routes/marketplaceRoutes.js'
 import notificationRoutes from './routes/notificationsRoutes.js'
 // import checkoutRoute from './routes/checkout.js'
@@ -32,6 +33,7 @@ app.use('/api/stores', storeRoutes);
 // app.use('/api/payout', payoutRouter);
 app.use('/api/inventory', invetoryRoutes)
 app.use('/api/orders', orderRoutes);
+app.use("/api/analytics", analyticsRoutes)
 app.use('/api/marketplace', marketplaceRoutes)
 app.use('/api/notifications', notificationRoutes);
 

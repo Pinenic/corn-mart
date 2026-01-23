@@ -91,7 +91,7 @@ export async function getBuyerOrderDetails(orderId) {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "*,store_orders(*,stores(name, owner_id, logo), history:store_order_status_history(*), order_items(*, products(name, thumbnail_url), product_variants(name, price)))"
+      "*,store_orders(*,stores(name, owner_id, logo), history:store_order_status_history(*), order_items(*, products(name, thumbnail_url), product_variants(name, price, image:product_images(image_url))))"
     )
     .eq("id", orderId)
     .single();

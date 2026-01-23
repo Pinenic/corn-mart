@@ -10,6 +10,9 @@ import { useStoreStore } from "@/store/useStore";
 import { SiteHeader } from "@/components/site-header";
 
 export default function Page() {
+  useEffect(() => {
+    document.title = 'Store Orders | Corn Mart';
+  }, []);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +39,7 @@ export default function Page() {
   }, [storeId]);
 
   return (
-    <div>
+    <div className="space-y-6">
       <SiteHeader title={"Orders"} storeId={storeId} />
       <OrdersOverview orders={orders} loading={loading} />
       <OrdersTable orders={orders} loading={loading} />

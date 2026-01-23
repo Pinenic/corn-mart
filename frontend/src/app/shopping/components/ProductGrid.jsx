@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Search, LayoutDashboard, List } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useInView } from "react-intersection-observer";
 // import data from "./data.json";
 import ProductCard from "./ProductCard";
@@ -24,6 +24,19 @@ const Categories = [
   "Industrial",
   "Toys & Games",
 ];
+const SORT_OPTIONS = [
+  {
+    key: "price_asc",
+    label: "Price: Low → High",
+  },
+  {
+    key: "price_desc",
+    label: "Price: High → Low",
+  },
+  // future
+  // { key: "newest", label: "Newest" },
+  // { key: "popular", label: "Most Popular" },
+];
 
 export default function ProductGrid({ initialProducts, loading, title }) {
   const { ref, inView } = useInView();
@@ -32,6 +45,25 @@ export default function ProductGrid({ initialProducts, loading, title }) {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [sort, setSort] = useState(null);
+
+  const sortedProducts = useMemo(() => {
+    if (!sort) return products;
+
+    const sorted = [...products];
+
+    if (sort === "price_asc") {
+      sorted.sort((a, b) => a.price - b.price);
+    }
+
+    if (sort === "price_desc") {
+      sorted.sort((a, b) => b.price - a.price);
+    }
+
+    console.log(sorted)
+
+    return sorted;
+  }, [products, sort]);
 
   const views = [
     { name: "List", icon: <List /> },
@@ -43,7 +75,7 @@ export default function ProductGrid({ initialProducts, loading, title }) {
 
     try {
       setLoadingMore(true);
-      const res = await getAllProducts(page + 1-1);
+      const res = await getAllProducts(page + 1 - 1);
 
       setProducts((prev) => [...prev, ...res.data.productsWithlocation]);
       setPage((prev) => prev + 1);
@@ -60,20 +92,36 @@ export default function ProductGrid({ initialProducts, loading, title }) {
       <main className="w-full">
         {/* Header */}
         <div className="flex justify-between px-3 mt-5">
-          {title ? <h2>{title}</h2> : (<div className="hidden"> <AutoBreadcrumb /></div>)}
+          {title ? (
+            <h2>{title}</h2>
+          ) : (
+            <div className="hidden">
+              {" "}
+              <AutoBreadcrumb />
+            </div>
+          )}
 
           <div className="flex w-full md:w-fit gap-4 justify-between md:justify-start">
             {/* Sort Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <span>Sort</span>
-                  <ChevronDown />
+                <Button variant="outline" size="sm" className="flex gap-1">
+                  <span>
+                    {SORT_OPTIONS.find((o) => o.key === sort)?.label ?? "Sort"}
+                  </span>
+                  <ChevronDown className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {Categories.map((cat) => (
-                  <DropdownMenuItem key={cat}>{cat}</DropdownMenuItem>
+
+              <DropdownMenuContent align="end">
+                {SORT_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.key}
+                    onClick={() => setSort(option.key)}
+                    className={sort === option.key ? "font-medium" : ""}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -109,30 +157,34 @@ export default function ProductGrid({ initialProducts, loading, title }) {
           }
         >
           {/* Initial Page Loading */}
-          {loading ? (
-            [...Array(8)].map((_, i) => <SkeletonProductCard key={i} />)
-          ) : (
-            products.map((product) => (
-              <ProductCard key={product.id} product={product} view={view} />
-            ))
-          )}
+          {loading
+            ? [...Array(8)].map((_, i) => <SkeletonProductCard key={i} />)
+            : sortedProducts.map((product) => (
+                <ProductCard key={product.id} product={product} view={view} />
+              ))}
 
           {/* Skeleton Loader for Loading More */}
           {loadingMore &&
-            [...Array(4)].map((_, i) => <SkeletonProductCard key={`sk-${i}`} />)}
+            [...Array(4)].map((_, i) => (
+              <SkeletonProductCard key={`sk-${i}`} />
+            ))}
         </div>
 
         {/* Load More / No More Message */}
         <div className="flex w-full justify-center mt-4" ref={ref}>
-          {!loading && !loadingMore && products.length > 0 && inView && hasMore && (
-            <Button
-              onClick={fetchMoreProducts}
-              variant="outline"
-              className="mt-2 mb-2"
-            >
-              Load More
-            </Button>
-          )}
+          {!loading &&
+            !loadingMore &&
+            products.length > 0 &&
+            inView &&
+            hasMore && (
+              <Button
+                onClick={fetchMoreProducts}
+                variant="outline"
+                className="mt-2 mb-2"
+              >
+                Load More
+              </Button>
+            )}
 
           {!hasMore && (
             <p className="text-gray-500 mt-2 text-sm">
@@ -156,4 +208,3 @@ export function SkeletonProductCard() {
     </div>
   );
 }
-

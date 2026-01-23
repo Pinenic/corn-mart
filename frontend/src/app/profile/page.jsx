@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthStore } from "@/store/useAuthStore";
 import ProfileForm from "@/components/profile/ProfileForm";
@@ -7,6 +8,9 @@ import PreferencesForm from "@/components/profile/PreferencesForm";
 import { useProfile } from "@/store/useProfile";
 
 export default function ProfilePage() {
+  useEffect(() => {
+    document.title = 'Profile | Corn Mart';
+  }, []);
   const { user } = useAuthStore();
   const { profile } = useProfile();
 

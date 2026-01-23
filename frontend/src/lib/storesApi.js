@@ -88,6 +88,18 @@ export async function updatePreferences(storeId, data) {
   });
 }
 
+// STORE ANALYTICS
+
+export default function getStoreAnalytics(storeId, start, end) {
+  return fetchApi(`/api/analytics/${storeId}`, {
+    method: "POST",
+    body: JSON.stringify({
+      start_date: start,
+      end_date: end,
+    }),
+  });
+}
+
 // helper formdata builder function
 
 export function buildLocationFormData(data) {

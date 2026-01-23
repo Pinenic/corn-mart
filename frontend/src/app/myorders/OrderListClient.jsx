@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import OrderCard from "./_components/OrderCard";
 import { useEffect, useState } from "react";
-import { CategoryTabs } from "@/components/store/CategoryTabs";
+// import { CategoryTabs } from "@/components/store/CategoryTabs";
 import { StatusTabs } from "./_components/StatusTabs";
 
 export default function OrderList({ orders = [], loading, soid, onSelect }) {
