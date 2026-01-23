@@ -1,4 +1,8 @@
-// app/checkout/page.js
+export const metadata = {
+  title: 'Checkout | Corn Mart',
+  description: 'Complete your purchase on Corn Mart.',
+};
+
 import BackButton from "@/components/BackButton";
 import CheckoutContent from "./CheckoutContent";
 

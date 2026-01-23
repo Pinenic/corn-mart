@@ -18,6 +18,10 @@ import { useProfile } from "@/store/useProfile";
 import { getCategories } from "@/lib/marketplaceApi";
 import SubcategorySelector from "../components/SubcategorySelector";
 import { useStoreStore } from "@/store/useStore";
+
+const setPageTitle = () => {
+  document.title = 'Add New Product | Corn Mart';
+};
 import ImageDropzone from "../components/ImageDropzone";
 import { useRouter } from "next/navigation";
 

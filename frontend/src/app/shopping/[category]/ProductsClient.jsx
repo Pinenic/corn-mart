@@ -27,12 +27,45 @@ const Categories = [
   "Toys & Games",
 ];
 
+const SORT_OPTIONS = [
+  {
+    key: "price_asc",
+    label: "Price: Low → High",
+  },
+  {
+    key: "price_desc",
+    label: "Price: High → Low",
+  },
+  // future
+  // { key: "newest", label: "Newest" },
+  // { key: "popular", label: "Most Popular" },
+];
+
 export default function ProductsClient({ initialProducts = [], category }) {
   const [products, setProducts] = useState(initialProducts || []);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState("Grid");
-  const [page, setPage] = useState(1);
-  const totalPages = 10;
+  // const [page, setPage] = useState(1);
+  // const totalPages = 10;
+  const [sort, setSort] = useState(null);
+
+  const sortedProducts = useMemo(() => {
+    if (!sort) return products;
+
+    const sorted = [...products];
+
+    if (sort === "price_asc") {
+      sorted.sort((a, b) => a.price - b.price);
+    }
+
+    if (sort === "price_desc") {
+      sorted.sort((a, b) => b.price - a.price);
+    }
+
+    console.log(sorted);
+
+    return sorted;
+  }, [products, sort]);
 
   useEffect(() => {
     // If server returned nothing, try fetching on client (network fallback)
@@ -68,16 +101,26 @@ export default function ProductsClient({ initialProducts = [], category }) {
     <>
       <main className="w-full">
         <div className="flex gap-4 px-3 mt-4">
+          {/* Sort Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant={"outline"} size={"sm"}>
-                <span>Sort</span>
-                <ChevronDown />
+              <Button variant="outline" size="sm" className="flex gap-1">
+                <span>
+                  {SORT_OPTIONS.find((o) => o.key === sort)?.label ?? "Sort"}
+                </span>
+                <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {Categories.map((cat) => (
-                <DropdownMenuItem key={cat}>{cat}</DropdownMenuItem>
+
+            <DropdownMenuContent align="end">
+              {SORT_OPTIONS.map((option) => (
+                <DropdownMenuItem
+                  key={option.key}
+                  onClick={() => setSort(option.key)}
+                  className={sort === option.key ? "font-medium" : ""}
+                >
+                  {option.label}
+                </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -116,8 +159,10 @@ export default function ProductsClient({ initialProducts = [], category }) {
                 <Spinner className="size-8 text-blue-500" />
               </div>
             </>
-          ) : products.length == 0 ? <p> No products yet </p> : (
-            products.map((product) => (
+          ) : products.length == 0 ? (
+            <p> No products yet </p>
+          ) : (
+            sortedProducts.map((product) => (
               <div key={product.id}>
                 <ProductCard product={product} view={view} />
               </div>

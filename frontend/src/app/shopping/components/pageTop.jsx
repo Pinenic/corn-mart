@@ -38,7 +38,7 @@ export default function PageTop({ Categories, setLoading, onResults }) {
       <div className="hidden lg:inline py-2">
         <AutoBreadcrumb />
       </div>
-      <MegaMenuCategories categories={Categories} />
+      {/* <MegaMenuCategories categories={Categories} /> */}
 
       <SearchBar onQuery={search} onSearch={handleSearch} />
     </div>

@@ -1,3 +1,8 @@
+export const metadata = {
+  title: 'My Orders | Corn Mart',
+  description: 'View and track your orders on Corn Mart.',
+};
+
 import OrdersClient from "./OrdersClient";
 import { getBuyerOrder, getStoreOrderDetails } from "@/lib/ordersApi";
 import data from './data.json';

@@ -1,7 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function CreateStoreForm() {
+  useEffect(() => {
+    document.title = 'Create Store | Corn Mart';
+  }, []);
   const [formData, setFormData] = useState({
     name: "",
     description: "",

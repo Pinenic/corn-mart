@@ -1,6 +1,7 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { formatNumber } from "@/utils/numberFormatter";
 
 //Stat helper funtion
 function getStoreOrderStats(orders) {
@@ -77,7 +78,7 @@ export default function OrdersOverview({ orders, loading }) {
               <div className="flex items-center gap-3 animate-pulse">
                 <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
               </div>
-            )  : <span>K {stats.potentialPayout}</span>}
+            )  : <span>K {formatNumber(stats.potentialPayout)}</span>}
             </h3>
           </div>
         </div>

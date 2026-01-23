@@ -11,7 +11,7 @@ export default function OrderDetailsStoreSection({
   refresh,
 }) {
   const onButtonClick = async () => {
-   await handleUpdate(storeOrder.id, storeOrder.store_id, storeOrder.status);
+    await handleUpdate(storeOrder.id, storeOrder.store_id, storeOrder.status);
     refresh();
   };
   return (
@@ -24,7 +24,7 @@ export default function OrderDetailsStoreSection({
           <div key={item.id} className="flex items-center gap-4 border-b pb-3">
             {item.products?.thumbnail_url && (
               <Image
-                src={item.products.thumbnail_url}
+                src={item.product_variants.image[0]?.image_url || item.products.thumbnail_url}
                 width={70}
                 height={70}
                 alt={item.products?.name ?? "product"}
@@ -56,13 +56,7 @@ export default function OrderDetailsStoreSection({
         {storeOrder.status == "cancelled" ? (
           <p>Cancelled</p>
         ) : storeOrder.status == "shipped" ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onButtonClick()
-            }
-          >
+          <Button variant="outline" size="sm" onClick={() => onButtonClick()}>
             {updating ? <Spinner /> : "Confirm"}
           </Button>
         ) : storeOrder.status == "delivered" ? (
@@ -71,13 +65,13 @@ export default function OrderDetailsStoreSection({
           <Button
             variant="destructive"
             size="sm"
-            onClick={() =>
-              onButtonClick()
-            }
+            onClick={() => onButtonClick()}
           >
             Cancel
           </Button>
-        ) : <p className="text-sm mt-1">Orders is being processed</p>}
+        ) : (
+          <p className="text-sm mt-1">Orders is being processed</p>
+        )}
         {/* <Button
           variant="destructive"
           size="sm"

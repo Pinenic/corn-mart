@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import ProductQuickViewModal from "../products/ProductQuickVeiwModal";
+import { formatNumber } from "@/utils/numberFormatter";
 
 export function ProductGrid({ products }) {
   const [open, setOpen] = useState(false);
@@ -57,7 +58,7 @@ export function ProductGrid({ products }) {
               {/* Product Info */}
               <div className="p-3">
                 <h3 className="text-sm font-medium">{p.name}</h3>
-                <p className="text-primary font-semibold mt-1">K{p.price}</p>
+                <p className="text-primary font-semibold mt-1">K{formatNumber(p.price)}</p>
               </div>
 
               {/* Mobile Add to Cart */}

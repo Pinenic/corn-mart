@@ -17,6 +17,9 @@ import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 
 export default function Page() {
+  useEffect(() => {
+    document.title = 'Store Settings | Corn Mart';
+  }, []);
   const { profile } = useProfile();
   const { store, loading, fetchStore } = useStoreStore();
   const [updating, setUpdating] = useState(false);
@@ -90,7 +93,7 @@ export default function Page() {
   return (
     <>
     <SiteHeader title={"Settings"} storeId={store?.id} />
-      <div className="max-w-full mx-auto px-4 py-10">
+      <div className="max-w-full mx-auto">
         {/* <h1 className="text-3xl font-bold text-muted-foreground mb-6">
           Settings
         </h1> */}

@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import AuthForm from "@/components/auth/AuthForm";
 import { createUserFolder } from "@/app/actions/signupAction";
@@ -10,6 +11,9 @@ import LoadingOverlay from "@/components/loading-overlay";
 import RedirectIfAuthed from "@/components/auth/RedirectIfAuthed";
 
 export default function SignupPage() {
+  useEffect(() => {
+    document.title = 'Sign Up | Corn Mart';
+  }, []);
   const { signUp, signIn } = useAuthStore();
   const [userLoading, setLoading] = useState(false);
   const router = useRouter();

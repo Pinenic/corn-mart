@@ -1,10 +1,14 @@
 "use client";
+import { useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import AuthForm from "@/components/auth/AuthForm";
 import { useRouter } from "next/navigation";
 import RedirectIfAuthed from "@/components/auth/RedirectIfAuthed";
 
 export default function LoginPage() {
+  useEffect(() => {
+    document.title = 'Login | Corn Mart';
+  }, []);
   const { signIn } = useAuthStore();
   const router = useRouter();
 

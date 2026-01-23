@@ -11,7 +11,7 @@ import {
 
 export default function MegaMenuCategories({ categories = [] }) {
   return (
-    <NavigationMenu className="w-full hidden md:block lg:hidden">
+    <NavigationMenu className="w-full md:block ">
       <NavigationMenuList className="w-full">
         <NavigationMenuItem className="w-full">
           {/* Trigger Button */}

@@ -2,6 +2,16 @@ import { AutoBreadcrumb } from "../components/AutoBreadcrumb";
 import ProductsClient from "./ProductsClient";
 import { getProductsByCategory } from "@/lib/marketplaceApi";
 
+export async function generateMetadata({ params }) {
+  const { category } = params || {};
+  const decodedCategory = category.charAt(0).toUpperCase() +
+          decodeURIComponent(category.slice(1).replace(/-/g, " "));
+  return {
+    title: `${decodedCategory} | Corn Mart`,
+    description: `Browse ${decodedCategory} products on Corn Mart marketplace.`,
+  };
+}
+
 export default async function Page({ params }) {
   const { category } = params || {};
   let products = [];
@@ -17,7 +27,7 @@ export default async function Page({ params }) {
   return (
     <div className="flex">
       <main className="w-full">
-        <div className="flex justify-between px-3 mt-5">
+        <div className="flex justify-between px-3 md:mt-5">
           <AutoBreadcrumb />
           {/* Sorting / view controls moved to client component to avoid client bundle for initial render */}
           <div className="flex gap-4" />

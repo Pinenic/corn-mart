@@ -9,6 +9,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Search, LayoutDashboard, List } from "lucide-react";
 import { useEffect, useState } from "react";
+
+const setPageTitle = () => {
+  document.title = 'Shop by Subcategory | Corn Mart';
+};
 // import data from "./data.json";
 import ProductCard from "../../components/ProductCard";
 // import {
@@ -83,7 +87,7 @@ export default function Page() {
   return (
     <div className="flex">
       <main className="w-full">
-        <div className="flex flex-col md:flex-row justify-between px-3 mt-5">
+        <div className="flex flex-col md:flex-row justify-between px-3 md:mt-5">
           <AutoBreadcrumb />
           <div className="flex gap-4 mt-2 md:mt-0 w-full md:w-fit justify-between md:justify-start">
             <DropdownMenu>

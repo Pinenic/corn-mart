@@ -45,7 +45,7 @@ export default function OrderDetails({ order = {}, loading = false }) {
             </table>
             <div className="flex mt-8 justify-end">
               <div className="flex flex-col space-y-1 w-56">
-                <h2 className="text-sm text-black flex">Order summary</h2>
+                <h2 className="text-md font-medium text-text flex">Order summary</h2>
                 <p className="text-sm text-muted-foreground flex justify-between mt-2">Sub Total <span>K{order.subtotal}</span></p>
                 <p className="text-sm text-muted-foreground flex justify-between mb-2">Platfor fee(5%)<span>-K{order.platform_fee}</span></p>
                 <p className="font-medium flex justify-between">Total<span>K{order.subtotal - order.platform_fee}</span></p>

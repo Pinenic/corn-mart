@@ -7,6 +7,9 @@ import { getBuyerNotifications, readAll, readOne } from "@/lib/notificationsApi"
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function NotificationsPage() {
+  useEffect(() => {
+    document.title = 'Notifications | Corn Mart';
+  }, []);
   const [notifications, setNotifications] = useState([]);
   const { init, user } = useAuthStore();
   const userId = user?.id;

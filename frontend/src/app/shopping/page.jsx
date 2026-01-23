@@ -22,6 +22,9 @@ try {
 }
 
 export default function Page() {
+  useEffect(() => {
+    document.title = "Shop | Corn Mart";
+  }, []);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchResults, setResults] = useState([]);

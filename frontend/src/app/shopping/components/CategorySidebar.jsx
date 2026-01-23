@@ -1,6 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Accordion,
   AccordionItem,
@@ -12,6 +17,7 @@ import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getCategories, getSingleCategoryWP } from "@/lib/marketplaceApi";
+import CategoryNav from "./CategoryNav";
 
 export default function CategorySidebar() {
   const { category } = useParams();
@@ -43,7 +49,11 @@ export default function CategorySidebar() {
   return (
     <div className="p-4 space-y-4">
       {category ? (
-        <CategoryLevelSidebar category={category} subcats={subcategories} />
+        <CategoryLevelSidebar
+          category={category}
+          subcats={subcategories}
+          categories={categories}
+        />
       ) : (
         <TopLevelSidebar categories={categories} loading={loading} />
       )}
@@ -53,7 +63,7 @@ export default function CategorySidebar() {
 
 function TopLevelSidebar({ categories, loading }) {
   return (
-    <div className=" w-fit pr-4">
+    <div className=" w-full pr-4">
       <h2 className="text-lg font-semibold mb-3">Shop By Category</h2>
       {loading && (
         <div className="flex flex-col gap-3 mt-3">
@@ -65,62 +75,142 @@ function TopLevelSidebar({ categories, loading }) {
         </div>
       )}
 
-      <div className=" w-fit pr-4">
+      <div className="p-2 rounded-xl">
         {categories.map((cat, i) => (
-          <div key={i} className="mb-4">
-            <Link
-              href={`/shopping/${cat.slug}`}
-              className="font-medium text-sm mb-2"
-            >
-              {cat.name}
-            </Link>
-            <div className="flex flex-col gap-1 pl-2">
-              {cat.subcategories.map((s, j) => (
+          <Accordion type="single" collapsible defaultValue="item-1" key={i}>
+            <AccordionItem value="item-1">
+              <AccordionTrigger className={`p-1`}>
                 <Link
-                  key={j}
-                  href={`/shopping/${cat.slug}/${s.slug}`}
-                  className="text-sm text-muted-foreground hover:text-foreground transition"
+                  href={`/shopping/${cat.slug}`}
+                  className="font-medium text-sm mb-2"
+                  onClick={() => SheetClose()}
                 >
-                  {s.name}
+                  {cat.name}
                 </Link>
-              ))}
-            </div>
-          </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-1 pl-2">
+                  {cat.subcategories.map((s, j) => (
+                    <Link
+                      key={j}
+                      href={`/shopping/${cat.slug}/${s.slug}`}
+                      className="text-sm text-muted-foreground hover:text-foreground transition"
+                      onClick={() => SheetClose()}
+                    >
+                      {s.name}
+                    </Link>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         ))}
       </div>
     </div>
   );
 }
 
-function CategoryLevelSidebar({ category, subcats }) {
+function CategoryLevelSidebar({ category, subcats, categories }) {
   const [subcategories, setSubs] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const currentCategorySlug = decodeURIComponent(category);
+
+  const filteredCategories = categories?.filter(
+    (cat) => cat.slug !== currentCategorySlug
+  );
+
   const getSubs = async () => {
-    const res = await getSingleCategoryWP(decodeURIComponent(category));
-    setSubs(res.data[0].subcategories);
+    try {
+      setLoading(true);
+      const res = await getSingleCategoryWP(decodeURIComponent(category));
+      setSubs(res.data[0].subcategories);
+      setLoading(false);
+    } catch (error) {
+      setSubs([])
+      console.error(error);
+    }
   };
   useEffect(() => {
     getSubs();
-  }, []);
+  }, [category]);
   return (
-    <div className=" w-64 pr-4">
-      <h2>
-        {category.charAt(0).toUpperCase() +
-          decodeURIComponent(category.slice(1).replace(/-/g, " "))}
-      </h2>
+    <div className=" w-64 pr-4 space-y-2 ">
+      <div className="bg-card p-2 rounded-xl">
+        <h2 className="text-lg font-semibold mb-3">
+          {category?.charAt(0).toUpperCase() +
+            decodeURIComponent(category.slice(1).replace(/-/g, " "))}
+        </h2>
 
-      <div className=" w-64 pr-4">
-        <div className="flex flex-col gap-1 pl-2">
-          {subcategories.map((s, j) => (
-            <Link
-              key={j}
-              href={`/shopping/${category}/${s.slug}`}
-              className="text-sm text-muted-foreground hover:text-foreground transition"
-            >
-              {s.name}
-            </Link>
-          ))}
+        <div className=" w-64 pr-4">
+          {loading ? (
+            <div className="flex flex-col gap-3 mt-3">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center w-32 gap-3 animate-pulse"
+                >
+                  <div className="flex-1 h-3 w-40 bg-muted rounded" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 pl-2">
+              {subcategories?.map((s, j) => (
+                <Link
+                  key={j}
+                  href={`/shopping/${category}/${s.slug}`}
+                  className="text-sm text-muted-foreground hover:text-foreground transition"
+                  onClick={() => SheetClose()}
+                >
+                  {s.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      <div className="border p-2 rounded-xl">
+        <Accordion type="single" collapsible >
+          <AccordionItem value="item-1">
+            <AccordionTrigger>More Categories</AccordionTrigger>
+            <AccordionContent>
+              {filteredCategories?.map((cat, i) => (
+                <Accordion type="single" collapsible key={i}>
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger className={`p-1`}>
+                      <Link
+                        href={`/shopping/${cat.slug}`}
+                        className="font-medium text-sm mb-2"
+                        onClick={() => SheetClose()}
+                      >
+                        {cat.name}
+                      </Link>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex flex-col gap-1 pl-2">
+                        {cat.subcategories.map((s, j) => (
+                          <Link
+                            key={j}
+                            href={`/shopping/${cat.slug}/${s.slug}`}
+                            className="text-sm text-muted-foreground hover:text-foreground transition"
+                            onClick={() => SheetClose()}
+                          >
+                            {s.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+
+      {/* <CategoryNav categories={categories}/> */}
     </div>
   );
 }

@@ -18,6 +18,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 // import { useProfile } from "@/store/useProfile";
 import { useStoreStore } from "@/store/useStore";
+
+const setPageTitle = () => {
+  document.title = 'Store Inventory | Corn Mart';
+};
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,7 +99,7 @@ export default function ProductsPage() {
   return (
     <>
     <SiteHeader title={"Inventory"} storeId={storeId}/>
-      <div className="h-[calc(80vh-5rem)] p-4">
+      <div className="w-full overflow-auto">
         <div className="flex justify-between mb-3">
           <Link href={"/store/dashboard/inventory/new"}>
             <Button>

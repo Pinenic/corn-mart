@@ -1,3 +1,8 @@
+export const metadata = {
+  title: 'Shopping Cart | Corn Mart',
+  description: 'Review your shopping cart and proceed to checkout.',
+};
+
 import CartClient from './CartClient';
 
 export default function Page() {

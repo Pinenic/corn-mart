@@ -10,7 +10,7 @@ export default function BackButton({ label = "Back" }) {
   return (
     <div className="md:hidden mb-3">
       <Button
-        variant="ghost"
+        variant="outline"
         className="flex items-center gap-2 p-0"
         onClick={() => router.back()}
       >

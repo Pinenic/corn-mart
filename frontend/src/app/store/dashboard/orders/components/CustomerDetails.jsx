@@ -18,7 +18,7 @@ export default function CustomerDetails({ customer = {}, loading = false }) {
           </div>
         ) : (
           <div className="flex flex-col">
-            <p className="flex justify-between text-muted-foreground ">Name <span> {customer?.full_name || "name"}</span></p>
+            <p className="flex justify-between text-muted-foreground capitalize">Name <span> {customer?.full_name || "name"}</span></p>
             <p className="flex justify-between text-muted-foreground ">email <span> {customer?.email || "email@email.com"}</span></p>
           </div>
         )}

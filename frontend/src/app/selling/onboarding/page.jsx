@@ -18,6 +18,10 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function StoreOnboarding() {
+  useEffect(() => {
+    document.title = 'Seller Onboarding | Corn Mart';
+  }, []);
+  
   const [step, setStep] = useState(1);
   const totalSteps = 3;
   const [loading, setLoading] = useState(false);

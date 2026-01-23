@@ -10,6 +10,9 @@ import { useParams } from "next/navigation";
 import { getFollowerCount, getStoreById } from "@/lib/storesApi";
 
 export default function StorePage({ params }) {
+  useEffect(() => {
+    document.title = "Store | Corn Mart";
+  }, []);
   const { storeId } = useParams();
   const [stores, setStores] = useState([]);
   const [storeLoc, setStoreLoc] = useState(null);
@@ -87,7 +90,9 @@ export default function StorePage({ params }) {
       "Welcome to Mika’s Cakery! We bake with love and passion — from cupcakes to celebration cakes.",
     followers: count,
     productsCount: stores.products?.length,
-    location: `${storeLoc?.city || "lusaka"}, ${storeLoc?.province || "lusaka"}`,
+    location: `${storeLoc?.city || "lusaka"}, ${
+      storeLoc?.province || "lusaka"
+    }`,
     rating: 4.9,
     joined: stores.created_at,
   };
@@ -95,7 +100,11 @@ export default function StorePage({ params }) {
   return (
     <div className="min-h-screen max-w-7xl mx-auto">
       {/* Store header */}
-      <StoreHeader store={store} storeLoc={stores?.location} refresh={refreshStore} />
+      <StoreHeader
+        store={store}
+        storeLoc={stores?.location}
+        refresh={refreshStore}
+      />
 
       {/* Category tabs */}
       <div className="sticky top-[54px] z-40">

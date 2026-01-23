@@ -36,12 +36,15 @@ export function ProductImages({ images }) {
             key={img.id}
             onClick={() => setActiveImage(img.image_url)}
             className={`relative w-20 h-20 rounded-md overflow-hidden border ${
-              activeImage === img.image_url
-                ? "ring-2 ring-primary"
-                : ""
+              activeImage === img.image_url ? "ring-2 ring-primary" : ""
             }`}
           >
-            <Image src={img.image_url} alt="thumb" fill className="object-cover" />
+            <Image
+              src={img.image_url}
+              alt="thumb"
+              fill
+              className="object-cover"
+            />
           </button>
         ))}
       </div>

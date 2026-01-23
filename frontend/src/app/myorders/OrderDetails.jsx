@@ -24,6 +24,7 @@ export default function OrderDetails({
       const res = await getBuyerOrderDetails(orderId);
       setOrder(res.store_orders);
       setFetching(false);
+      console.log(res.store_orders);
     } catch (error) {
       console.error(error);
     }

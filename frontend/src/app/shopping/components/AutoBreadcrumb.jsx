@@ -23,16 +23,16 @@ export function AutoBreadcrumb() {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbItem>
+        {/* <BreadcrumbItem>
           <BreadcrumbLink href="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
+        </BreadcrumbItem> */}
 
         {paths.map((p, i) => (
           <div key={i} className="flex gap-2 items-center">
-            <BreadcrumbSeparator />
             <BreadcrumbItem key={p.href}>
               <BreadcrumbLink href={p.href}>{p.label}</BreadcrumbLink>
             </BreadcrumbItem>
+            {i !== (paths.length - 1) ? <BreadcrumbSeparator /> : <p></p>}
           </div>
         ))}
       </BreadcrumbList>

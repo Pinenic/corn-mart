@@ -1,10 +1,14 @@
 "use client";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 export default function Page() {
+  useEffect(() => {
+    document.title = 'Order Successful | Corn Mart';
+  }, []);
   return (
     <div className="flex justify-center border h-[90vh] my-auto ">
       <div className="flex flex-col gap-8 my-auto">

@@ -105,6 +105,9 @@ function OrdersTable({ orders, loading }) {
 }
 
 export default function Page() {
+  useEffect(() => {
+    document.title = 'Store Dashboard | Corn Mart';
+  }, []);
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -176,7 +179,7 @@ export default function Page() {
     <SiteHeader title={"Overview"} storeId={storeId} />
       <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
-          <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          <div className="flex flex-col gap-4 sm:gap-6">
             <SectionCards
               revenue={revenue}
               customers={customers}

@@ -151,7 +151,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <nav className="md:hidden bg-background/90 border-t border-chart-1">
+        <nav className="flex justify-center md:hidden bg-background/90 border-t border-chart-1">
           {navLinks.map((link) => (
             <Link
               key={link.name}
