@@ -1,4 +1,4 @@
-const ranges = ["24h", "7d", "30d", "This Month"];
+const ranges = ["24h", "7d", "30d", "3m"];
 
 export function DateRangeSelector({ value, onChange }) {
   return (
