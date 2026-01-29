@@ -4,13 +4,13 @@ import NotificationCard from "@/components/notifications/NotificationCard";
 import { Button } from "@/components/ui/button";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import {
-  getBuyerNotifications,
+  getSellerNotifications,
   readAll,
   readOne,
 } from "@/lib/notificationsApi";
 import { useAuthStore } from "@/store/useAuthStore";
 
-export default function NotificationsPage() {
+export default function Page() {
   useEffect(() => {
     document.title = "Notifications | Corn Mart";
   }, []);
@@ -24,7 +24,7 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     try {
       setFetching(true);
-      const data = await getBuyerNotifications(userId);
+      const data = await getSellerNotifications(userId);
       setNotificationz(data);
       setFetching(false);
     } catch (error) {
@@ -34,7 +34,7 @@ export default function NotificationsPage() {
 
   const refreshNotifications = async () => {
     try {
-      const data = await getBuyerNotifications(userId);
+      const data = await getSellerNotifications(userId);
       setNotificationz(data);
     } catch (error) {
       console.error(error);

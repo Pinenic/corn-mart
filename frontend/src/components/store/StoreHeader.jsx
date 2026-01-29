@@ -1,20 +1,23 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import StoreInfoCard from "./StoreInfoCard";
 import FollowButton from "./FollowButton";
 import { useEffect, useState } from "react";
+import ShareButton from "./ShareButton";
+import { usePathname } from "next/navigation";
 
 export function StoreHeader({ store, storeLoc, refresh }) {
-  const [storeData, setStoreData] = useState({})
+  const [storeData, setStoreData] = useState({});
+  const pathname = usePathname();
 
-  useEffect(()=>{
-    if(!store.id){
-      return
+  useEffect(() => {
+    if (!store.id) {
+      return;
     }
-    setStoreData(store)
-  },[store])
+    setStoreData(store);
+  }, [store]);
   return (
     <div className="relative h-72 lg:h-96 flex flex-col justify-end">
       <div
@@ -29,13 +32,12 @@ export function StoreHeader({ store, storeLoc, refresh }) {
         </Avatar>
         <div className="flex-1">
           <div className="flex-1">
-            <h1 className="md:text-2xl font-semibold ">
-              {storeData.name}
-            </h1>
+            <h1 className="md:text-2xl font-semibold ">{storeData.name}</h1>
           </div>
           <div>
             <p className="text-xs md:text-sm">
-              {storeData.followers} followers · {storeData.productsCount} products
+              {storeData.followers} followers · {storeData.productsCount}{" "}
+              products
             </p>
           </div>
           <p className="hidden md:flex text-xs lg:text-sm leading-relaxed">
@@ -44,24 +46,33 @@ export function StoreHeader({ store, storeLoc, refresh }) {
           </p>
           <div className="hidden md:flex flex flex-wrap gap-4 text-xs lg:text-sm mt-1">
             <p>
-              <span className="font-medium text-muted-foreground">Location:</span>{" "}
+              <span className="font-medium text-muted-foreground">
+                Location:
+              </span>{" "}
               {storeData.location || "Unknown"}
             </p>
             <p>
-              <span className="font-medium  text-muted-foreground">Rating:</span> ⭐{" "}
-              {storeData.rating || "4.8"} / 5
+              <span className="font-medium  text-muted-foreground">
+                Rating:
+              </span>{" "}
+              ⭐ {storeData.rating || "4.8"} / 5
             </p>
             <p>
-              <span className="font-medium  text-muted-foreground">Joined:</span>{" "}
+              <span className="font-medium  text-muted-foreground">
+                Joined:
+              </span>{" "}
               {new Date(storeData.joined).toLocaleDateString("en-GB", {
-                        // day: "2-digit",
-                        // month: "short",
-                        year: "numeric",
-                      })}
+                // day: "2-digit",
+                // month: "short",
+                year: "numeric",
+              })}
             </p>
           </div>
         </div>
-        <FollowButton storeId={storeData.id} refresh={refresh}/>
+        <div className="flex flex-col md:flex-row gap-2">
+          <FollowButton storeId={storeData.id} refresh={refresh} />
+          <ShareButton url={window.location.origin + pathname}/>
+        </div>
       </div>
     </div>
   );

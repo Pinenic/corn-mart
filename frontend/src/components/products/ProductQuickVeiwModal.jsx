@@ -7,17 +7,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import { getProductById } from "@/lib/marketplaceApi";
 import ProductControls from "@/app/shopping/product/[slugAndId]/_components/ProductControls";
+
+/* ---------------------------------- */
+/* Product Images */
+/* ---------------------------------- */
 
 function ProductImages({ images }) {
   const [activeImage, setActiveImage] = useState(
     images?.[0]?.image_url || null
   );
 
-  // 👇 Reset image when variant/images change
   useEffect(() => {
     setActiveImage(images?.[0]?.image_url || null);
   }, [images]);
@@ -42,61 +44,68 @@ function ProductImages({ images }) {
   );
 }
 
+/* ---------------------------------- */
+/* Modal */
+/* ---------------------------------- */
+
 export default function ProductQuickViewModal({
   open,
   onOpenChange,
   product,
 }) {
-  if (!product) return null;
 
+  // ✅ Hooks must ALWAYS be first
   const [fullProd, setFullProd] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [loading, setLoading] = useState(false);
 
-   // images sent to the gallery
-    const imagesToShow = useMemo(() => {
-      if (
-        selectedVariant &&
-        selectedVariant.product_images &&
-        selectedVariant.product_images.length > 0
-      ) {
-        return selectedVariant.product_images;
-      }
-      return fullProd.product_images || [];
-    }, [selectedVariant, fullProd.product_images]);
-  
-
-  const fetchFullProd = async () => {
-    try {
-      setLoading(true);
-      const res = await getProductById(product.id);
-      setFullProd(res.data[0]);
-      setSelectedVariant(res.data[0].product_variants[0]);
-      console.log(res.data[0]);
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
+  const imagesToShow = useMemo(() => {
+    if (
+      selectedVariant?.product_images?.length > 0
+    ) {
+      return selectedVariant.product_images;
     }
-  };
 
+    return fullProd?.product_images || [];
+  }, [selectedVariant, fullProd]);
+
+  // ✅ Fetch product
   useEffect(() => {
+    if (!product) return;
+
+    const fetchFullProd = async () => {
+      try {
+        setLoading(true);
+        const res = await getProductById(product.id);
+        const data = res.data[0];
+
+        setFullProd(data);
+        setSelectedVariant(data.product_variants?.[0] || null);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchFullProd();
   }, [product]);
+
+  // ✅ Guard AFTER hooks
+  if (!product) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[70vh] overflow-y-scroll">
+
         <div className="grid grid-cols-1 mt-10 md:mt-0 md:grid-cols-2 gap-6">
-          {/* Image */}
-          {/* <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-            <Image
-              src={product.thumbnail_url}
-              alt={product.name}
-              fill
-              className="object-cover"
-            />
-          </div> */}
-          {loading ? <p></p> : <ProductImages images={imagesToShow}/>}
+
+          {/* Images */}
+          {loading ? (
+            <p />
+          ) : (
+            <ProductImages images={imagesToShow} />
+          )}
 
           {/* Details */}
           <div className="space-y-4">
@@ -106,17 +115,6 @@ export default function ProductQuickViewModal({
               </DialogTitle>
             </DialogHeader>
 
-            {/* <p className="text-sm text-muted-foreground">
-              {product.description}
-            </p>
-
-            <p className="text-lg font-bold">
-              ZMW {product.price.toLocaleString()}
-            </p>
-
-            <Button className="w-full" onClick={() => onAddToCart(product)}>
-              Add to Cart
-            </Button> */}
             {loading ? (
               <p>Loading...</p>
             ) : (
@@ -126,8 +124,11 @@ export default function ProductQuickViewModal({
                 selectedVariant={selectedVariant}
               />
             )}
+
           </div>
+
         </div>
+
       </DialogContent>
     </Dialog>
   );

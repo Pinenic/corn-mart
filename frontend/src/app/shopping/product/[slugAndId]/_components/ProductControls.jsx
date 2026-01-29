@@ -27,7 +27,7 @@ export default function ProductControls({
 
     setAdding(true);
     try {
-      addItem(product.id, selectedVariant.id, quantity);
+      await addItem(product.id, selectedVariant.id, quantity);
     } finally {
       setAdding(false);
     }
@@ -57,7 +57,7 @@ export default function ProductControls({
         onClick={handleAdd}
         disabled={adding}
       >
-        {loading ? <p className="flex gap-3">Adding <Spinner /> </p> : "Add to Cart"}
+        {adding ? <p className="flex gap-3">Adding <Spinner /> </p> : "Add to Cart"}
       </Button>
     </div>
   );

@@ -57,7 +57,7 @@ export const useCart = create(
         )
         .eq("user_id", userId)
         .maybeSingle();
-       console.log(cart);
+      console.log(cart);
 
       if (error) {
         console.error("Error fetching cart", error);
@@ -94,8 +94,8 @@ export const useCart = create(
       };
       console.log("addItem args:", { productId, variantId, quantity });
 
-      set({ items: [...prevItems, optimisticItem] });
-      get().calculateTotals([...prevItems, optimisticItem]);
+      // set({ items: [...prevItems, optimisticItem] });
+      // get().calculateTotals([...prevItems, optimisticItem]);
 
       // RPC call
       const { error } = await supabase.rpc("add_to_cart", {

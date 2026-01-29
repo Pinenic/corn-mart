@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  IconBell,
   IconCamera,
   IconChartBar,
   IconDashboard,
@@ -13,6 +14,7 @@ import {
   IconHelp,
   IconInnerShadowTop,
   IconListDetails,
+  IconNotification,
   IconReport,
   IconSearch,
   IconSettings,
@@ -61,55 +63,60 @@ const data = {
       icon: IconFolder,
     },
   ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
+  // navClouds: [
+  //   {
+  //     title: "Capture",
+  //     icon: IconCamera,
+  //     isActive: true,
+  //     url: "#",
+  //     items: [
+  //       {
+  //         title: "Active Proposals",
+  //         url: "#",
+  //       },
+  //       {
+  //         title: "Archived",
+  //         url: "#",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     title: "Proposal",
+  //     icon: IconFileDescription,
+  //     url: "#",
+  //     items: [
+  //       {
+  //         title: "Active Proposals",
+  //         url: "#",
+  //       },
+  //       {
+  //         title: "Archived",
+  //         url: "#",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     title: "Prompts",
+  //     icon: IconFileAi,
+  //     url: "#",
+  //     items: [
+  //       {
+  //         title: "Active Proposals",
+  //         url: "#",
+  //       },
+  //       {
+  //         title: "Archived",
+  //         url: "#",
+  //       },
+  //     ],
+  //   },
+  // ],
   navSecondary: [
+    {
+      title: "Notifications",
+      url: "/store/dashboard/notifications",
+      icon: IconBell,
+    },
     {
       title: "Settings",
       url: "/store/dashboard/settings",

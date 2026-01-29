@@ -38,6 +38,10 @@ function getDateRange(range) {
       start.setDate(end.getDate() - 30);
       break;
 
+    case "3m":
+      start.setDate(end.getDate() - 90);
+      break;
+
     default:
       throw new Error("Invalid range");
   }
