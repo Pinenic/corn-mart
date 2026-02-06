@@ -1,12 +1,13 @@
 import express from "express";
+import asyncHandler from '../utils/asyncHandler.js';
 import { getAllBuyerNotifications, getAllSellerNotifications, readAllNotifications, readSingleNotification } from "../controllers/notificationsController.js";
 
 
 const router = express.Router();
 
-router.get("/:userId", getAllBuyerNotifications);
-router.get("/store/:userId", getAllSellerNotifications);
-router.patch("/:id/read", readSingleNotification);
-router.patch("/:userId/read-all", readAllNotifications);
+router.get("/:userId", asyncHandler(getAllBuyerNotifications));
+router.get("/store/:userId", asyncHandler(getAllSellerNotifications));
+router.patch("/:id/read", asyncHandler(readSingleNotification));
+router.patch("/:userId/read-all", asyncHandler(readAllNotifications));
 
 export default router

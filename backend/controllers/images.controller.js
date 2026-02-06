@@ -1,3 +1,4 @@
+import AppError from '../utils/AppError.js';
 import {
   addProductImages,
   addVariantImages,
@@ -9,13 +10,13 @@ import { processImageUploads } from "../services/imageUpload.service.js";
 import { deleteImageSafely } from "../services/imageDelete.service.js";
 import { supabase } from "../supabaseClient.js";
 
-export async function uploadProductImagesController(req, res) {
+export async function uploadProductImagesController(req, res, next) {
   try {
     const { productId } = req.params;
     const { userId } = req.body;
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "No images uploaded" });
+      throw new AppError('No images uploaded', 400, { code: 'NO_IMAGES_UPLOADED' });
     }
 
     const uploaded = await processImageUploads({
@@ -32,23 +33,21 @@ export async function uploadProductImagesController(req, res) {
 
     res.status(201).json({ data: data });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 }
 
-export async function uploadVariantImagesController(req, res) {
+export async function uploadVariantImagesController(req, res, next) {
   try {
     const { variantId } = req.params;
     const { product_id, userId } = req.body;
 
-    console.log(variantId, " and ", product_id);
-
     if (!product_id) {
-      return res.status(400).json({ error: "product_id is required" });
+      throw new AppError('product_id is required', 400, { code: 'MISSING_PRODUCT_ID' });
     }
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "No images uploaded" });
+      throw new AppError('No images uploaded', 400, { code: 'NO_IMAGES_UPLOADED' });
     }
 
     const uploaded = await processImageUploads({
@@ -69,21 +68,21 @@ export async function uploadVariantImagesController(req, res) {
 
     res.status(201).json({ data: data });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 }
 
-export async function getProductImagesController(req, res) {
+export async function getProductImagesController(req, res, next) {
   try {
     const { productId } = req.params;
     const images = await getProductImages(productId);
     res.json(images);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    next(err);
   }
 }
 
-export async function deleteImageController(req, res) {
+export async function deleteImageController(req, res, next) {
   try {
     const { imageId } = req.params;
 
@@ -94,13 +93,13 @@ export async function deleteImageController(req, res) {
       .single();
 
     if (error || !image) {
-      return res.status(404).json({ error: "Image not found" });
+      throw new AppError('Image not found', 404, { code: 'IMAGE_NOT_FOUND' });
     }
 
     await deleteImageSafely(image);
 
     res.status(204).send();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 }

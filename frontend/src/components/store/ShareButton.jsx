@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Share2, Copy, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ShareButton({ url }) {
   const [open, setOpen] = useState(false);
@@ -10,8 +11,9 @@ export default function ShareButton({ url }) {
   const handleCopy = async () => {
     await navigator.clipboard.writeText(url);
     setCopied(true);
+    toast.success("Copied!");
 
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 4000);
     setOpen(false);
   };
 

@@ -108,8 +108,8 @@ export const getSubCategory = async (maincat, category) => {
   return revisedData;
 };
 
-export const searchDb = async (query) => {
-  const searchResults = await searchHelper(query);
+export const searchDb = async (query, storeId = null) => {
+  const searchResults = await searchHelper(query, storeId);
   if (!searchResults) throw new Error(`Failed to search db`);
   return searchResults;
 };
@@ -118,37 +118,62 @@ export const searchDb = async (query) => {
  * Helper functions
  */
 
-async function searchHelper(query) {
+async function searchHelper(query, storeId = null) {
+  /* ---------------- CATEGORIES ---------------- */
+
   const { data: categories, error: catError } = await supabase
     .from("categories")
     .select("*")
     .ilike("slug", `%${query}%`);
+
+  /* ---------------- SUBCATEGORIES ---------------- */
+
   const { data: subcategories, error: subcatError } = await supabase
     .from("subcategories")
     .select("*")
     .ilike("slug", `%${query}%`);
-  const { data: products, error: prodError } = await supabase
+
+  /* ---------------- PRODUCTS ---------------- */
+
+  let productQuery = supabase
     .from("products")
     .select("*")
     .ilike("name", `%${query}%`);
 
-  const productsWithlocation = await Promise.all(
-    products.map(async (product) => {
+  // ✅ If storeId exists → limit to store
+  if (storeId) {
+    productQuery = productQuery.eq("store_id", storeId);
+    console.log("executing", (storeId))
+  }
+
+  const { data: products, error: prodError } = await productQuery;
+
+  /* ---------------- LOCATION ENRICH ---------------- */
+
+  const productsWithLocation = await Promise.all(
+    (products || []).map(async (product) => {
       const location = await productLocationHelper(product.store_id);
       return { ...product, location };
     })
   );
 
-  try {
-    const results = Promise.all([
-      categories,
-      subcategories,
-      productsWithlocation,
-    ]);
-    return results;
-  } catch (error) {
-    console.log("Error fetching results", error);
+  /* ---------------- ERRORS ---------------- */
+
+  if (catError || subcatError || prodError) {
+    console.error({
+      catError,
+      subcatError,
+      prodError,
+    });
   }
+
+  /* ---------------- RETURN ---------------- */
+
+  return {
+    categories: categories || [],
+    subcategories: subcategories || [],
+    products: productsWithLocation || [],
+  };
 }
 
 function organizeProducts(arr) {

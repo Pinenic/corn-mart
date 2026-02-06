@@ -1,4 +1,5 @@
 import express from "express";
+import asyncHandler from '../utils/asyncHandler.js';
 import {
   getStores,
   getStoreById,
@@ -18,10 +19,10 @@ import { upload } from "../middlewares/multerConfig.js";
 const router = express.Router();
 
 // Get all stores
-router.get("/", getStores);
+router.get("/", asyncHandler(getStores));
 
 // Get a single store by ID
-router.get("/:id", getStoreById);
+router.get("/:id", asyncHandler(getStoreById));
 
 // Create a new store
 router.post(
@@ -30,7 +31,7 @@ router.post(
     { name: "logo", maxCount: 1 },
     { name: "banner", maxCount: 1 },
   ]),
-  createStore
+  asyncHandler(createStore)
 );
 
 // Update an existing store
@@ -40,27 +41,27 @@ router.put(
     { name: "logo", maxCount: 1 },
     { name: "banner", maxCount: 1 },
   ]),
-  updateStore
+  asyncHandler(updateStore)
 );
 
 /**
  *  STORE FOLLOW ROUTES
  */
 
-router.post("/:storeId/follow", follow);
-router.delete("/:storeId/follow", unfollow);
-router.get("/:storeId/is-following", checkUserFollow);
-router.get("/:storeId/followers", getFollowersCount);
+router.post("/:storeId/follow", asyncHandler(follow));
+router.delete("/:storeId/follow", asyncHandler(unfollow));
+router.get("/:storeId/is-following", asyncHandler(checkUserFollow));
+router.get("/:storeId/followers", asyncHandler(getFollowersCount));
 
 /**
  * STORE LOCATION AND DELIVERY ROUTES
  */
 
 
-router.post("/:storeId/location", createStoreLocation);
-router.get("/:storeId/location", getStoreLocation);
-router.put("/:storeId/location", updateStoreLocation);
-router.delete("/:storeId/location", deleteStoreLocation);
+router.post("/:storeId/location", asyncHandler(createStoreLocation));
+router.get("/:storeId/location", asyncHandler(getStoreLocation));
+router.put("/:storeId/location", asyncHandler(updateStoreLocation));
+router.delete("/:storeId/location", asyncHandler(deleteStoreLocation));
 
 
 export default router;

@@ -1,4 +1,5 @@
 import express from "express";
+import asyncHandler from '../utils/asyncHandler.js';
 import {
   getProducts,
   getProductById,
@@ -23,40 +24,40 @@ import {
 
 const router = express.Router();
 
-router.get("/:storeId", getProducts);
-router.get("/product/:productId", getProductById);
-router.post("/product", upload.array("images"), createNewProduct);
-router.put("/product/:productId", upload.array("images"), updateProduct);
-router.put("/product/status/:productId", toggleActiveStatus);
-router.delete("/product/:productId", deleteProduct);
-router.get("/product/variants/:productId", getProductVariants);
-router.get("/product/variant/:variantId", getVariantById);
-router.post("/product/variants", createNewVariant);
-router.put("/product/variant/:variantId", updateVariant);
-router.delete("/product/variant/:variantId", deleteVariant);
-router.put("/restock/variant/:variantId", restockVariant);
+router.get("/:storeId", asyncHandler(getProducts));
+router.get("/product/:productId", asyncHandler(getProductById));
+router.post("/product", upload.array("images"), asyncHandler(createNewProduct));
+router.put("/product/:productId", upload.array("images"), asyncHandler(updateProduct));
+router.put("/product/status/:productId", asyncHandler(toggleActiveStatus));
+router.delete("/product/:productId", asyncHandler(deleteProduct));
+router.get("/product/variants/:productId", asyncHandler(getProductVariants));
+router.get("/product/variant/:variantId", asyncHandler(getVariantById));
+router.post("/product/variants", asyncHandler(createNewVariant));
+router.put("/product/variant/:variantId", asyncHandler(updateVariant));
+router.delete("/product/variant/:variantId", asyncHandler(deleteVariant));
+router.put("/restock/variant/:variantId", asyncHandler(restockVariant));
 
 // Product image routes
 router.post(
   "/products/:productId/thumbnail",
   upload.array("images", 2), // Max 2 images
-  imageController.uploadProductImages
+  asyncHandler(imageController.uploadProductImages)
 );
 
 router.post(
   "/products/:productId/images",
   upload.array("images", 4), // Max 4 images
-  uploadProductImagesController
+  asyncHandler(uploadProductImagesController)
 );
 
 // Product variant image route
 router.post(
   "/products/variants/:variantId/images",
   upload.array("images", 4), // Max 4 images
-  uploadVariantImagesController
+  asyncHandler(uploadVariantImagesController)
 );
 
-router.get("/products/:productId/images", imageController.getProductImages);
+router.get("/products/:productId/images", asyncHandler(imageController.getProductImages));
 
 // router.delete(
 //   "/products/:productId/images",
@@ -64,7 +65,7 @@ router.get("/products/:productId/images", imageController.getProductImages);
 // );
 
 // Individual image routes
-router.delete("/images/:imageId", deleteImageController);
+router.delete("/images/:imageId", asyncHandler(deleteImageController));
 
 // router.delete("/images/batch", imageController.deleteMultipleImages);
 
@@ -74,6 +75,6 @@ router.delete("/images/:imageId", deleteImageController);
 //   imageController.replaceImage
 // );
 
-router.patch("/images/:imageId/thumbnail", imageController.setThumbnail);
+router.patch("/images/:imageId/thumbnail", asyncHandler(imageController.setThumbnail));
 
 export default router;

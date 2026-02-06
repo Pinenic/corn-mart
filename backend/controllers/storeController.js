@@ -1,3 +1,4 @@
+import AppError from '../utils/AppError.js';
 import {
   getAllStores,
   getStore,
@@ -13,62 +14,50 @@ import {
   deleteLocation,
 } from "../services/storeService.js";
 
-export const getStores = async (req, res) => {
+export const getStores = async (req, res, next) => {
   try {
     const stores = await getAllStores();
     res.json(stores);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const getStoreById = async (req, res) => {
+export const getStoreById = async (req, res, next) => {
   try {
     const store = await getStore(req.params.id);
-    if (!store)
-      return res
-        .status(404)
-        .json({ error: "Store not found", id: req.params.id });
+    if (!store) throw new AppError('Store not found', 404, { code: 'STORE_NOT_FOUND', id: req.params.id });
     res.json(store);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const createStore = async (req, res) => {
+export const createStore = async (req, res, next) => {
   try {
     const files = {
       logo: req.files.logo?.[0],
       banner: req.files.banner?.[0],
     };
     const store = await createNewStore(req.body, files);
-    store != null
-      ? res
-          .status(201)
-          .json({
-            store: store,
-            message: "The new store has been created successfully",
-          })
-      : res.json({ message: "A store already exists for this user" });
+    if (!store) throw new AppError('A store already exists for this user', 409, { code: 'STORE_ALREADY_EXISTS' });
+    res.status(201).json({ store: store, message: 'The new store has been created successfully' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const updateStore = async (req, res) => {
+export const updateStore = async (req, res, next) => {
   try {
     const files = {
       logo: req.files.logo?.[0],
       banner: req.files.banner?.[0],
     };
     const store = await updateExistingStore(req.params.id, req.body, files);
-    if (!store)
-      return res
-        .status(404)
-        .json({ error: "Store not found", id: req.params.id });
+    if (!store) throw new AppError('Store not found', 404, { code: 'STORE_NOT_FOUND', id: req.params.id });
     res.json(store);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
@@ -76,101 +65,101 @@ export const updateStore = async (req, res) => {
  *  STORE FOLLOW SYSTEM
  */
 
-export const follow = async (req, res) => {
+export const follow = async (req, res, next) => {
   try {
     const { storeId } = req.params;
     const { userId } = req.query;
+    if (!userId) throw new AppError('userId is required', 400, { code: 'INVALID_PAYLOAD' });
     const response = await followStore(userId, storeId);
     res.json(response);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-export const unfollow = async (req, res) => {
+export const unfollow = async (req, res, next) => {
   try {
     const { storeId } = req.params;
     const { userId } = req.query;
+    if (!userId) throw new AppError('userId is required', 400, { code: 'INVALID_PAYLOAD' });
     const response = await unfollowStore(userId, storeId);
     res.json(response);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-export const checkUserFollow = async (req, res) => {
+export const checkUserFollow = async (req, res, next) => {
   try {
     const { storeId } = req.params;
     const { userId } = req.query;
+    if (!userId) throw new AppError('userId is required', 400, { code: 'INVALID_PAYLOAD' });
     const response = await checkIfUserFollows(userId, storeId);
     res.json(response);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-export const getFollowersCount = async (req, res) => {
+export const getFollowersCount = async (req, res, next) => {
   try {
     const { storeId } = req.params;
     const response = await getFollowerCount(storeId);
     res.json(response);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
 /**
  * Create store location
  */
-export const createStoreLocation = async (req, res) => {
+export const createStoreLocation = async (req, res, next) => {
   try {
     const { storeId } = req.params;
     const response = await createLocation(storeId, req.body);
     res.status(201).json(response);
   } catch (error) {
-    res.status(400).json({ error: error.message });
-    console.log(error);
+    next(error);
   }
 };
 
 /**
  * Get store location
  */
-export const getStoreLocation = async (req, res) => {
+export const getStoreLocation = async (req, res, next) => {
   try {
     const { storeId } = req.params;
     const response = await getLocation(storeId);
-    res.status(201).json(response);
+    res.status(200).json(response);
   } catch (error) {
-    res.status(400).json({ error: error.message });
-    console.log(error);
+    next(error);
   }
 };
 
 /**
  * Update store location
  */
-export const updateStoreLocation = async (req, res) => {
+export const updateStoreLocation = async (req, res, next) => {
   try {
     const { storeId } = req.params;
     const response = await updateLocation(storeId, req.body);
-    res.status(201).json(response);
+    res.status(200).json(response);
   } catch (error) {
-    res.status(400).json({ error: error.message });
-    console.log(error);
+    next(error);
   }
 };
 
 /**
  * Delete store location
  */
-export const deleteStoreLocation = async (req, res) => {
+export const deleteStoreLocation = async (req, res, next) => {
   try {
     const { storeId } = req.params;
     const response = await deleteLocation(storeId);
-    response ? res.status(204).send(): res.status(500);
+    if (response) return res.status(204).send();
+    throw new AppError('Problem deleting store location', 500, { code: 'DELETE_LOCATION_FAILED' });
   } catch (error) {
-    res.status(400).json({ error: error.message });
-    console.log(error);
+    next(error);
   }
 };

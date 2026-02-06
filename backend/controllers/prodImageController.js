@@ -1,23 +1,21 @@
 // ============================================
 // controllers/imageController.js
 // ============================================
+import AppError from '../utils/AppError.js';
 import * as imageService from "../services/prodimageService.js";
 
 /**
  * Upload multiple images for a product
  * POST /api/products/:productId/images
  */
-export async function uploadProductImages(req, res) {
+export async function uploadProductImages(req, res, next) {
   try {
     const { productId } = req.params;
     const { thumbnailIndex = 0 } = req.body;
     const { userId } = req.body; // Assuming auth middleware sets req.user
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No files uploaded",
-      });
+      throw new AppError('No files uploaded', 400, { code: 'NO_FILES_UPLOADED' });
     }
 
     const uploadedImages = await imageService.uploadImages(
@@ -33,12 +31,7 @@ export async function uploadProductImages(req, res) {
       data: uploadedImages,
     });
   } catch (error) {
-    console.error("Error uploading images:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to upload images",
-      error: error.message,
-    });
+    next(error);
   }
 }
 
@@ -46,7 +39,7 @@ export async function uploadProductImages(req, res) {
  * Get all images for a product
  * GET /api/products/:productId/images
  */
-export async function getProductImages(req, res) {
+export async function getProductImages(req, res, next) {
   try {
     const { productId } = req.params;
 
@@ -57,12 +50,7 @@ export async function getProductImages(req, res) {
       data: images,
     });
   } catch (error) {
-    console.error("Error fetching images:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch images",
-      error: error.message,
-    });
+    next(error);
   }
 }
 
@@ -70,7 +58,7 @@ export async function getProductImages(req, res) {
  * Delete a single image
  * DELETE /api/images/:imageId
  */
-export async function deleteImage(req, res) {
+export async function deleteImage(req, res, next) {
   try {
     const { imageId } = req.params;
 
@@ -81,12 +69,7 @@ export async function deleteImage(req, res) {
       message: "Image deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting image:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete image",
-      error: error.message,
-    });
+    next(error);
   }
 }
 
@@ -94,15 +77,12 @@ export async function deleteImage(req, res) {
  * Delete multiple images
  * DELETE /api/images/batch
  */
-export async function deleteMultipleImages(req, res) {
+export async function deleteMultipleImages(req, res, next) {
   try {
     const { imageIds } = req.body;
 
     if (!imageIds || !Array.isArray(imageIds) || imageIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Image IDs array is required",
-      });
+      throw new AppError('Image IDs array is required', 400, { code: 'MISSING_IMAGE_IDS' });
     }
 
     await imageService.deleteImages(imageIds);
@@ -112,12 +92,7 @@ export async function deleteMultipleImages(req, res) {
       message: "Images deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting images:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete images",
-      error: error.message,
-    });
+    next(error);
   }
 }
 
@@ -125,16 +100,13 @@ export async function deleteMultipleImages(req, res) {
  * Replace/update a single image
  * PUT /api/images/:imageId
  */
-export async function replaceImage(req, res) {
+export async function replaceImage(req, res, next) {
   try {
     const { imageId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user?.id;
 
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file uploaded",
-      });
+      throw new AppError('No file uploaded', 400, { code: 'NO_FILE_UPLOADED' });
     }
 
     const updatedImage = await imageService.replaceImage(
@@ -149,12 +121,7 @@ export async function replaceImage(req, res) {
       data: updatedImage,
     });
   } catch (error) {
-    console.error("Error replacing image:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to replace image",
-      error: error.message,
-    });
+    next(error);
   }
 }
 
@@ -162,7 +129,7 @@ export async function replaceImage(req, res) {
  * Set thumbnail for a product
  * PATCH /api/images/:imageId/thumbnail
  */
-export async function setThumbnail(req, res) {
+export async function setThumbnail(req, res, next) {
   try {
     const { imageId } = req.params;
 
@@ -173,12 +140,7 @@ export async function setThumbnail(req, res) {
       message: "Thumbnail updated successfully",
     });
   } catch (error) {
-    console.error("Error setting thumbnail:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to set thumbnail",
-      error: error.message,
-    });
+    next(error);
   }
 }
 
@@ -186,7 +148,7 @@ export async function setThumbnail(req, res) {
  * Delete all images for a product
  * DELETE /api/products/:productId/images
  */
-export async function deleteAllProductImages(req, res) {
+export async function deleteAllProductImages(req, res, next) {
   try {
     const { productId } = req.params;
 
@@ -197,12 +159,7 @@ export async function deleteAllProductImages(req, res) {
       message: "All product images deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting product images:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete product images",
-      error: error.message,
-    });
+    next(error);
   }
 }
 

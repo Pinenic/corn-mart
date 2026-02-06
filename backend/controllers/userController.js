@@ -1,21 +1,22 @@
+import AppError from '../utils/AppError.js';
 import { getAllUsers, getUser } from '../services/userService.js';
 
-export const getUsers = async (req, res) => {
+export const getUsers = async (req, res, next) => {
   try {
     const users = await getAllUsers();
     res.json(users);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const getUserById = async (req, res) => {
+export const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const user = await getUser(id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) throw new AppError('User not found', 404, { code: 'USER_NOT_FOUND' });
     res.json(user);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };

@@ -109,9 +109,11 @@ export const useCart = create(
         set({ items: prevItems });
         get().calculateTotals(prevItems);
 
-        toast.error("Failed to add item", {
-          description: error.message,
-        });
+        console.error(error)
+
+         toast.error("Failed to add item", {
+           description: "Not enough stock",
+         });
 
         return;
       }
