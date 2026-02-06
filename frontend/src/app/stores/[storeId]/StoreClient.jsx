@@ -8,14 +8,36 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { getFollowerCount } from "@/lib/storesApi";
+import { searchMarket } from "@/lib/marketplaceApi";
+import SearchBar from "@/app/shopping/components/SearchBar";
 
 export default function StoreClient({ initialStore }) {
-
   const [stores, setStores] = useState(initialStore);
   const [storeLoc, setStoreLoc] = useState(initialStore.location?.[0]);
   const [count, setCount] = useState("");
   const [products, setProducts] = useState(initialStore.products || []);
   const [categories, setCategories] = useState(["all"]);
+  const [searchResults, setResults] = useState([]);
+
+  async function search(q) {
+    try {
+      const res = await searchMarket(q, stores?.id);
+      return res.data;
+    } catch (error) {
+      return error.message;
+    }
+  }
+
+  async function handleSearch(q) {
+    try {
+      setLoading(true);
+      const res = await searchMarket(q, stores?.id);
+      setResults(res.data["products"]);
+      setLoading(false);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   useEffect(() => {
     sortCategories(products);
@@ -30,7 +52,7 @@ export default function StoreClient({ initialStore }) {
   const sortCategories = (prods) => {
     setCategories([
       "all",
-      ...new Set(prods.map(p => p.category.trim().toLowerCase()))
+      ...new Set(prods.map((p) => p.category.trim().toLowerCase())),
     ]);
   };
 
@@ -41,7 +63,7 @@ export default function StoreClient({ initialStore }) {
     activeCategory === "all"
       ? products
       : products.filter(
-          p => p.category.trim().toLowerCase() === activeCategory
+          (p) => p.category.trim().toLowerCase() === activeCategory
         );
 
   const store = {
@@ -54,12 +76,11 @@ export default function StoreClient({ initialStore }) {
     productsCount: products.length,
     location: `${storeLoc?.city}, ${storeLoc?.province}`,
     rating: 4.9,
-    joined: stores.created_at
+    joined: stores.created_at,
   };
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto">
-
       <StoreHeader store={store} storeLoc={stores.location} />
 
       <div className="top-[54px]">
@@ -71,17 +92,7 @@ export default function StoreClient({ initialStore }) {
       </div>
 
       <div className="flex items-center gap-2 max-w-7xl mb-2 mx-auto p-4">
-        <div className="flex flex-1 items-center border rounded-xl px-3">
-          <Search className="w-4 h-4 mr-2" />
-          <Input
-            placeholder="Search products..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="border-none"
-          />
-        </div>
-
-        <Button>Search</Button>
+        <SearchBar onQuery={search} onSearch={handleSearch} />
       </div>
 
       <ProductGrid
@@ -89,7 +100,6 @@ export default function StoreClient({ initialStore }) {
         category={activeCategory}
         products={filteredProducts}
       />
-
     </div>
   );
 }

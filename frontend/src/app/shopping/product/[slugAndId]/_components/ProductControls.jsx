@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { VariantSelector } from "./VariantSelector";
 import { QuantitySelector } from "./QuantitySelector";
 import { useCart } from "@/store/useCart";
+import {useAuthStore} from "@/store/useAuthStore";
 import { toast } from "sonner";
 import { formatNumber } from "@/utils/numberFormatter";
 import { Spinner } from "@/components/ui/spinner";
@@ -14,6 +15,7 @@ export default function ProductControls({
   selectedVariant,
   setSelectedVariant,
 }) {
+  const {user, init} = useAuthStore();
   const { addItem, loading } = useCart();
   const variants = product?.product_variants || [];
   const [quantity, setQuantity] = useState(1);
@@ -22,6 +24,10 @@ export default function ProductControls({
   async function handleAdd() {
     if (!selectedVariant) {
       toast.error("Please choose a variant");
+      return;
+    }
+    if(!user){
+      toast.info("Login to make a purchcase");
       return;
     }
 

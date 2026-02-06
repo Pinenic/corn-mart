@@ -39,9 +39,10 @@ export default function SearchBar({ onQuery, onSearch }) {
     clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(async () => {
       const data = await onQuery(query);
-      setResults(data[2]);
+      setResults(data["products"]);
       setLoading(false);
       setActiveIndex(0);
+      console.log(data);
     }, 400);
   }, [query]);
 
@@ -129,7 +130,7 @@ export default function SearchBar({ onQuery, onSearch }) {
                 </div>
               )}
 
-              {!loading && results.length === 0 && (
+              {!loading && results?.length === 0 && (
                 <div className="p-3 text-sm text-muted-foreground">
                   No results found.
                 </div>
@@ -141,7 +142,9 @@ export default function SearchBar({ onQuery, onSearch }) {
                   results?.map((item, index) => (
                     <Link
                       key={item.id}
-                      href={`/shopping/product/${generateSlug(item.name)}-${item.id}`}
+                      href={`/shopping/product/${generateSlug(item.name)}-${
+                        item.id
+                      }`}
                       ref={(el) => (listRef.current[index] = el)}
                       className={`py-2 px-2 text-sm rounded-lg transition flex items-center gap-3 ${
                         index === activeIndex ? "bg-accent" : "hover:bg-accent"

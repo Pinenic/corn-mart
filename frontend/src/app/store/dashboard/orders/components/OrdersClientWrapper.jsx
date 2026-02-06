@@ -5,6 +5,7 @@ import TopRow from "./TopRow";
 import OrderDetails from "./OrderDetails";
 import CustomerDetails from "./CustomerDetails";
 import Chat from "./Chat";
+import { getStoreOrderDetails } from "@/lib/ordersApi";
 
 export default function OrdersClientWrapper({ initialOrder = {}, id }) {
   const [order, setOrder] = useState(initialOrder || {});
@@ -13,9 +14,7 @@ export default function OrdersClientWrapper({ initialOrder = {}, id }) {
   const fetchOrder = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/store/order/${id}`, { cache: "no-store" });
-      if (!res.ok) throw new Error(res.statusText || "Failed to fetch order");
-      const data = await res.json();
+      const data = await getStoreOrderDetails(id);
       setOrder(data);
       return data;
     } catch (err) {
@@ -28,20 +27,16 @@ export default function OrdersClientWrapper({ initialOrder = {}, id }) {
 
   const refetchOrder = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/store/order/${id}`, { cache: "no-store" });
-      if (!res.ok) throw new Error(res.statusText || "Failed to fetch order");
-      const data = await res.json();
+      const data = await getStoreOrderDetails(id);
       setOrder(data);
       return data;
     } catch (err) {
-      console.error("OrdersClientWrapper: fetchOrder error", err?.message || err);
+      console.error("OrdersClientWrapper: refetchOrder error", err?.message || err);
       return null;
-    } finally {
-      return;
     }
   };
 
-  // In case server rendered initialOrder is empty (or stale), fetch once on mount
+  // In case server rendered initialOrder is empty (or stale), fetch once on moun
   useEffect(() => {
     if (!initialOrder || !initialOrder.id) {
       fetchOrder();

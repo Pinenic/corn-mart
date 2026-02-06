@@ -187,7 +187,7 @@ export default function ProductsPage() {
             className="w-full h-full bg-card px-5 py-2 border rounded-lg overflow-hidden"
           >
             {/* Left: Products Table */}
-            <ResizablePanel defaultSize={selectedProduct ? 60 : 100}>
+            <ResizablePanel defaultSize={selectedProduct ? 60 : 100} minSize={65}>
               {loading ? (
                 <>
                   <div className="flex items-center justify-center min-h-[50vh]">
@@ -198,155 +198,30 @@ export default function ProductsPage() {
               ) : (
                 <>
                   {view == "Table" ? (
-                    <ProductTable
-                      onSelectProduct={setSelectedProduct}
-                      selectedProduct={selectedProduct}
-                      onDelete={handleDelete}
-                      products={products}
-                      loading={delloading}
-                    />
-                  ) : view == "List" ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
-                      {products.map((product) => (
-                        <Card className="w-full p-2 mb-2" key={product.id}>
-                          <CardContent className="">
-                            <div className="flex gap-4">
-                              <div className="flex bg-muted rounded-lg h-20 items-center">
-                                <Image
-                                  src={product.thumbnail_url}
-                                  alt="preview"
-                                  width={60}
-                                  height={60}
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="flex flex-col gap-2 md:justify-between h-16 md:mt-2">
-                                <div className="flex flex-col md:flex-row gap-2 md:items-center">
-                                  <h1 className="text-sm line-clamp-1">
-                                    {product.name}
-                                  </h1>
-                                  <p className="text-xs bg-muted w-fit p-1 px-2 rounded-xl">
-                                    {product.category}
-                                  </p>
-                                </div>
-                                <div className="flex gap-2 text-sm text-muted-foreground">
-                                  <h1>K{formatNumber(product.price)}</h1>
-                                  <p>
-                                    {product.product_variants.reduce(
-                                      (sum, pv) => sum + (pv.stock || 0),
-                                      0
-                                    )}
-                                    pcs
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex justify-end grow">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm">
-                                      <Ellipsis className="hover:bg-muted hover:cursor-pointer rounded-xl" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent>
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        setSelectedProduct(product)
-                                      }
-                                    >
-                                      View
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => handleDelete(product.id)}
-                                      className="text-destructive"
-                                    >
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-6 p-4 overflow-y-scroll">
-                      {products.map((product) => (
-                        <Card className="w-full p-2 px-0 mb-2" key={product.id}>
-                          <CardContent className="h-full px-3">
-                            <div className="flex flex-col justify-between h-full gap-4">
-                              <div className="flex bg-muted rounded-lg h-40 justify-center items-center">
-                                <Image
-                                  src={product.thumbnail_url}
-                                  alt="preview"
-                                  width={400}
-                                  height={100}
-                                  className="object-contain w-full h-full"
-                                />
-                              </div>
-                              <div className="flex flex-col gap-2 md:justify-between h-16 md:mt-2">
-                                <div className="flex flex-col gap-2 ">
-                                  <h1 className="text-sm line-clamp-1">
-                                    {product.name}
-                                  </h1>
-                                  <p className="text-xs bg-muted w-fit p-1 px-2 rounded-xl">
-                                    {product.category}
-                                  </p>
-                                </div>
-                                <div className="flex gap-2 text-sm text-muted-foreground">
-                                  <h1>K{formatNumber(product.price)}</h1>
-                                  <Separator orientation="vertical" />
-                                  <p>
-                                    {product.product_variants.reduce(
-                                      (sum, pv) => sum + (pv.stock || 0),
-                                      0
-                                    )}
-                                    pcs
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex justify-end gap-3 mt-4">
-                                <Button
-                                  size={"sm"}
-                                  className={"text-xs"}
-                                  onClick={() => setSelectedProduct(product)}
-                                >
-                                  View
-                                </Button>
-                                <Button
-                                  variant={"outline"}
-                                  size={"sm"}
-                                  className={"text-xs"}
-                                >
-                                  Delete
-                                </Button>
-                                {/* <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <Ellipsis className="hover:bg-muted hover:cursor-pointer rounded-xl" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuItem
-                                    onClick={() => setSelectedProduct(product)}
-                                  >
-                                    View
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleDelete(product.id)}
-                                    className="text-destructive"
-                                  >
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu> */}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
+              <ProductTable
+                onSelectProduct={setSelectedProduct}
+                selectedProduct={selectedProduct}
+                onDelete={handleDelete}
+                products={products}
+                loading={delloading}
+              />
+            ) : view == "List" ? (
+              <ProductList
+                onSelectProduct={setSelectedProduct}
+                selectedProduct={selectedProduct}
+                onDelete={handleDelete}
+                products={products}
+                loading={delloading}
+              />
+            ) : (
+              <ProductGrid
+                onSelectProduct={setSelectedProduct}
+                selectedProduct={selectedProduct}
+                onDelete={handleDelete}
+                products={products}
+                loading={delloading}
+              />
+            )}
                 </>
               )}
             </ResizablePanel>
@@ -355,7 +230,7 @@ export default function ProductsPage() {
             {selectedProduct && (
               <>
                 <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={25} minSize={20}>
+                <ResizablePanel defaultSize={25} minSize={25}>
                   <ProductDetailsPanel
                     product={selectedProduct}
                     reloadList={refreshProducts}

@@ -1,3 +1,4 @@
+import AppError from '../utils/AppError.js';
 import {
   getProductsByStore,
   getProductByID,
@@ -15,29 +16,29 @@ import {
 import { deleteAllProductImages, updateProductImages, uploadProductImages } from "../services/productImageService.js";
 import {uploadImages} from "../services/prodimageService.js"
 
-export const getProducts = async (req, res) => {
+export const getProducts = async (req, res, next) => {
   const { storeId } = req.params;
   try {
     const products = await getProductsByStore(storeId);
     res.json(products);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-export const getProductById = async (req, res) => {
+export const getProductById = async (req, res, next) => {
   const { productId } = req.params;
   try {
     const product = await getProductByID(productId);
+    if (!product) throw new AppError('Product not found', 404, { code: 'PRODUCT_NOT_FOUND' });
     res.json(product);
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
 
-export const createNewProduct = async (req, res) => {
+export const createNewProduct = async (req, res, next) => {
   try {
     const { userId, name, description, price, stock, store_id, category, subcat } = req.body;
     const subcategory = await createSubcategory(JSON.parse(subcat));
@@ -51,19 +52,19 @@ export const createNewProduct = async (req, res) => {
 
     res.status(201).json({ success: " true", response: product });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
 // UPDATE
-export const updateProduct = async (req, res) => {
+export const updateProduct = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const { userId, newImages, removedImageIds, ...updates } = req.body;
 
     const product = await updateAProduct(productId, updates);
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      throw new AppError('Product not found', 404, { code: 'PRODUCT_NOT_FOUND' });
     }
 
     // Handle image updates if provided
@@ -76,12 +77,12 @@ export const updateProduct = async (req, res) => {
 
     res.json({ success: " true", response: product });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
 // DELETE
-export const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res, next) => {
   try {
     const { productId } = req.params;
 
@@ -91,45 +92,45 @@ export const deleteProduct = async (req, res) => {
     const response = await deleteAProduct(productId);
     res.json({ success: response });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 }
 
-export const toggleActiveStatus = async (req, res) => {
+export const toggleActiveStatus = async (req, res, next) => {
   const { productId } = req.params;
   try {
     const { isActive } = req.body;
     const response = await toggleProductActiveStatus(productId, isActive);
-    if (!response)
-      res.status(404).json({ error: "product not found", id: req.params });
+    if (!response) throw new AppError('Product not found', 404, { code: 'PRODUCT_NOT_FOUND' });
     res.json({ success: " true", response: response });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
 
-export const getProductVariants = async (req, res) => {
+export const getProductVariants = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const variants = await getAllVariants(productId);
     res.json(variants);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const getVariantById = async (req, res) => {
+export const getVariantById = async (req, res, next) => {
   try {
     const { variantId } = req.params;
     const variant = await getAVariant(variantId);
+    if (!variant) throw new AppError('Variant not found', 404, { code: 'VARIANT_NOT_FOUND' });
     res.json(variant);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const createNewVariant = async (req, res) => {
+export const createNewVariant = async (req, res, next) => {
   try {
     const { productId, name, description, price, stock, lowStockThreshold } = req.body;
     const variant = await createVariant({
@@ -142,51 +143,41 @@ export const createNewVariant = async (req, res) => {
     });
     res.json(variant);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const updateVariant = async (req, res) => {
+export const updateVariant = async (req, res, next) => {
     try {
     const { variantId } = req.params;
-    console.log(variantId);
     const updates = req.body;
-    console.log(updates);
     const variant = await updateAVariant(variantId, updates);
-    if (!variant)
-      return res
-        .status(404)
-        .json({ error: "variant not found", id: req.params });
+    if (!variant) throw new AppError('Variant not found', 404, { code: 'VARIANT_NOT_FOUND' });
     res.json(variant);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const restockVariant = async (req, res) => {
+export const restockVariant = async (req, res, next) => {
     try {
     const { variantId } = req.params;
-    console.log(variantId);
     const updates = req.body;
-    console.log(updates);
     const variant = await updateAVariant(variantId, updates);
-    if (!variant)
-      return res
-        .status(404)
-        .json({ error: "variant not found", id: req.params });
+    if (!variant) throw new AppError('Variant not found', 404, { code: 'VARIANT_NOT_FOUND' });
     res.json(variant);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-export const deleteVariant = async (req, res) => {
+export const deleteVariant = async (req, res, next) => {
     try {
     const { variantId } = req.params;
     const response = await deleteAVariant(variantId);
     res.json({ success: response });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 

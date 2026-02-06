@@ -27,7 +27,7 @@ export default function PageTop({ Categories, setLoading, onResults }) {
     try {
       setLoading(true);
       const res = await searchMarket(q);
-      onResults(res.data[2]);
+      onResults(res.data["products"]);
       setLoading(false);
     } catch (error) {
       console.log(error.message);

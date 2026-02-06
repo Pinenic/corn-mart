@@ -12,8 +12,8 @@ export async function getProductById(id){
     return fetchApi(`/api/marketplace/${id}`);
 }
 
-export async function searchMarket (query) {
-    return fetchApi(`/api/marketplace/search?q=${query}`);
+export async function searchMarket (query, storeId = null) {
+    return fetchApi(`/api/marketplace/search?q=${query}&sid=${storeId ? storeId : null}`);
 }
 
 export async function getCategories () {

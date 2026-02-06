@@ -10,7 +10,9 @@ import orderRoutes from './routes/orderRoutes.js'
 import analyticsRoutes from './routes/analytics.routes.js'
 import marketplaceRoutes from './routes/marketplaceRoutes.js'
 import notificationRoutes from './routes/notificationsRoutes.js'
-// import checkoutRoute from './routes/checkout.js'
+import { notificationWorker } from './workers/notificationWorker.js';
+import { emailWorker } from './workers/emailWorker.js';import notFoundHandler from './middlewares/notFoundHandler.js';
+import errorHandler from './middlewares/errorHandler.js';// import checkoutRoute from './routes/checkout.js'
 // import payoutRouter from './routes/payout.js'
 // import momoCheckoutRoute from './routes/momoCheckout.js';
 // import { pollPendingPayments } from './jobs/pollPendingPayments.js';
@@ -22,6 +24,9 @@ dotenv.config();
 const app = express();
 
 const corsOptions = { origin: '*' };
+
+// setInterval(notificationWorker, 5000); // every 5 sec
+// setInterval(emailWorker, 7000);        // every 7 sec
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -36,6 +41,9 @@ app.use('/api/orders', orderRoutes);
 app.use("/api/analytics", analyticsRoutes)
 app.use('/api/marketplace', marketplaceRoutes)
 app.use('/api/notifications', notificationRoutes);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // pollPendingPayments();
 // pollEligiblePayouts();
