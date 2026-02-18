@@ -39,18 +39,18 @@ export default function ProductList({
     }
   };
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 px-2">
       {products.map((product) => (
-        <Card className="w-full py-2 mb-2 min-w-sm" key={product.id}>
+        <Card className="w-full py-2 mb-2 min-w-xs" key={product.id}>
           <CardContent className=" px-1">
             <div className="flex gap-4">
-              <div className="flex bg-muted rounded-lg h-20 min-w-16 items-center">
+              <div className="flex bg-muted rounded-lg h-20 w-20 items-center">
                 <Image
                   src={product.thumbnail_url}
                   alt="preview"
                   width={60}
                   height={60}
-                  className="object-cover"
+                  className="object-cover w-full h-full rounded-lg"
                 />
               </div>
               <div className="flex flex-col gap-2 md:justify-between h-16 md:mt-2">

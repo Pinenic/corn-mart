@@ -20,7 +20,7 @@ export function OrderStatusChart({ data }) {
       <div className="flex items-center gap-6">
         {/* Chart */}
         <div className="h-56 w-56">
-          {data.length == 0 ? <h3 className="text-sm font-medium mb-4 mx-auto text-center">No orders in this period</h3> : <ResponsiveContainer width="100%" height="100%">
+          {data.length == 0 ? <h3 className="text-sm font-medium mb-4 mx-auto text-center mt-10">No orders in this period</h3> : <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data}

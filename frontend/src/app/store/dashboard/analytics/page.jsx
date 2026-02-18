@@ -16,6 +16,7 @@ import {
   PopularProductsBarChart,
   RevenueComparisonChart,
 } from "./_components/RevenueAndProductsCharts";
+import LoadingOverlay from "@/components/loading-overlay";
 
 const setPageTitle = () => {
   document.title = "Store Analytics | Corn Mart";
@@ -57,6 +58,7 @@ function mapOrdersToPieData(orders) {
     { status: "Pending", value: orders.pending },
     { status: "Completed", value: orders.completed },
     { status: "Cancelled", value: orders.cancelled },
+    { status: "Processing", value: (orders.total -(orders.cancelled + orders.pending + orders.completed)) },
   ].filter((item) => item.value > 0);
 }
 
@@ -72,12 +74,18 @@ export default function Page() {
     try {
       setLoading(true);
       const res = await getStoreAnalytics(storeId, start, end);
-      setData(res);
-      setPieData(mapOrdersToPieData(res.orders));
+      console.log(res);
+      
+      // The response structure is { success: true, data: {...analytics...} }
+      const analyticsData = res.data || res;
+      
+      setData(analyticsData);
+      setPieData(mapOrdersToPieData(analyticsData?.orders || {}));
       console.log(res);
       setLoading(false);
     } catch (err) {
       console.error(err.message);
+      setLoading(false);
     }
   };
 
@@ -88,25 +96,29 @@ export default function Page() {
     fetchAnalytics(start_date, end_date);
   }, [range]);
   const { popularProductsChart, revenueComparison } = useAnalyticsAdapter(data);
+  // while (loading) {
+  //   <LoadingOverlay show={loading}/>
+  // }
   return (
     <div className="space-y-6">
+      <LoadingOverlay show={loading}/>
       <SiteHeader title={"Analytics"} storeId={storeId} />
       <AnalyticsHeader />
       <DateRangeSelector value={range} onChange={setRange} />
 
       <KpiGrid>
-        <KpiCard title="Total Orders" value={data?.orders.total} />
+        <KpiCard title="Total Orders" value={data?.orders?.total || 0} />
         <KpiCard
           title="Completion Rate"
-          value={(data?.orders.completion_rate * 100).toFixed(1) + "%"}
+          value={((data?.orders?.completion_rate || 0) * 100).toFixed(1) + "%"}
         />
-        <KpiCard title="Customers" value={data?.customers.total} />
-        <KpiCard title="Revenue" value={data?.revenue.total} />
+        <KpiCard title="Customers" value={data?.customers?.total || 0} />
+        <KpiCard title="Revenue" value={data?.revenue?.total || 0} />
       </KpiGrid>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <OrderStatusChart data={PieData || []} loading={loading} />
-        <CompletionRateCard rate={data?.orders.completion_rate} />
+        <CompletionRateCard rate={data?.orders?.completion_rate || 0} />
         <RevenueComparisonChart data={revenueComparison} />
       </div>
 

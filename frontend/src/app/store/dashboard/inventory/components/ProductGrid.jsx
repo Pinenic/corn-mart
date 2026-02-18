@@ -38,13 +38,13 @@ export default function ProductGrid({
         <Card className="w-full p-2 px-0 mb-2 border-none" key={product.id}>
           <CardContent className="h-full px-3">
             <div className="flex flex-col justify-between h-full gap-4">
-              <div className="flex bg-muted rounded-lg h-40 justify-center items-center">
+              <div className="flex bg-muted rounded-lg h-40  justify-center items-center">
                 <Image
                   src={product.thumbnail_url}
                   alt="preview"
                   width={400}
                   height={100}
-                  className="object-contain w-full h-full"
+                  className="object-cover w-full h-full rounded-lg"
                 />
               </div>
               <div className="flex flex-col gap-2 md:justify-between h-16 md:mt-2">

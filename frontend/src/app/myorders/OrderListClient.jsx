@@ -38,15 +38,21 @@ export default function OrderList({ orders = [], loading, soid, onSelect }) {
           </div>
         ) : (
           <CardContent className="p-6">
-            {filteredStatus.map((mo) => (
-              <div
-                key={mo.id}
-                className="flex flex-col gap-4"
-                onClick={() => onSelect(mo.id)}
-              >
-                <OrderCard order={mo} selectedId={soid} />
-              </div>
-            ))}
+            {filteredStatus.length == 0 ? (
+              <p className="text-center font-medium text-gray-400">No {activeCategory == "all" ? "" : activeCategory} orders yet</p>
+            ) : (
+              <>
+                {filteredStatus.map((mo) => (
+                  <div
+                    key={mo.id}
+                    className="flex flex-col gap-4"
+                    onClick={() => onSelect(mo.id)}
+                  >
+                    <OrderCard order={mo} selectedId={soid} />
+                  </div>
+                ))}
+              </>
+            )}
           </CardContent>
         )}
       </Card>

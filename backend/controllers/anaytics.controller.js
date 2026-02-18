@@ -13,7 +13,11 @@ export const getAnalytics = async (req, res, next) => {
     const end = new Date(end_date);
     if (isNaN(start.getTime()) || isNaN(end.getTime())) throw new AppError('Invalid date format', 400, { code: 'INVALID_DATES' });
 
-    const response = await getStoreAnalytics(storeId, start, end);
+    // Format dates as ISO strings for Supabase
+    const startIso = start.toISOString();
+    const endIso = end.toISOString();
+
+    const response = await getStoreAnalytics(storeId, startIso, endIso);
 
     res.status(200).json({ success: true, data: response });
   } catch (error) {

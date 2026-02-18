@@ -9,7 +9,7 @@ export default function LoadingOverlay({ show = false, text = "Loading..." }) {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        "fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs"
       )}
     >
       <div className="flex flex-col items-center space-y-3 text-center text-white">

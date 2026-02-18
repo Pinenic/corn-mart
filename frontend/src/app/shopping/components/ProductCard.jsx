@@ -31,7 +31,7 @@ export default function ProductCard({ product, view = "Grid" }) {
               <img
                 src={product.thumbnail_url}
                 alt={product.name}
-                className="object-contain w-full h-full"
+                className="object-cover w-full h-full"
               />
             )}
           </div>
