@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { DollarSign, User, Users, Package, ShoppingBag } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
+import { formatNumber } from "@/utils/numberFormatter";
 
 export function SectionCards({
   revenue,
@@ -31,7 +32,7 @@ export function SectionCards({
                 <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
               </div>
             ) : (
-              <span>K {revenue}</span>
+              <span className="text-sm md:text-lg md: md:line-clamp-1">K {formatNumber(revenue)}</span>
             )}
           </CardTitle>
           <CardAction>
@@ -43,7 +44,7 @@ export function SectionCards({
           </CardAction>
         </CardHeader>
         {/* <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
+          <div className=" md:line-clamp-1 flex gap-2 font-medium">
             Trending up this month <IconTrendingUp className="size-4" />
           </div>
           <div className="text-muted-foreground">
@@ -60,7 +61,8 @@ export function SectionCards({
                 <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
               </div>
             ) : (
-              customers?.length
+              <span className="text-sm md:text-lg  md:line-clamp-1">{customers?.length}</span>
+              
             )}
           </CardTitle>
           <CardAction>
@@ -72,7 +74,7 @@ export function SectionCards({
           </CardAction>
         </CardHeader>
         {/* <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
+          <div className=" md:line-clamp-1 flex gap-2 font-medium">
             Down 20% this period <IconTrendingDown className="size-4" />
           </div>
           <div className="text-muted-foreground">
@@ -89,7 +91,8 @@ export function SectionCards({
                 <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
               </div>
             ) : (
-              orders?.length
+              <span className="text-sm md:text-lg  md:line-clamp-1">{orders?.length}</span>
+              
             )}
           </CardTitle>
           <CardAction>
@@ -101,7 +104,7 @@ export function SectionCards({
           </CardAction>
         </CardHeader>
         {/* <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
+          <div className=" md:line-clamp-1 flex gap-2 font-medium">
             Strong user retention <IconTrendingUp className="size-4" />
           </div>
           <div className="text-muted-foreground">Engagement exceed targets</div>
@@ -116,7 +119,8 @@ export function SectionCards({
                 <div className="flex-1 h-8 w-8 bg-muted rounded-lg" />
               </div>
             ) : (
-              products?.length
+              <span className="text-sm md:text-lg  md:line-clamp-1">{products?.length}</span>
+              
             )}
           </CardTitle>
           <CardAction>
@@ -128,7 +132,7 @@ export function SectionCards({
           </CardAction>
         </CardHeader>
         {/* <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
+          <div className=" md:line-clamp-1 flex gap-2 font-medium">
             Steady performance increase <IconTrendingUp className="size-4" />
           </div>
           <div className="text-muted-foreground">Meets growth projections</div>

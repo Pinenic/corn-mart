@@ -96,7 +96,7 @@ export default function ProductQuickViewModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[70vh] overflow-y-scroll">
+      <DialogContent className="max-w-3xl md:w-xl max-h-[70vh] md:h-fit overflow-y-scroll">
 
         <div className="grid grid-cols-1 mt-10 md:mt-0 md:grid-cols-2 gap-6">
 

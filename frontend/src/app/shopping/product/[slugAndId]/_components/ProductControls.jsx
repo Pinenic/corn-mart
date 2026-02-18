@@ -41,11 +41,11 @@ export default function ProductControls({
 
   return (
     <div className="mt-4 space-y-6">
-      <p className="text-3xl font-bold mt-2">
-        ZMW {formatNumber(selectedVariant?.price?.toFixed(2))}
+      <p className="text-xl md:text-2xl font-semibold md:font-bold mt-2">
+        K {formatNumber(selectedVariant?.price?.toFixed(2))}
       </p>
 
-      <p className="text-gray-700 whitespace-pre-line">
+      <p className="text-muted-foreground whitespace-pre-line">
         {selectedVariant?.description || product.description}
       </p>
 

@@ -1,4 +1,5 @@
 import { supabase } from "../supabaseClient.js";
+import { handleSupabaseError } from "../utils/handleSupabaseError.js";
 
 export async function createOrder(cart_id, buyer_id) {
   const { data, error } = await supabase.rpc("create_reservation", {
@@ -103,34 +104,49 @@ export async function getBuyerOrderDetails(orderId) {
 export async function getStoreOrders(storeId) {
   const { data: orders, error: ordersError } = await supabase
     .from("store_orders")
-    .select("*, order_items(*,products(name, thumbnail_url))")
+    .select("*, order_items(*,products(name, thumbnail_url)), order:order_id(buyer_id, users:buyer_id(id, full_name, email, avatar_url))")
     .eq("store_id", storeId)
     .order("created_at", { ascending: false });
 
-  if (ordersError) throw new Error(`Error fetching order, ${ordersError}`);
+  if (ordersError) {
+    throw handleSupabaseError(ordersError, {
+      message: "Failed to fetch store orders",
+    });
+  }
 
-  // For each order, fetch customer info and merge it
-  const ordersWithCustomer = await Promise.all(
-    orders.map(async (order) => {
-      const customer = await getCustomerInfo(order.order_id);
-      return { ...order, customer };
-    })
-  );
+  // Transform the response to match expected format
+  const ordersWithCustomer = orders.map((order) => {
+    const customer = order.order?.users?.[0] || {
+      id: null,
+      full_name: "Unknown",
+      email: "unknown@example.com",
+      avatar_url: null,
+    };
+    
+    return {
+      ...order,
+      customer,
+    };
+  });
 
-  // Return enriched results
   return ordersWithCustomer;
 }
 
 export async function getStoreOrderDetails(orderId) {
   const { data, error } = await supabase
     .from("store_orders")
-    .select("*, order_items(*,products(name, thumbnail_url))")
+    .select("*, order_items(*,products(name, thumbnail_url)), order:order_id(buyer_id, users:buyer_id(id, full_name, email, avatar_url))")
     .eq("id", orderId)
     .single();
 
-  if (error) throw new Error(`Error fetching the order, ${error}`);
+  if (error) throw handleSupabaseError(error, { message: "Failed to fetch store order details" });
 
-  const customer = await getCustomerInfo(data.order_id);
+  const customer = data.order?.users?.[0] || {
+    id: null,
+    full_name: "Unknown",
+    email: "unknown@example.com",
+    avatar_url: null,
+  };
 
   return { ...data, customer };
 }
@@ -242,25 +258,3 @@ export async function getLastRead(orderId, userId) {
 /**
  * HELPER FUNCTIONS
  */
-
-//profile helper
-async function getCustomerInfo(oId) {
-  const { data, error } = await supabase
-    .from("orders")
-    .select("id, buyer_id")
-    .eq("id", oId)
-    .single();
-
-  if (error) throw new Error(`Error fetching order info, ${error}`);
-
-  const { data: customer, error: customerError } = await supabase
-    .from("users")
-    .select("id, full_name, email, avatar_url")
-    .eq("id", data.buyer_id)
-    .single();
-
-  if (customerError)
-    throw new Error(`Error fetching customer info, ${customerError}`);
-
-  return customer;
-}
