@@ -48,8 +48,8 @@ export default function ProductList({
                 <Image
                   src={product.thumbnail_url}
                   alt="preview"
-                  width={60}
-                  height={60}
+                  width={600}
+                  height={600}
                   className="object-cover w-full h-full rounded-lg"
                 />
               </div>

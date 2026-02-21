@@ -25,8 +25,8 @@ const app = express();
 
 const corsOptions = { origin: '*' };
 
-// setInterval(notificationWorker, 5000); // every 5 sec
-// setInterval(emailWorker, 7000);        // every 7 sec
+ setInterval(notificationWorker, 60000); // every 60 sec
+ setInterval(emailWorker, 70000);        // every 70 sec
 
 app.use(cors(corsOptions));
 app.use(express.json());

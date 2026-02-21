@@ -1,6 +1,7 @@
 import { supabase } from "../supabaseClient.js";
 
 export async function notificationWorker() {
+  console.log("checking for new notifications...")
   const { data: notifications } = await supabase
     .from("notifications")
     .update({ status: "processing" })
@@ -8,7 +9,8 @@ export async function notificationWorker() {
     .select("*")
     .limit(25);
 
-  if (notifications.length == 0) {
+  if (!notifications || notifications.length == 0) {
+    console.log("No new notifications found...")
     return;
   }
 
