@@ -1,4 +1,4 @@
-import AppError from '../utils/AppError.js';
+import AppError from "../utils/AppError.js";
 import {
   updateStoreOrderStatus,
   getBuyerOrderDetails,
@@ -18,13 +18,18 @@ import {
 export const createNewOrder = async (req, res, next) => {
   try {
     const { cart_id, buyer_id } = req.body;
-    if (!cart_id || !buyer_id) throw new AppError('cart_id and buyer_id required', 400, { code: 'INVALID_PAYLOAD' });
+    if (!cart_id || !buyer_id)
+      throw new AppError("cart_id and buyer_id required", 400, {
+        code: "INVALID_PAYLOAD",
+      });
 
     const response = await createOrder(cart_id, buyer_id);
 
     if (!response) {
       // If exception in DB function, Supabase returns error
-      throw new AppError('Problem creating the order', 400, { code: 'ORDER_CREATION_FAILED' });
+      throw new AppError("Problem creating the order", 400, {
+        code: "ORDER_CREATION_FAILED",
+      });
     }
 
     return res.json({ order_id: response });
@@ -36,13 +41,18 @@ export const createNewOrder = async (req, res, next) => {
 export const shipOrder = async (req, res, next) => {
   try {
     const { storeOrderId, sellerId } = req.body;
-    if (!storeOrderId || !sellerId) throw new AppError('storeOrderId and sellerId required', 400, { code: 'INVALID_PAYLOAD' });
+    if (!storeOrderId || !sellerId)
+      throw new AppError("storeOrderId and sellerId required", 400, {
+        code: "INVALID_PAYLOAD",
+      });
 
     const response = await SellerShipOrder(storeOrderId, sellerId);
 
     if (!response) {
       // If exception in DB function, Supabase returns error
-      throw new AppError('Problem confirming the order', 400, { code: 'ORDER_CONFIRM_FAILED' });
+      throw new AppError("Problem confirming the order", 400, {
+        code: "ORDER_CONFIRM_FAILED",
+      });
     }
 
     return res.json({ order_id: response });
@@ -53,13 +63,18 @@ export const shipOrder = async (req, res, next) => {
 export const cancelOrder = async (req, res, next) => {
   try {
     const { storeOrderId, sellerId } = req.body;
-    if (!storeOrderId || !sellerId) throw new AppError('storeOrderId and sellerId required', 400, { code: 'INVALID_PAYLOAD' });
+    if (!storeOrderId || !sellerId)
+      throw new AppError("storeOrderId and sellerId required", 400, {
+        code: "INVALID_PAYLOAD",
+      });
 
     const response = await SellerCancelOrder(storeOrderId, sellerId);
 
     if (!response) {
       // If exception in DB function, Supabase returns error
-      throw new AppError('Problem cancelling the order', 400, { code: 'ORDER_CANCEL_FAILED' });
+      throw new AppError("Problem cancelling the order", 400, {
+        code: "ORDER_CANCEL_FAILED",
+      });
     }
 
     return res.json({ order_id: response });
@@ -81,7 +96,10 @@ export const updateStoreOrder = async (req, res, next) => {
       metadata
     );
     if (response) return res.json({ success: true, data: response });
-    throw new AppError('Problem updating store order', 400, { code: 'STORE_ORDER_UPDATE_FAILED', data: response });
+    throw new AppError("Problem updating store order", 400, {
+      code: "STORE_ORDER_UPDATE_FAILED",
+      data: response,
+    });
   } catch (err) {
     next(err);
   }
@@ -156,7 +174,10 @@ export const sendImageMessage = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const { userId, role } = req.body;
-    if (!req.files || req.files.length === 0) throw new AppError('No files uploaded', 400, { code: 'NO_FILES_UPLOADED' });
+    if (!req.files || req.files.length === 0)
+      throw new AppError("No files uploaded", 400, {
+        code: "NO_FILES_UPLOADED",
+      });
     const response = await postImagesMessage(orderId, userId, role, req.files);
     res.json(response);
   } catch (error) {

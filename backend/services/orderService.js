@@ -2,13 +2,29 @@ import { supabase } from "../supabaseClient.js";
 import { handleSupabaseError } from "../utils/handleSupabaseError.js";
 
 export async function createOrder(cart_id, buyer_id) {
-  const { data, error } = await supabase.rpc("create_reservation", {
+  
+  
+  try {
+    // Set a timeout for the RPC call (30 seconds)
+    // const controller = new AbortController();
+    // const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    const { data, error } = await supabase.rpc("create_reservation", {
     p_cart_id: cart_id,
     p_buyer_id: buyer_id,
   });
-  if (error) throw new Error(`${error}`);
+    
+    // clearTimeout(timeoutId);
+    
+    if(error) throw handleSupabaseError(error, { message: "Failed to create order" });
 
-  return data;
+    return data;
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('Create Order query timeout - request took too long');
+    }
+    throw err;
+  }
 }
 
 /*
@@ -116,7 +132,7 @@ export async function getStoreOrders(storeId) {
 
   // Transform the response to match expected format
   const ordersWithCustomer = orders.map((order) => {
-    const customer = order.order?.users?.[0] || {
+    const customer = order.order?.users || {
       id: null,
       full_name: "Unknown",
       email: "unknown@example.com",
@@ -141,7 +157,7 @@ export async function getStoreOrderDetails(orderId) {
 
   if (error) throw handleSupabaseError(error, { message: "Failed to fetch store order details" });
 
-  const customer = data.order?.users?.[0] || {
+  const customer = data.order?.users || {
     id: null,
     full_name: "Unknown",
     email: "unknown@example.com",

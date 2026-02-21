@@ -45,7 +45,7 @@ export async function emailWorker() {
           })
           .eq("id", job.id);
 
-        console.log('failed to send')
+        console.log('failed to send', err.message)
       }
     }
 
