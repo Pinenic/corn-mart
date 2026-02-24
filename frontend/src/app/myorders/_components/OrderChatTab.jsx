@@ -259,12 +259,12 @@ export default function ChatTab({ orders = [] }) {
     }
 
     // const uploadedMessages = await response.json();
-    console.log("now removing placeholder")
+    console.log("now removing placeholder");
 
     // 2️⃣ Remove placeholder after success
     setMessages((prev) => prev.filter((msg) => msg.id !== "__uploading__"));
 
-    console.log("placeholder removed")
+    console.log("placeholder removed");
     setSending(false);
     fileRef.current.value = null;
 
@@ -286,7 +286,7 @@ export default function ChatTab({ orders = [] }) {
               width={36}
               height={36}
               alt={sto.stores.name}
-              className="w-10 h-10 rounded-full object-cover"
+              className={ sto.id == selectedSto?.id ? "w-10 h-10 border-2 border-foreground hover:cursor-pointer rounded-full object-cover" : "w-10 h-10 hover:cursor-pointer rounded-full object-cover"}
             />
             <span className="text-xs hidden md:block">{sto.stores.name}</span>
           </button>

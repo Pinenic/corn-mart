@@ -19,3 +19,9 @@ export async function readAll(userId) {
         method: "PATCH"
     });
 }
+
+export async function viewAll(userId) {
+    return fetchApi(`/api/notifications/${userId}/view-all`, {
+        method: "PATCH"
+    });
+}

@@ -14,7 +14,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     document.title = "Notifications | Corn Mart";
   }, []);
-  const [notifications, setNotifications] = useState([]);
+  // const [notifications, setNotifications] = useState([]);
   const { init, user } = useAuthStore();
   const userId = user?.id;
   const [notificationz, setNotificationz] = useState([]);

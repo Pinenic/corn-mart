@@ -59,19 +59,33 @@ export const getSingleCategory = async (category) => {
 export const getProductsByCategory = async (category) => {
   const { data, error } = await supabase
     .from("categories")
-    .select("*,subcategories(*, products(*))")
-    .eq("slug", category);
+    .select(`
+      *,
+      subcategories(
+        *,
+        products(*)
+      )
+    `)
+    .eq("slug", category)
+    .eq("subcategories.products.is_active", true); //  FILTER HERE
 
-  if (error) throw new Error("Error fetching the category", error);
+  if (error) {
+    console.error(error);
+    throw new Error("Error fetching the category");
+  }
 
-  const organizedProducts = organizeProducts(data[0].subcategories);
-  const productsWithlocation = await Promise.all(
+  const organizedProducts = organizeProducts(
+    data?.[0]?.subcategories || []
+  );
+
+  const productsWithLocation = await Promise.all(
     organizedProducts.map(async (product) => {
       const location = await productLocationHelper(product.store_id);
       return { ...product, location };
     })
   );
-  return productsWithlocation;
+
+  return productsWithLocation;
 };
 
 export const getSubCategory = async (maincat, category) => {
@@ -79,6 +93,7 @@ export const getSubCategory = async (maincat, category) => {
   const { data, error } = await supabase
     .from("subcategories")
     .select("*, products(*)")
+    .eq("products.is_active", true)
     .eq("category_id", Category[0].id)
     .eq("slug", category);
 
@@ -138,7 +153,8 @@ async function searchHelper(query, storeId = null) {
   let productQuery = supabase
     .from("products")
     .select("*")
-    .ilike("name", `%${query}%`);
+    .ilike("name", `%${query}%`)
+    .eq("is_active", true);
 
   // ✅ If storeId exists → limit to store
   if (storeId) {

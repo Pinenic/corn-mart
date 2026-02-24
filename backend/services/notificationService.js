@@ -47,3 +47,15 @@ export async function markAllAsRead(userId) {
 
     return true;
 }
+
+
+export async function markAllAsViewed(userId) {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ viewed: true })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    return true;
+}

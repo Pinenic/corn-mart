@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useProfile } from "./useProfile";
 import { useCart } from "./useCart";
 import { useStoreStore } from "./useStore";
-import useNotifications from "@/hooks/useNotifications";
+import useNotifications from "@/hooks/useNotificationsRealtime";
 import { useNotificationStore } from "./useNotificationStore";
 
 export const useAuthStore = create((set, get) => ({
