@@ -17,6 +17,7 @@ export const getStore = async (id) => {
     .from("stores")
     .select("*, products(*), location:store_locations(city, province)")
     .eq("id", id)
+    .eq("products.is_active", true)
     .single();
 
   if (error) return null;

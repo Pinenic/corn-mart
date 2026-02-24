@@ -13,6 +13,8 @@ import { useProfile } from "@/store/useProfile";
 import CartDrawer from "../cart/CartDrawer";
 import { ThemeToggle } from "../darkModeButton";
 import { useStoreStore } from "@/store/useStore";
+import NotificationBell from "../notifications/Notificationbutton";
+import useNotificationsRealtime from "@/hooks/useNotificationsRealtime";
 
 export default function Header() {
   const pathname = usePathname();
@@ -40,6 +42,8 @@ export default function Header() {
     { name: "Stores", href: "/stores" },
     { name: "About", href: "/about" },
   ];
+
+  
 
   return (
     <header className="sticky top-0 z-50 bg-white/70 dark:bg-muted/40 backdrop-blur-md border-b border-gray-100 dark:border-none shadow-sm">
@@ -90,14 +94,16 @@ export default function Header() {
               {/* Cart icon */}
               <CartDrawer />
 
-              <Button
+              <NotificationBell user={user}/>
+
+              {/* <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => router.push("/notifications")}
                 className="hover:text-primary"
               >
                 <Bell size={22} />
-              </Button>
+              </Button> */}
 
               {/* User avatar dropdown */}
               <DropdownMenu>

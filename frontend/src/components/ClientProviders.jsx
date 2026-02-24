@@ -5,13 +5,16 @@ import { useAuthStore } from "@/store/useAuthStore";
 import Header from "@/components/layout/Header";
 import ToasterProvider from "@/components/ToasterProvider";
 import { ThemeProvider } from "@/components/theme-provider";
+import useNotificationsRealtime from "@/hooks/useNotificationsRealtime";
 
 export default function ClientProviders({ children }) {
-  const { init } = useAuthStore();
+  const { init, user } = useAuthStore();
 
   useEffect(() => {
     init();
   }, [init]);
+
+  useNotificationsRealtime(user?.id);
 
   return (
     <ThemeProvider
