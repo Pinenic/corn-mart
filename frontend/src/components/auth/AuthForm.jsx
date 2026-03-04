@@ -41,7 +41,7 @@ export default function AuthForm({ mode = "signup", onSubmit }) {
       )}
 
       <InputField label="Email" name="email" type="email" />
-      <InputField label="Password" name="password" type="password" />
+      <InputField label="Password" name="password" type="password" isSignup={isSignup}/>
 
       {error && (
         <div className="text-red-600 text-sm text-center">{error}</div>

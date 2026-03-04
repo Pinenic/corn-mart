@@ -8,6 +8,7 @@ import storeRoutes from './routes/storeRoutes.js';
 import invetoryRoutes from './routes/inventoryRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import analyticsRoutes from './routes/analytics.routes.js'
+import authRoutes from './routes/auth.routes.js'
 import marketplaceRoutes from './routes/marketplaceRoutes.js'
 import notificationRoutes from './routes/notificationsRoutes.js'
 import { notificationWorker } from './workers/notificationWorker.js';
@@ -31,6 +32,7 @@ const corsOptions = { origin: '*' };
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/stores', storeRoutes);

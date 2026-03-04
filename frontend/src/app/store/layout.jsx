@@ -1,7 +1,7 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export default function RootLayout({ children }) {
+export default function DashboardLayout({ children }) {
   return (
     <main className="min-h-screen">
       <AuthGuard>

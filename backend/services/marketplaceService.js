@@ -1,6 +1,6 @@
 import { supabase } from "../supabaseClient.js";
 
-export const getAllProducts = async ({ offset = 0, limit = 12 }) => {
+export const getAllProducts = async ({ offset = 0, limit = 24 }) => {
   let hasMore = true;
   const from = offset * limit;
   const to = from + (limit - 1);

@@ -26,6 +26,7 @@ export default function Page() {
     document.title = "Shop | Corn Mart";
   }, []);
   const [products, setProducts] = useState([]);
+  const [initialHasMore, setInitialHasMore] = useState(true)
   const [loading, setLoading] = useState(false);
   const [searchResults, setResults] = useState([]);
   // const [searchLoading, setSearchLoadin] = useState(false);
@@ -35,6 +36,8 @@ export default function Page() {
       setLoading(true);
       const res = await getAllProducts(0);
       setProducts(res.data.productsWithlocation);
+      setInitialHasMore(res.data.hasMore)
+      console.log(res.data.productsWithlocation)
       setLoading(false);
     } catch (error) {
       console.error("failed to fetch products", error);
@@ -79,7 +82,7 @@ export default function Page() {
               title="Search results"
             />
           ) : (
-            <ProductGrid initialProducts={products} loading={loading} />
+            <ProductGrid initialProducts={products} initialHasMore={initialHasMore} loading={loading} />
           )}
         </>
       )}

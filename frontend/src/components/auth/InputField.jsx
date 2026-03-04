@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useState } from "react";
 
 export default function InputField({
@@ -5,11 +6,11 @@ export default function InputField({
   name,
   type = "text",
   required = true,
+  isSignup,
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
-  const inputType =
-    type === "password" && showPassword ? "text" : type;
+  const inputType = type === "password" && showPassword ? "text" : type;
 
   return (
     <div className="flex flex-col space-y-1">
@@ -29,15 +30,18 @@ export default function InputField({
       />
 
       {type === "password" && (
-        <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mt-1">
-          <input
-            type="checkbox"
-            checked={showPassword}
-            onChange={(e) => setShowPassword(e.target.checked)}
-            className="accent-leafGreen-500"
-          />
-          Show password
-        </label>
+        <div className="flex justify-between mt-2">
+          <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={(e) => setShowPassword(e.target.checked)}
+              className="accent-leafGreen-500"
+            />
+            Show password
+          </label>
+          {/* <Link href={'/recovery/forgot-password'} className="text-sm hover:text-primary/90"> Forgot password?</Link> */}
+        </div>
       )}
     </div>
   );
