@@ -15,6 +15,8 @@ import ProductCard from "./ProductCard";
 // import CategorySidebar from "./components/CategorySidebar";
 import { AutoBreadcrumb } from "./AutoBreadcrumb";
 import { getAllProducts, searchMarket } from "@/lib/marketplaceApi";
+import { saveLastClickedItem } from "@/utils/lastClickedItem";
+import useRestoreLastItem from "@/hooks/useRestoreLastItem";
 
 const Categories = [
   "Electronics",
@@ -38,13 +40,18 @@ const SORT_OPTIONS = [
   // { key: "popular", label: "Most Popular" },
 ];
 
-export default function ProductGrid({ initialProducts, loading, title }) {
+export default function ProductGrid({
+  initialProducts,
+  initialHasMore,
+  loading,
+  title,
+}) {
   const { ref, inView } = useInView();
   const [view, setView] = useState("Grid");
   const [products, setProducts] = useState(initialProducts);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(initialHasMore);
   const [sort, setSort] = useState(null);
 
   const sortedProducts = useMemo(() => {
@@ -60,7 +67,7 @@ export default function ProductGrid({ initialProducts, loading, title }) {
       sorted.sort((a, b) => b.price - a.price);
     }
 
-    console.log(sorted)
+    console.log(sorted);
 
     return sorted;
   }, [products, sort]);
@@ -86,6 +93,8 @@ export default function ProductGrid({ initialProducts, loading, title }) {
       setLoadingMore(false);
     }
   }
+  const ready = sortedProducts.length > 0;
+  useRestoreLastItem("last-item", ready);
 
   return (
     <div className="flex">
@@ -160,7 +169,15 @@ export default function ProductGrid({ initialProducts, loading, title }) {
           {loading
             ? [...Array(8)].map((_, i) => <SkeletonProductCard key={i} />)
             : sortedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} view={view} />
+                <div
+                  id={`item-${product.id}`}
+                  key={product.id}
+                  onClick={() => {
+                    saveLastClickedItem("last-item", product.id);
+                  }}
+                >
+                  <ProductCard key={product.id} product={product} view={view} />
+                </div>
               ))}
 
           {/* Skeleton Loader for Loading More */}
@@ -186,11 +203,7 @@ export default function ProductGrid({ initialProducts, loading, title }) {
               </Button>
             )}
 
-          {!hasMore && (
-            <p className="text-gray-500 mt-2 text-sm">
-              no more products to load.
-            </p>
-          )}
+          {!hasMore && <p className="text-gray-500 mt-2 text-sm">No more.</p>}
         </div>
       </main>
     </div>

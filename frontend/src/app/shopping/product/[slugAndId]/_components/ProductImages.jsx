@@ -16,8 +16,8 @@ export function ProductImages({ images }) {
   if (!images || images.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative w-full rounded-xl overflow-hidden border">
+    <div className="flex flex-col gap-4 items-center">
+      <div className="relative w-sm rounded-xl overflow-hidden border">
         {activeImage && (
           <Image
             src={activeImage}

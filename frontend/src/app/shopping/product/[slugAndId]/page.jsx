@@ -5,6 +5,7 @@ import { getProductById } from "@/lib/marketplaceApi";
 import { parseSlugAndId } from "./_utils/parseSlugAndId";
 import { ProductImages } from "./_components/ProductImages";
 import ProductClientWrapper from "./ProductClientWrapper";
+import ProductPageStage from "./productpageStage";
 
 export async function generateMetadata(props) {
   const params = await props.params;
@@ -61,7 +62,7 @@ export default async function Page(props) {
           <ProductControls product={product} />
         </div>
       </div> */}
-      <ProductClientWrapper product={product} />
+      <ProductPageStage product={product} />
 
       {/* SEO: JSON-LD */}
       <script

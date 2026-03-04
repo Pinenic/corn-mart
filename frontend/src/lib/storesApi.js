@@ -99,7 +99,6 @@ export default function getStoreAnalytics(storeId, start, end) {
     }),
   });
 }
-
 // helper formdata builder function
 
 export function buildLocationFormData(data) {

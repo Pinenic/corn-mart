@@ -2,7 +2,7 @@ import { fetchApi } from "./apiClient";
 
 export async function getAllProducts(offset, limit) {
   return fetchApi(
-    `/api/marketplace?limit=${limit ? limit : 12}&offset=${offset}`
+    `/api/marketplace?limit=${limit ? limit : 24}&offset=${offset}`
   );
 }
 

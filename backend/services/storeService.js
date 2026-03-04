@@ -166,14 +166,13 @@ export const createLocation = async (storeId, locationData) => {
     throw new Error(error.message);
   }
 
-  return(data);
+  return data;
 };
 
 /**
  * Get store location
  */
 export const getLocation = async (storeId) => {
-
   const { data, error } = await supabase
     .from("store_locations")
     .select("*")
@@ -184,14 +183,13 @@ export const getLocation = async (storeId) => {
     throw new Error(error.message);
   }
 
-  return(data);
+  return data;
 };
 
 /**
  * Update store location
  */
 export const updateLocation = async (storeId, update) => {
-
   const { data, error } = await supabase
     .from("store_locations")
     .update(update)
@@ -203,7 +201,7 @@ export const updateLocation = async (storeId, update) => {
     throw new Error(error.message);
   }
 
-  return(data);
+  return data;
 };
 
 /**
@@ -221,5 +219,5 @@ export const deleteLocation = async (req, res) => {
     throw new Error(error.message);
   }
 
-  return { success : true};
+  return { success: true };
 };

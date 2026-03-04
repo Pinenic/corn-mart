@@ -6,10 +6,13 @@ import { Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { getStores } from "@/lib/storesApi";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+import { saveLastClickedItem } from "@/utils/lastClickedItem";
+import useRestoreLastItem from "@/hooks/useRestoreLastItem";
 
 export default function StoresPage() {
   useEffect(() => {
-    document.title = 'Stores | Corn Mart';
+    document.title = "Stores | Corn Mart";
   }, []);
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,16 +35,21 @@ export default function StoresPage() {
     fetchStores();
   }, []);
 
+  const ready = stores.length > 0;
+  useRestoreLastItem("last-item", ready);
+
+  useScrollRestoration(!loading);
+
   const skeletonCards = Array.from({ length: 8 }).map((_, i) => (
     <Card
       key={`skeleton-${i}`}
       className="hover:shadow-lg transition-all border border-muted bg-muted rounded-xl overflow-hidden"
     >
       <div className="animate-pulse">
-      <div className="bg-gray-300 dark:bg-gray-700 h-36 w-full rounded-md"></div>
-      <div className="mt-2 h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
-      <div className="mt-2 h-4 bg-gray-300 dark:bg-gray-700 w-1/2 rounded"></div>
-    </div>
+        <div className="bg-gray-300 dark:bg-gray-700 h-36 w-full rounded-md"></div>
+        <div className="mt-2 h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+        <div className="mt-2 h-4 bg-gray-300 dark:bg-gray-700 w-1/2 rounded"></div>
+      </div>
     </Card>
   ));
 
@@ -51,41 +59,52 @@ export default function StoresPage() {
         Explore Stores
       </h1>
 
-      <Button className={"mb-2"} onClick={() => router.push("/selling/onboarding")}>
+      <Button
+        className={"mb-2"}
+        onClick={() => router.push("/selling/onboarding")}
+      >
         <Plus /> Create Store
       </Button>
 
-      {error && (
-        <p className="text-sm text-red-500 mb-4">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {loading
           ? skeletonCards
           : stores.map((store) => (
-              <Link href={`/stores/${store.id}`} key={store.id}>
-                <Card className="hover:shadow-lg transition-all border border-muted bg-muted rounded-xl overflow-hidden">
-                  <img
-                    src={store.banner}
-                    alt={store.name}
-                    className="w-full h-40 object-cover"
-                  />
-                  <div className="p-4">
-                    <h2 className="font-semibold text-primary text-lg truncate">
-                      {store.name}
-                    </h2>
-                    <p className="text-sm text-nuted-foreground mb-2 line-clamp-2">
-                      {store.description}
-                    </p>
-                    <div className="flex items-center text-nuted-foreground text-sm">
-                      <Users size={16} className="mr-1" />
-                      {store.followers_count} follows
+              <div
+                id={`item-${store.id}`}
+                key={store.id}
+                onClick={() => {
+                  saveLastClickedItem("last-item", store.id);
+                }}
+              >
+                <Link
+                  href={`/stores/${store.id}`}
+                  key={store.id}
+                  scroll={false}
+                >
+                  <Card className="hover:shadow-lg transition-all border border-muted bg-muted rounded-xl overflow-hidden">
+                    <img
+                      src={store.banner}
+                      alt={store.name}
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="p-4">
+                      <h2 className="font-semibold text-primary text-lg truncate">
+                        {store.name}
+                      </h2>
+                      <p className="text-sm text-nuted-foreground mb-2 line-clamp-2">
+                        {store.description}
+                      </p>
+                      <div className="flex items-center text-nuted-foreground text-sm">
+                        <Users size={16} className="mr-1" />
+                        {store.followers_count} follows
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </Link>
+                  </Card>
+                </Link>
+              </div>
             ))}
       </div>
     </div>

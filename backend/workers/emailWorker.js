@@ -11,7 +11,7 @@ function buildEmailTemplate(notification) {
 }
 
 export async function emailWorker() {
-    console.log("starting to send emails")
+  console.log("starting to send emails");
   try {
     const { data: jobs } = await supabase
       .from("notification_deliveries")
@@ -25,7 +25,7 @@ export async function emailWorker() {
         await sendEmail({
           to: job.recipient,
           subject: job.notifications.title,
-          html: buildEmailTemplate(job.notifications)
+          html: buildEmailTemplate(job.notifications),
         });
 
         await supabase
@@ -33,22 +33,20 @@ export async function emailWorker() {
           .update({ status: "sent" })
           .eq("id", job.id);
 
-        console.log("sent", job.id)
-
+        console.log("sent", job.id);
       } catch (err) {
         await supabase
           .from("notification_deliveries")
           .update({
             status: "failed",
             attempts: job.attempts + 1,
-            last_error: err.message
+            last_error: err.message,
           })
           .eq("id", job.id);
 
-        console.log('failed to send', err.message)
+        console.log("failed to send", err.message);
       }
     }
-
   } catch (err) {
     console.error("Email Worker Error:", err.message);
   }

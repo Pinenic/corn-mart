@@ -40,6 +40,25 @@ function ProductImages({ images }) {
           />
         )}
       </div>
+
+      <div className="flex gap-3 justify-center overflow-x-auto">
+        {images.map((img) => (
+          <button
+            key={img.id}
+            onClick={() => setActiveImage(img.image_url)}
+            className={`relative w-20 h-20 rounded-md overflow-hidden border ${
+              activeImage === img.image_url ? "ring-2 ring-primary" : ""
+            }`}
+          >
+            <Image
+              src={img.image_url}
+              alt="thumb"
+              fill
+              className="object-cover"
+            />
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -48,21 +67,15 @@ function ProductImages({ images }) {
 /* Modal */
 /* ---------------------------------- */
 
-export default function ProductQuickViewModal({
-  open,
-  onOpenChange,
-  product,
-}) {
-
+export default function ProductQuickViewModal({ open, onOpenChange, product }) {
   // ✅ Hooks must ALWAYS be first
   const [fullProd, setFullProd] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [loading, setLoading] = useState(false);
+  const VIEW = "modal";
 
   const imagesToShow = useMemo(() => {
-    if (
-      selectedVariant?.product_images?.length > 0
-    ) {
+    if (selectedVariant?.product_images?.length > 0) {
       return selectedVariant.product_images;
     }
 
@@ -97,15 +110,9 @@ export default function ProductQuickViewModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl md:w-xl max-h-[70vh] md:h-fit overflow-y-scroll">
-
         <div className="grid grid-cols-1 mt-10 md:mt-0 md:grid-cols-2 gap-6">
-
           {/* Images */}
-          {loading ? (
-            <p />
-          ) : (
-            <ProductImages images={imagesToShow} />
-          )}
+          {loading ? <p /> : <ProductImages images={imagesToShow} />}
 
           {/* Details */}
           <div className="space-y-4">
@@ -122,13 +129,11 @@ export default function ProductQuickViewModal({
                 product={fullProd}
                 setSelectedVariant={setSelectedVariant}
                 selectedVariant={selectedVariant}
+                view={VIEW}
               />
             )}
-
           </div>
-
         </div>
-
       </DialogContent>
     </Dialog>
   );
