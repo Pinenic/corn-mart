@@ -160,7 +160,7 @@ export default function StoreOnboarding() {
                               <Label htmlFor="storeName">Store name</Label>
                               <Input
                                 id="storeName"
-                                placeholder="E.g. Mika's Cakery"
+                                placeholder="E.g. Corn Mart"
                                 value={storeName}
                                 onChange={(e) => setStoreName(e.target.value)}
                               />

@@ -1,32 +1,27 @@
 import { v4 as uuidv4 } from "uuid";
 
 export const passwordRecovery = async (req, res) => {
-  const hash = req.url.split("#")[1];
-  const params = new URLSearchParams(hash);
+  const access_token = req.body?.access_token || req.query.access_token;
 
-  const access_token = params.get("access_token");
+  // console.log(access_token);
 
   if (!access_token) {
-    return res.status(400).send("Invalid recovery link");
+    return res.status(400).json({ error: "Invalid recovery link" });
   }
 
-  // Create temporary reset session
   const resetSessionId = uuidv4();
-
-  // Store securely (Redis or DB recommended)
   global.resetSessions = global.resetSessions || {};
   global.resetSessions[resetSessionId] = {
     access_token,
-    expires: Date.now() + 10 * 60 * 1000
+    expires: Date.now() + 10 * 60 * 1000,
   };
 
-  // send safe cookie to browser
   res.cookie("reset_session", resetSessionId, {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict"
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
   });
 
-  // redirect to frontend reset page
-  res.redirect("https://yourfrontend.com/reset-password");
-}
+  // Return JSON instead of redirecting (let Next.js handle the redirect)
+  res.status(200).json({ success: true });
+};

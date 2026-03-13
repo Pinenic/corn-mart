@@ -41,50 +41,51 @@ export default function NotificationBell({ user }) {
   useNotificationsRealtime(user?.id);
 
   useEffect(() => {
+    if (!user?.id) return;
     fetchNotifications();
     console.log(notifications);
   }, [user]);
 
   useEffect(() => {
-      if (!user?.id) return;
-  
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
-  
-      const channel = supabase
-        .channel(`notifications-${user?.id}`)
-  
-        // NEW
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "notifications",
-            filter: `user_id=eq.${user?.id}`,
-          },
-          (payload) => addNotification(payload.new)
-        )
-  
-        // UPDATED
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "notifications",
-            filter: `user_id=eq.${user?.id}`,
-          },
-          (payload) => updateNotification(payload.new)
-        )
-  
-        .subscribe();
-  
-      channelRef.current = channel;
-  
-      return () => supabase.removeChannel(channel);
-    }, [user]);
+    if (!user?.id) return;
+
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
+    const channel = supabase
+      .channel(`notifications-${user?.id}`)
+
+      // NEW
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user?.id}`,
+        },
+        (payload) => addNotification(payload.new)
+      )
+
+      // UPDATED
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user?.id}`,
+        },
+        (payload) => updateNotification(payload.new)
+      )
+
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => supabase.removeChannel(channel);
+  }, [user]);
 
   return (
     <DropdownMenu onOpenChange={(open) => open && handleOpen()}>

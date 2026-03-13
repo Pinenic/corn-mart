@@ -1,48 +1,51 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
-import userRoutes from './routes/userRoutes.js';
-import productRoutes from './routes/productRoutes.js';
-import storeRoutes from './routes/storeRoutes.js';
-import invetoryRoutes from './routes/inventoryRoutes.js'
-import orderRoutes from './routes/orderRoutes.js'
-import analyticsRoutes from './routes/analytics.routes.js'
-import authRoutes from './routes/auth.routes.js'
-import marketplaceRoutes from './routes/marketplaceRoutes.js'
-import notificationRoutes from './routes/notificationsRoutes.js'
-import { notificationWorker } from './workers/notificationWorker.js';
-import { emailWorker } from './workers/emailWorker.js';import notFoundHandler from './middlewares/notFoundHandler.js';
-import errorHandler from './middlewares/errorHandler.js';// import checkoutRoute from './routes/checkout.js'
+import userRoutes from "./routes/userRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import storeRoutes from "./routes/storeRoutes.js";
+import invetoryRoutes from "./routes/inventoryRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+import marketplaceRoutes from "./routes/marketplaceRoutes.js";
+import notificationRoutes from "./routes/notificationsRoutes.js";
+import { notificationWorker } from "./workers/notificationWorker.js";
+import { emailWorker } from "./workers/emailWorker.js";
+import notFoundHandler from "./middlewares/notFoundHandler.js";
+import errorHandler from "./middlewares/errorHandler.js"; // import checkoutRoute from './routes/checkout.js'
+import { corsOptions } from "./config/cors.js";
 // import payoutRouter from './routes/payout.js'
 // import momoCheckoutRoute from './routes/momoCheckout.js';
 // import { pollPendingPayments } from './jobs/pollPendingPayments.js';
 // import { pollEligiblePayouts } from './jobs/pollPayouts.js';
 
-
-
 dotenv.config();
 const app = express();
 
-const corsOptions = { origin: '*' };
+// const corsOptions = { origin: "*" };
+// app.options("*", cors(corsOptions));
 
- setInterval(notificationWorker, 60000); // every 60 sec
- setInterval(emailWorker, 70000);        // every 70 sec
+setInterval(notificationWorker, 60000); // every 60 sec
+setInterval(emailWorker, 70000); // every 70 sec
 
 app.use(cors(corsOptions));
+app.use(cookieParser())
 app.use(express.json());
 
-// app.use('/api/auth', authRoutes)
-app.use('/api/users', userRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/stores', storeRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/stores", storeRoutes);
 // app.use('/api/checkout', momoCheckoutRoute);
 // app.use('/api/payout', payoutRouter);
-app.use('/api/inventory', invetoryRoutes)
-app.use('/api/orders', orderRoutes);
-app.use("/api/analytics", analyticsRoutes)
-app.use('/api/marketplace', marketplaceRoutes)
-app.use('/api/notifications', notificationRoutes);
+app.use("/api/inventory", invetoryRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/marketplace", marketplaceRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
@@ -50,4 +53,6 @@ app.use(errorHandler);
 // pollPendingPayments();
 // pollEligiblePayouts();
 const PORT = process.env.PORT || 5000;
-app.listen(PORT,"0.0.0.0", () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, "0.0.0.0", () =>
+  console.log(`Server running on port ${PORT}`)
+);

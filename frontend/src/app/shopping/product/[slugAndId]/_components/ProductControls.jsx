@@ -22,7 +22,7 @@ export default function ProductControls({
   product,
   selectedVariant,
   setSelectedVariant,
-  view
+  view,
 }) {
   const { user, init } = useAuthStore();
   const { addItem, loading } = useCart();
@@ -42,7 +42,7 @@ export default function ProductControls({
 
     setAdding(true);
     try {
-      await addItem(product.id, selectedVariant.id, quantity);
+      await addItem(product.id, selectedVariant.id, quantity, selectedVariant.stock);
     } finally {
       setAdding(false);
     }
@@ -107,12 +107,16 @@ export default function ProductControls({
           <p className="text-sm text-muted-foreground">
             ({selectedVariant?.stock} available)
           </p>
-          {view == "page" ? <Link
-            href={`/stores/${product?.store_id}`}
-            className="underline text-sm text-primary hover:text-blue-300"
-          >
-            More from store
-          </Link> : ""}
+          {view == "page" ? (
+            <Link
+              href={`/stores/${product?.store_id}`}
+              className="underline text-sm text-primary hover:text-blue-300"
+            >
+              More from store
+            </Link>
+          ) : (
+            ""
+          )}
         </div>
         <Accordion type="single" collapsible defaultValue="item-1" clas>
           <AccordionItem value="item-1">

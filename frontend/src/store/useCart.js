@@ -80,22 +80,24 @@ export const useCart = create(
     // -------------------------
     // Add Item (Optimistic + RPC)
     // -------------------------
-    addItem: async (productId, variantId, quantity) => {
+    addItem: async (productId, variantId, quantity, stock) => {
       const prevItems = get().items;
 
-      // optimistic UI update
-      const fakeId = "temp-" + Math.random();
-      const optimisticItem = {
-        id: fakeId,
-        product_id: productId,
-        variant_id: variantId,
-        quantity,
-        price: 0, // will correct after reload
-      };
-      console.log("addItem args:", { productId, variantId, quantity });
+      // Check if item already exists in cart
+      const existingItem = prevItems.find(
+        (item) => item.product_id === productId && item.variant_id === variantId
+      );
 
-      // set({ items: [...prevItems, optimisticItem] });
-      // get().calculateTotals([...prevItems, optimisticItem]);
+      // Guard against exceeding stock limit
+      if (existingItem) {
+        const newQuantity = existingItem.quantity + quantity;
+        if (newQuantity > stock) {
+          toast.error("Cannot add item", {
+            description: "Quantity will exceed stock available.",
+          });
+          return;
+        }
+      }
 
       // RPC call
       const { error } = await supabase.rpc("add_to_cart", {
@@ -105,23 +107,18 @@ export const useCart = create(
       });
 
       if (error) {
-        // rollback
         set({ items: prevItems });
         get().calculateTotals(prevItems);
-
-        console.error(error)
-
-         toast.error("Failed to add item", {
-           description: "Not enough stock",
-         });
-
+        console.error(error);
+        toast.error("Failed to add item", {
+          description: "Not enough stock",
+        });
         return;
       }
 
       toast.success("Added to cart", {
         description: "Item was added successfully.",
       });
-
       await get().getCart(get().user);
     },
 
