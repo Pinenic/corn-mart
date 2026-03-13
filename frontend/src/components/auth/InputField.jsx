@@ -40,7 +40,7 @@ export default function InputField({
             />
             Show password
           </label>
-          {/* <Link href={'/recovery/forgot-password'} className="text-sm hover:text-primary/90"> Forgot password?</Link> */}
+          <Link href={'/recovery/forgot-password'} className="text-sm hover:text-primary/90"> Forgot password?</Link> 
         </div>
       )}
     </div>
