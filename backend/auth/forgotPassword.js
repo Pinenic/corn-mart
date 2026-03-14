@@ -12,9 +12,11 @@ export const forgotPassword = async (req, res, next) => {
        });
      }
 
+     console.log(process.env.FRONTEND_URL);
+
      await supabase.auth.resetPasswordForEmail(email, {
        redirectTo: `${
-         process.env.FRONTEND_URL || "http://localhost:3000"
+         process.env.FRONTEND_URL || "https://www.pinapps.net"
        }/recovery/redirect`,
      });
 
