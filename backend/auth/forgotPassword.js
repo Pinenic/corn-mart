@@ -12,6 +12,8 @@ export const forgotPassword = async (req, res, next) => {
        });
      }
 
+     console.log(process.env.FRONTEND_URL);
+
      await supabase.auth.resetPasswordForEmail(email, {
        redirectTo: `${
          process.env.FRONTEND_URL || "https://www.pinapps.net"
