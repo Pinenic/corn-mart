@@ -7,8 +7,8 @@ const supabaseAdmin = createClient(
 );
 
 export const resetPassword = async (req, res) => {
-  // const sessionId = req.cookies.reset_session;
-  // const session = global.resetSessions?.[sessionId];
+  const sessionId = req.cookies.reset_session;
+  const session = global.resetSessions?.[sessionId];
 
   if (!session || session.expires < Date.now()) {
     console.log("Reset session expired" )
