@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.example
+.env.local
+.env.*.local
+dist/
+coverage/
+*.log
+.DS_Store
+
+
+# miscelleneous
+IMAGE_UPLOAD_ANALYSIS.md
+IMPLEMENTATION_COMPLETE.md

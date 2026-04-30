@@ -1,58 +1,88 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import cookieParser from "cookie-parser";
+// server.js
+// Process entry point. Starts the HTTP server and handles graceful shutdown.
+//
+// Graceful shutdown matters because:
+//   - In-flight requests should complete before the process exits
+//   - Supabase connections should be released cleanly
+//   - Kubernetes/Docker send SIGTERM before force-killing a container
 
-import userRoutes from "./routes/userRoutes.js";
-import productRoutes from "./routes/productRoutes.js";
-import storeRoutes from "./routes/storeRoutes.js";
-import invetoryRoutes from "./routes/inventoryRoutes.js";
-import orderRoutes from "./routes/orderRoutes.js";
-import analyticsRoutes from "./routes/analytics.routes.js";
-import authRoutes from "./routes/auth.routes.js";
-import marketplaceRoutes from "./routes/marketplaceRoutes.js";
-import notificationRoutes from "./routes/notificationsRoutes.js";
-import { notificationWorker } from "./workers/notificationWorker.js";
-import { emailWorker } from "./workers/emailWorker.js";
-import notFoundHandler from "./middlewares/notFoundHandler.js";
-import errorHandler from "./middlewares/errorHandler.js"; // import checkoutRoute from './routes/checkout.js'
-import { corsOptions } from "./config/cors.js";
-// import payoutRouter from './routes/payout.js'
-// import momoCheckoutRoute from './routes/momoCheckout.js';
-// import { pollPendingPayments } from './jobs/pollPendingPayments.js';
-// import { pollEligiblePayouts } from './jobs/pollPayouts.js';
+// dotenv must be the very first import so env vars are loaded
+// before any other module (especially config/env.js) is evaluated
+import "dotenv/config";
 
-dotenv.config();
-const app = express();
+import app from "./src/app.js";
+import env from "./src/config/env.js";
+import logger from "./src/utils/logger.js";
+import { emailWorker } from "./src/workers/emailWorker.js";
+import { notificationWorker } from "./src/workers/notificationWorker.js";
 
-// const corsOptions = { origin: "*" };
-// app.options("*", cors(corsOptions));
+let server;
 
-setInterval(notificationWorker, 60000); // every 60 sec
-setInterval(emailWorker, 70000); // every 70 sec
+function start() {
+  server = app.listen(env.PORT, () => {
+    logger.info(`Corn Mart API running`, {
+      port: env.PORT,
+      env: env.NODE_ENV,
+      version: process.env.npm_package_version || "1.0.0",
+    });
+  });
 
-app.use(cors(corsOptions));
-app.use(cookieParser())
-app.use(express.json());
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      logger.error(`Port ${env.PORT} is already in use`);
+    } else {
+      logger.error("Server error", { message: err.message });
+    }
+    process.exit(1);
+  });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/stores", storeRoutes);
-// app.use('/api/checkout', momoCheckoutRoute);
-// app.use('/api/payout', payoutRouter);
-app.use("/api/inventory", invetoryRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/marketplace", marketplaceRoutes);
-app.use("/api/notifications", notificationRoutes);
+  setInterval(notificationWorker, 60000); // every 60 sec
+  setInterval(emailWorker, 70000); // every 70 sec
+}
 
-app.use(notFoundHandler);
-app.use(errorHandler);
+// ── Graceful shutdown ─────────────────────────────────────────
+// Stops accepting new connections, waits for in-flight requests to finish,
+// then exits cleanly. Container orchestrators (Docker, Kubernetes) send
+// SIGTERM first, then SIGKILL after a grace period (default 30s).
 
-// pollPendingPayments();
-// pollEligiblePayouts();
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, "0.0.0.0", () =>
-  console.log(`Server running on port ${PORT}`)
-);
+function shutdown(signal) {
+  logger.info(`${signal} received — starting graceful shutdown`);
+
+  if (!server) return process.exit(0);
+
+  server.close((err) => {
+    if (err) {
+      logger.error("Error during server close", { message: err.message });
+      process.exit(1);
+    }
+    logger.info("All connections closed — process exiting");
+    process.exit(0);
+  });
+
+  // Force exit after 10s if connections are still open
+  setTimeout(() => {
+    logger.warn("Forced shutdown after timeout");
+    process.exit(1);
+  }, 10_000).unref();
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+
+// Catch unhandled promise rejections — log and exit
+// (Node.js will exit with code 1 by default in Node 18+, but we want logging)
+process.on("unhandledRejection", (reason) => {
+  logger.error("Unhandled promise rejection", { reason: String(reason) });
+  shutdown("unhandledRejection");
+});
+
+// Catch uncaught exceptions — these are always fatal
+process.on("uncaughtException", (err) => {
+  logger.error("Uncaught exception", {
+    message: err.message,
+    stack: err.stack,
+  });
+  shutdown("uncaughtException");
+});
+
+start();
