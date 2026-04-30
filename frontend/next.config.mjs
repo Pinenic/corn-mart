@@ -11,7 +11,6 @@ const __dirname = dirname(__filename);
 const monorepoRoot = join(__dirname, '..', '..');
 
 /** @type {import('next').NextConfig} */
-import path from "path";
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -36,14 +35,6 @@ const nextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
     ],
-  },
-  experimental: {
-    turbo: {
-      root: monorepoRoot,
-    },
-    serverActions: {
-      allowedOrigins: ["vpz9b0n1-3000.uks1.devtunnels.ms", "localhost:3000"],
-    },
   },
 };
 
