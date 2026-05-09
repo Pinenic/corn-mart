@@ -9,6 +9,7 @@
 
 import Joi from "joi";
 import response from "../utils/response.js";
+import { messageSchemas } from "./validate.messages.js";
 
 // Internal factory
 function validate(source, schema) {
@@ -254,6 +255,7 @@ const schemas = {
   placeOrder: placeOrderSchema,
   cancelOrder: cancelOrderSchema,
   notificationQuery: notificationQuerySchema,
+  ...messageSchemas,
 };
 
 export { validateBody, validateQuery, validateParams, schemas };

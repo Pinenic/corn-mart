@@ -34,6 +34,10 @@ import marketplaceStoreRoutes from "./marketplace/stores.js";
 import marketplaceProductRoutes from "./marketplace/products.js";
 import marketplaceBuyerRoutes from "./marketplace/buyer.js";
 
+// Messages
+import storeConversationRoutes from "./conversations.store.js";
+import buyerConversationRoutes from "./conversations.buyer.js";
+
 const router = express.Router();
 
 // ── Global reference data ─────────────────────────────────────
@@ -55,7 +59,37 @@ router.use("/marketplace/products", marketplaceProductRoutes);
 // buyer.js handles /orders and /notifications internally
 router.use("/marketplace", marketplaceBuyerRoutes);
 
+// ── Messages: for authenticated user ─────────────────────────────
+router.use("/stores/:storeId", storeConversationRoutes);
+router.use("/marketplace/conversations", buyerConversationRoutes);
+
 // ── Health check (no auth required) ──────────────────────────
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check endpoint
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                     timestamp:
+ *                       type: string
+ *                     version:
+ *                       type: string
+ */
 router.get("/health", (req, res) => {
   res.status(200).json({
     success: true,

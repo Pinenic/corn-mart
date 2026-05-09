@@ -9,12 +9,9 @@ import {
 import Link from "next/link";
 import { Badge, Button } from "@/components/ui";
 import { OrderContextCard } from "./OrderContextCard";
-import {
-  CONVERSATIONS, MESSAGES, QUICK_REPLIES, CONV_STATUS,
-  getCustomer, getCustomerOrders,
-  formatMessageTime, formatMessageTimeFull,
-} from "@/lib/messages-data";
-import { ORDERS, STATUS_CONFIG } from "@/lib/orders-data";
+import { formatMessageTimeFull } from "@/lib/messages-data";
+import { useBuyerConversation, useBuyerConversations } from "@/lib/hooks/useBuyerMessages";
+import { useProfile } from "@/lib/store/useProfile";
 
 function SystemMessage({ msg }) {
   if (msg.type === "order_ref") {
@@ -40,23 +37,26 @@ function SystemMessage({ msg }) {
   );
 }
 
-function MessageBubble({ msg, customer, showTime }) {
-  const isStore    = msg.sender === "store";
-  const isCustomer = msg.sender === "customer";
+function MessageBubble({ msg, store, showTime, userSide = "buyer" }) {
+  // Perspective: from buyer's view vs store's view
+  const isCurrentUser = userSide === "buyer" 
+    ? msg.sender_type === "customer" 
+    : msg.sender_type === "store";
+  const isOtherUser = !isCurrentUser;
 
   return (
-    <div className={`flex items-end gap-2 ${isStore ? "justify-end" : "justify-start"}`}>
-      {/* Customer avatar */}
-      {isCustomer && (
+    <div className={`flex items-end gap-2 ${isCurrentUser ? "justify-end" : "justify-start"}`}>
+      {/* Other user avatar */}
+      {isOtherUser && (
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-semibold flex-shrink-0 self-end mb-0.5"
-          style={{ background: customer.avatarBg, color: customer.avatarColor }}
+          style={{ background: "var(--color-accent-subtle)", color: "var(--color-accent-text)" }}
         >
-          {customer.initials}
+          {store ? <img src={userSide === "buyer" ? store?.customer_avatar : store?.store_logo} alt="store" className="w-full h-full rounded-full" /> : "SK"}
         </div>
       )}
 
-      <div className={`flex flex-col gap-1 max-w-[75%] ${isStore ? "items-end" : "items-start"}`}>
+      <div className={`flex flex-col gap-1 max-w-[75%] ${isCurrentUser ? "items-end" : "items-start"}`}>
         {/* Order reference pill (compact) for regular messages with order_id */}
         {msg.order_id && msg.type !== "order_ref" && (
           <OrderContextCard orderId={msg.order_id} compact />
@@ -66,7 +66,7 @@ function MessageBubble({ msg, customer, showTime }) {
         <div
           className="px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed"
           style={
-            isStore
+            isCurrentUser
               ? { background: "var(--color-accent)", color: "white", borderBottomRightRadius: 4 }
               : { background: "white", color: "var(--color-text-primary)", border: "0.5px solid var(--color-border)", borderBottomLeftRadius: 4 }
           }
@@ -78,80 +78,79 @@ function MessageBubble({ msg, customer, showTime }) {
         {showTime && (
           <p className="text-[10px] px-1" style={{ color: "var(--color-text-tertiary)" }}>
             {formatMessageTimeFull(msg.created_at)}
-            {isStore && " · You"}
+            {isCurrentUser && " · You"}
           </p>
         )}
       </div>
 
-      {/* Store avatar */}
-      {isStore && (
+      {/* Current user avatar */}
+      {isCurrentUser && (
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-semibold flex-shrink-0 self-end mb-0.5"
-          style={{ background: "var(--color-accent-subtle)", color: "var(--color-accent-text)" }}
+          style={{ background: "var(--color-bg)", color: "var(--color-text-primary)" }}
         >
-          SK
+          {/* Use buyer initials or something */}
+          Y
         </div>
       )}
     </div>
   );
 }
 
-export function ChatPanel({ convId, onBack, onStatusChange }) {
-  const [messages, setMessages]       = useState(() => MESSAGES[convId] ? [...MESSAGES[convId]] : []);
-  const [text, setText]               = useState("");
-  const [showQuickReplies, setShowQR] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);
-  const [conv, setConv]               = useState(null);
+export function ChatPanel({ 
+  convId, 
+  conversation, 
+  messages, 
+  isLoading, 
+  sending, 
+  sendMessage, 
+  markAllRead,
+  onBack, 
+  userSide = "buyer" 
+}) {
+  const [text, setText] = useState("");
   const bottomRef = useRef(null);
 
   // Re-load when convId changes
   useEffect(() => {
-    setMessages(MESSAGES[convId] ? [...MESSAGES[convId]] : []);
     setText("");
-    setShowQR(false);
   }, [convId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    // markAllRead();
   }, [messages]);
 
   // Find conv + customer
-  const conversation = CONVERSATIONS.find((c) => c.id === convId);
-  const customer     = conversation ? getCustomer(conversation.customer_id) : null;
-  const customerOrders = conversation ? getCustomerOrders(conversation.customer_id) : [];
+  // const conversation = CONVERSATIONS.find((c) => c.id === convId);
+  // const customer     = conversation ? getCustomer(conversation.customer_id) : null;
+  // const customerOrders = conversation ? getCustomerOrders(conversation.customer_id) : [];
 
-  if (!conversation || !customer) return null;
+  if (!conversation) return <div>Loading...</div>;
 
-  const sendMessage = () => {
+  const handleSendMessage = () => {
     if (!text.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id:         `m-new-${Date.now()}`,
-        sender:     "store",
-        body:       text.trim(),
-        created_at: new Date().toISOString(),
-        order_id:   null,
-      },
-    ]);
+    sendMessage({ body: text });
     setText("");
+    // mutate(); // Hook handles revalidation
   };
 
-  const markResolved = () => {
-    setMessages((prev) => [
-      ...prev,
-      { id: `sys-${Date.now()}`, type: "system", sender: "system", body: "Conversation marked as resolved.", created_at: new Date().toISOString(), order_id: null },
-    ]);
-    onStatusChange?.(convId, "resolved");
-  };
+  // const markResolved = () => {
+  //   setMessages((prev) => [
+  //     ...prev,
+  //     { id: `sys-${Date.now()}`, type: "system", sender: "system", body: "Conversation marked as resolved.", created_at: new Date().toISOString(), order_id: null },
+  //   ]);
+  //   onStatusChange?.(convId, "resolved");
+  // };
 
-  const statusCfg = CONV_STATUS[conversation.status];
+  // Assume status config, or hardcode for now
+  const statusCfg = { label: conversation.status === "open" ? "Open" : "Resolved" };
 
   return (
     <div className="flex-1 flex min-w-0 overflow-hidden">
 
       {/* ── Main chat area ── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
 
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b flex-shrink-0"
@@ -165,8 +164,8 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
           {/* Avatar */}
           <div className="relative flex-shrink-0">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold"
-              style={{ background: customer.avatarBg, color: customer.avatarColor }}>
-              {customer.initials}
+              >
+              <img src={userSide == "buyer" ? conversation?.store_logo : conversation?.customer_avatar} alt="s_logo" className="w-full h-full" />
             </div>
             {conversation.status === "open" && (
               <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full border-[1.5px] border-white"
@@ -177,7 +176,7 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
           {/* Name + topic */}
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-semibold truncate" style={{ color: "var(--color-text-primary)" }}>
-              {customer.name}
+              {userSide == "buyer" ? conversation?.store_name : conversation?.customer_name}
             </p>
             <p className="text-[11px] truncate" style={{ color: "var(--color-text-tertiary)" }}>
               {conversation.topic}
@@ -194,7 +193,7 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
           {/* Actions */}
           <div className="flex items-center gap-1 flex-shrink-0">
             {conversation.status === "open" && (
-              <button onClick={markResolved}
+              <button 
                 className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-[11px] font-medium transition-colors hover:bg-[var(--color-success-bg)]"
                 style={{ borderColor: "var(--color-border-md)", color: "var(--color-text-secondary)" }}
                 title="Mark as resolved">
@@ -202,32 +201,26 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
                 <span className="hidden sm:inline">Resolve</span>
               </button>
             )}
-            <button onClick={() => setShowSidebar((s) => !s)}
-              className="w-7 h-7 flex items-center justify-center rounded-lg border transition-colors hover:bg-[var(--color-bg)]"
-              style={{ borderColor: showSidebar ? "var(--color-accent)" : "var(--color-border-md)", color: showSidebar ? "var(--color-accent)" : "var(--color-text-secondary)" }}
-              title="Customer info">
-              <MoreHorizontal size={15} />
-            </button>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+        <div className="flex-1 min-h-0 overflow-y-scroll px-4 py-4 space-y-3"
           style={{ background: "var(--color-bg)" }}>
           {messages.map((msg, i) => {
-            if (msg.sender === "system") return <SystemMessage key={msg.id} msg={msg} />;
+            if (msg.type === "system") return <SystemMessage key={msg.id} msg={msg} />;
             // Show timestamp if last message or sender changes
             const next = messages[i + 1];
-            const showTime = !next || next.sender !== msg.sender || next.type === "system";
+            const showTime = !next || next.sender_type !== msg.sender_type || next.type === "system";
             return (
-              <MessageBubble key={msg.id} msg={msg} customer={customer} showTime={showTime} />
+              <MessageBubble key={msg.id} msg={msg} store={conversation} showTime={showTime} userSide={userSide} />
             );
           })}
           <div ref={bottomRef} />
         </div>
 
-        {/* Quick replies bar */}
-        {showQuickReplies && (
+        {/* Quick replies bar - commented out as hooks don't provide quick replies */}
+        {/* {showQuickReplies && (
           <div className="px-3 py-2 border-t flex gap-2 overflow-x-auto flex-shrink-0"
             style={{ borderColor: "var(--color-border)", background: "white", scrollbarWidth: "none" }}>
             {QUICK_REPLIES.map((qr) => (
@@ -244,24 +237,16 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
               <X size={13} />
             </button>
           </div>
-        )}
+        )} */}
 
         {/* Compose */}
         <div className="flex items-end gap-2 p-3 border-t flex-shrink-0"
           style={{ borderColor: "var(--color-border)", background: "white" }}>
-          {/* Quick reply trigger */}
-          <button onClick={() => setShowQR((s) => !s)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg border flex-shrink-0 transition-colors hover:bg-[var(--color-accent-subtle)]"
-            style={{ borderColor: showQuickReplies ? "var(--color-accent)" : "var(--color-border-md)", color: showQuickReplies ? "var(--color-accent)" : "var(--color-text-secondary)" }}
-            title="Quick replies">
-            <Zap size={14} />
-          </button>
-
           {/* Text input */}
           <textarea
             value={text}
             onChange={(e) => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; }}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
             placeholder={conversation.status === "resolved" ? "This conversation is resolved. Type to reopen…" : "Type a reply… (Enter to send, Shift+Enter for new line)"}
             rows={1}
             className="flex-1 px-3 py-2 rounded-lg border text-[13px] outline-none transition-colors resize-none overflow-hidden focus:border-[var(--color-accent)]"
@@ -270,21 +255,21 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
 
           {/* Send */}
           <button
-            onClick={sendMessage}
-            disabled={!text.trim()}
+            onClick={handleSendMessage}
+            disabled={!text.trim() || sending}
             className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0 transition-all disabled:opacity-40"
-            style={{ background: text.trim() ? "var(--color-accent)" : "var(--color-bg)", color: text.trim() ? "white" : "var(--color-text-tertiary)" }}
+            style={{ background: text.trim() && !sending ? "var(--color-accent)" : "var(--color-bg)", color: text.trim() && !sending ? "white" : "var(--color-text-tertiary)" }}
           >
             <Send size={14} />
           </button>
         </div>
       </div>
 
-      {/* ── Customer sidebar ── */}
+      {/* ── Customer sidebar - commented out for buyer view ── */}
+      {/*
       {showSidebar && (
         <div className="w-64 flex-shrink-0 border-l flex flex-col overflow-hidden"
           style={{ borderColor: "var(--color-border)", background: "white" }}>
-          {/* Sidebar header */}
           <div className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
             style={{ borderColor: "var(--color-border)" }}>
             <p className="text-[12px] font-semibold" style={{ color: "var(--color-text-primary)" }}>
@@ -298,7 +283,6 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            {/* Profile */}
             <div className="px-4 py-4 border-b" style={{ borderColor: "var(--color-border)" }}>
               <div className="flex flex-col items-center text-center gap-2">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center text-[15px] font-bold"
@@ -323,7 +307,6 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
               </div>
             </div>
 
-            {/* Order history */}
             <div className="px-4 py-3">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--color-text-tertiary)" }}>
@@ -371,6 +354,7 @@ export function ChatPanel({ convId, onBack, onStatusChange }) {
           </div>
         </div>
       )}
+      */}
     </div>
   );
 }
