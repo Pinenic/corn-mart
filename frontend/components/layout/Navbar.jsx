@@ -17,11 +17,13 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { useCart } from "@/lib/store/useCart";
 import useAuthStore from "@/lib/store/useAuthStore";
 import { useNotifications } from "@/lib/hooks/useNotifications";
+import { useBuyerUnreadCount } from "@/lib/hooks/useBuyerMessages";
 import { NotifDrawer } from "@/components/notifications/NotifDrawer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/lib/store/useProfile";
 import { LayoutDashboard } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 const NAV_LINKS = [
   { href: "/marketplace", label: "Marketplace" },
@@ -43,6 +45,7 @@ export function Navbar() {
   const { notifications } = useNotifications();
   const { user, storeId, isAuthenticated, signOut } = useAuthStore();
   const { profile } = useProfile();
+  const buyerUnreadCount = useBuyerUnreadCount();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -60,7 +63,6 @@ export function Navbar() {
     setUser(false);
     router.push("/");
   };
-
 
   return (
     <>
@@ -165,11 +167,16 @@ export function Navbar() {
                     />
                     <div className="absolute right-0 top-11 bg-white rounded-2xl border border-[var(--color-border)] shadow-xl z-20 w-44 py-1 overflow-hidden">
                       {[
-                        { href: "/orders", Icon: Package, label: "My Orders" },
                         {
                           href: "/account/notifications",
                           Icon: Bell,
                           label: "Notifications",
+                        },
+                        { href: "/orders", Icon: Package, label: "My Orders" },
+                        {
+                          href: "/account/messages",
+                          Icon: MessageSquare,
+                          label: "Messages",
                         },
                       ].map(({ href, Icon, label }) => (
                         <Link
@@ -179,6 +186,11 @@ export function Navbar() {
                           className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] hover:text-[var(--color-text-primary)] transition-colors"
                         >
                           <Icon size={14} /> {label}
+                          {label === "Messages" && buyerUnreadCount > 0 && (
+                            <span className="ml-auto w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                              {buyerUnreadCount > 9 ? "9+" : buyerUnreadCount}
+                            </span>
+                          )}
                         </Link>
                       ))}
                       {
@@ -188,6 +200,9 @@ export function Navbar() {
                           className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] hover:text-[var(--color-text-primary)] transition-colors"
                         >
                           <LayoutDashboard size={14} /> {"Dashboard"}
+                          {buyerUnreadCount > 0 && (
+                            <span className="ml-auto w-2 h-2 rounded-full bg-red-500"></span>
+                          )}
                         </Link>
                       }
                       <div className="border-t border-[var(--color-border)] my-1" />

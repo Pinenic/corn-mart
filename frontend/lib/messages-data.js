@@ -202,7 +202,7 @@ export function getCustomerOrders(customerId) {
 
 export function formatMessageTime(isoString) {
   const d = new Date(isoString);
-  const now = new Date("2026-03-18T12:00:00Z");
+  const now = new Date();
   const diffMs  = now - d;
   const diffMin = Math.floor(diffMs / 60000);
   const diffHr  = Math.floor(diffMs / 3600000);

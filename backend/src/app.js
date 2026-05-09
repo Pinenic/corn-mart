@@ -11,10 +11,12 @@ import helmet      from "helmet";
 import cors        from "cors";
 import compression from "compression";
 import morgan      from "morgan";
+import swaggerUi    from "swagger-ui-express";
 
 import env                             from "./config/env.js";
 import logger                          from "./utils/logger.js";
 import routes                          from "./routes/index.js";
+import specs                           from "./config/swagger.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -83,12 +85,15 @@ if (env.isDev) {
 // ── 7. Routes ─────────────────────────────────────────────────
 app.use("/api/v1", routes);
 
-// ── 8. 404 handler ────────────────────────────────────────────
+// ── 8. API Documentation ──────────────────────────────────────
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
+// ── 9. 404 handler ────────────────────────────────────────────
 // Catches requests that didn't match any route.
 // Must come after all routes, before the error handler.
 app.use(notFoundHandler);
 
-// ── 9. Global error handler ───────────────────────────────────
+// ── 10. Global error handler ───────────────────────────────────
 // Must be the LAST middleware (4 arguments = error handler in Express).
 // Catches anything passed to next(err) and anything thrown by asyncHandler.
 app.use(errorHandler);

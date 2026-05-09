@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, SECTION_LABELS } from "@/lib/nav";
 import { useStoreStore } from "@/lib/store/useStore";
+import { useStoreUnreadCount } from "@/lib/hooks/useStoreMessages";
 
 const sections = ["main", "store"];
 
 export function Sidebar() {
   const { store } = useStoreStore();
   const pathname = usePathname();
+  const unreadCount = useStoreUnreadCount();
 
   const isActive = (href) => pathname.startsWith(href);
 
@@ -120,7 +122,7 @@ export function Sidebar() {
                       style={{ opacity: active ? 1 : 0.6, flexShrink: 0 }}
                     />
                     <span className="sidebar-label-text">{item.label}</span>
-                    {/* {item.badge && (
+                    {item.key === "messages" && unreadCount > 0 && (
                       <span
                         className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center sidebar-label-text"
                         style={{
@@ -128,9 +130,9 @@ export function Sidebar() {
                           color: "#fff",
                         }}
                       >
-                        {item.badge}
+                        {unreadCount > 9 ? "9+" : unreadCount}
                       </span>
-                    )} */}
+                    )}
                   </Link>
                 );
               })}
