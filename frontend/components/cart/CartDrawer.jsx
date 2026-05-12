@@ -4,7 +4,7 @@ import { X, Trash2, ShoppingBag, Plus, Minus, ArrowRight } from "lucide-react";
 import { Drawer } from "@/components/ui/Modal";
 import { Button, Spinner } from "@/components/ui";
 import { formatPrice, truncate, cn } from "@/lib/utils";
-import {useCartStore} from "@/lib/store/cartStore";
+import { useCartStore } from "@/lib/store/cartStore";
 import useAuthStore from "@/lib/store/useAuthStore";
 import { usePlaceOrder } from "@/lib/hooks/useBuyerOrders";
 import { toast } from "@/lib/store/toastStore";
@@ -82,7 +82,7 @@ function CartItem({ item }) {
 }
 
 export function CartDrawer() {
-  const cartId = useCartStore((s) => s.cartId)
+  const cartId = useCartStore((s) => s.cartId);
   const isOpen = useCartStore((s) => s.isOpen);
   const closeCart = useCartStore((s) => s.closeCart);
   const items = useCartStore((s) => s.items);
@@ -210,7 +210,7 @@ export function CartDrawer() {
                 {
                   label: "Phone",
                   field: "phone",
-                  placeholder: "+1 555 000 0000",
+                  placeholder: "+260 900 0000",
                 },
                 {
                   label: "Address",
@@ -223,6 +223,7 @@ export function CartDrawer() {
                 <div key={field}>
                   <label className="text-[11px] font-medium text-[var(--color-text-secondary)] block mb-1">
                     {label}
+                    {field == "name" || field == "phone" ? "  *" : ""}
                   </label>
                   <input
                     value={shipping[field]}
@@ -230,6 +231,7 @@ export function CartDrawer() {
                       setShipping((s) => ({ ...s, [field]: e.target.value }))
                     }
                     placeholder={placeholder}
+                    required
                     className="w-full h-10 px-3 rounded-xl border border-[var(--color-border-md)] bg-white text-[13px] outline-none focus:border-[var(--color-primary)] placeholder:text-[var(--color-text-muted)]"
                   />
                 </div>
@@ -302,6 +304,10 @@ export function CartDrawer() {
             <Button
               className="w-full"
               loading={loading}
+              disabled={
+                step == "shipping" &&
+                (shipping.name == "" || shipping.phone == "")
+              }
               onClick={handleCheckout}
             >
               {step === "cart" ? (

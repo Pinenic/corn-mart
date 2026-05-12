@@ -35,7 +35,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import useSWR from "swr";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { apiClient, swrFetcher } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { toast } from "@/lib/store/toastStore";
@@ -122,11 +122,44 @@ export function useBuyerConversation(conversationId) {
   const [sending, setSending] = useState(false);
   const [localMessages, setLocalMessages] = useState([]);
 
+  const markedRef = useRef(false);
+
   const conversation = data?.data ?? null;
-  // Merge server messages with optimistic local ones
-  const messages = conversation
-    ? [...(conversation.messages ?? []), ...localMessages]
-    : [];
+  // Merge DB messages with optimistic local ones.
+  // Filter out any localMessages whose id now appears in the server list
+  // (i.e. the Realtime event arrived before localMessages was cleared).
+  const serverMessages = conversation?.messages ?? [];
+  const serverIds = new Set(serverMessages.map((m) => m.id));
+  const pendingLocals = localMessages.filter((m) => !serverIds.has(m.id));
+  const messages = [...serverMessages, ...pendingLocals];
+
+  // Mark store messages as read once when conversation is opened
+  useEffect(() => {
+    if (!conversation || markedRef.current) return;
+    markedRef.current = true;
+    
+    // Optimistically mark all messages as read
+    mutate(prev => {
+      if (!prev?.data) return prev;
+      return {
+        ...prev,
+        data: {
+          ...prev.data,
+          messages: (prev.data.messages || []).map(m => ({
+            ...m,
+            is_read: true
+          }))
+        }
+      };
+    }, false);
+    
+    apiClient
+      .patch(`/marketplace/conversations/${conversationId}/read`, {})
+      .catch(() => {
+        // Revalidate to restore accurate state on error
+        mutate();
+      });
+  }, [conversation, conversationId, mutate]);
 
   // Realtime: append new messages from the store live
   useEffect(() => {
@@ -149,6 +182,7 @@ export function useBuyerConversation(conversationId) {
           if (msg.sender_type !== "customer") {
             setLocalMessages((prev) => {
               if (prev.some((m) => m.id === msg.id)) return prev;
+              if (serverIds.has(msg.id)) return prev;
               return [...prev, msg];
             });
           }
@@ -164,12 +198,13 @@ export function useBuyerConversation(conversationId) {
   // Reset local messages when switching conversations
   useEffect(() => {
     setLocalMessages([]);
+    markedRef.current = false;
   }, [conversationId]);
 
   // ── sendMessage ──────────────────────────────────────────────
   const sendMessage = useCallback(
-    async ({ body, orderId } = {}) => {
-      console.log(body);
+    async ({ body, reference, orderId } = {}) => {
+      // console.log(body);
       if (!conversationId || !body?.trim()) return null;
       setSending(true);
 
@@ -181,6 +216,7 @@ export function useBuyerConversation(conversationId) {
         type: "text",
         body: body.trim(),
         order_id: orderId ?? null,
+        reference: reference ?? null,
         is_read: false,
         created_at: new Date().toISOString(),
         _optimistic: true,
@@ -188,10 +224,10 @@ export function useBuyerConversation(conversationId) {
       setLocalMessages((prev) => [...prev, optimistic]);
 
       try {
-        console.log("debug break1")
+        console.log("debug break1");
         const result = await apiClient.post(
           `/marketplace/conversations/${conversationId}/messages`,
-          { body: body.trim(), order_id: orderId ?? null }
+          { body: body.trim(), reference: reference ?? null, order_id: orderId ?? null }
         );
         // Replace the optimistic entry with the confirmed DB row
         setLocalMessages((prev) =>
@@ -281,7 +317,7 @@ export function useBuyerUnreadCount() {
 
   // Fetch ALL open conversations (high limit) to sum unread counts
   const key = token
-    ? ["/marketplace/conversations", { page: 1, limit: 100, status: "open" }]
+    ? ["/marketplace/conversations", { page: 1, limit: 40, status: "open" }]
     : null;
 
   const { data } = useSWR(key, swrFetcher, {
@@ -290,7 +326,8 @@ export function useBuyerUnreadCount() {
   });
 
   const count = (data?.data ?? []).reduce(
-    (sum, c) => sum + (c.unread_count ?? 0), 0
+    (sum, c) => sum + (c.unread_count ?? 0),
+    0
   );
 
   // Realtime bump — subscribe to the same messages INSERT event
@@ -304,14 +341,18 @@ export function useBuyerUnreadCount() {
       .on(
         "postgres_changes",
         {
-          event:  "INSERT",
+          event: "INSERT",
           schema: "public",
-          table:  "messages",
+          table: "messages",
         },
-        () => { mutate(); }
+        () => {
+          mutate();
+        }
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [userId, mutate]);
 
   return count;

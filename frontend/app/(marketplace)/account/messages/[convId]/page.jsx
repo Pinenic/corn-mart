@@ -3,11 +3,13 @@
 import { useParams, useRouter } from "next/navigation";
 import { ChatPanel } from "@/components/messages/ChatPanel";
 import { useBuyerConversation } from "@/lib/hooks/useBuyerMessages";
+import { useProfile } from "@/lib/store/useProfile";
 
 export default function MessageConversationPage() {
   const { convId } = useParams();
   const router = useRouter();
   const { conversation, messages, isLoading, sendMessage, sending } = useBuyerConversation(convId);
+  const {profile} = useProfile()
 
   if (!convId) return null;
 
@@ -22,6 +24,7 @@ export default function MessageConversationPage() {
         sendMessage={sendMessage}
         onBack={() => router.push("/account/messages")}
         userSide="buyer"
+        avatar={profile?.avatar_url}
       />
     </div>
   );

@@ -139,7 +139,7 @@ export function ConversationList({ conversations, isLoading, userSide, selectedI
 
     return list;
   }, [search, filter, conversations]);
-  console.log("filtered: ", filtered);
+  // console.log("filtered: ", filtered);
 
   const totalUnread = conversations.reduce((s, c) => s + c.unread_count, 0);
 

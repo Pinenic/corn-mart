@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { useProfile } from "@/lib/store/useProfile";
 import { LayoutDashboard } from "lucide-react";
 import { MessageSquare } from "lucide-react";
+import { useStoreUnreadCount } from "@/lib/hooks/useStoreMessages";
 
 const NAV_LINKS = [
   { href: "/marketplace", label: "Marketplace" },
@@ -46,6 +47,7 @@ export function Navbar() {
   const { user, storeId, isAuthenticated, signOut } = useAuthStore();
   const { profile } = useProfile();
   const buyerUnreadCount = useBuyerUnreadCount();
+  const count = useStoreUnreadCount();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -145,6 +147,9 @@ export function Navbar() {
                   onClick={() => setUser((v) => !v)}
                   className="flex items-center gap-1.5 h-9 px-2.5 rounded-xl hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
                 >
+                  {(count > 0 || buyerUnreadCount > 0) && (
+                    <span className="ml-auto w-2 h-2 rounded-full bg-red-500"></span>
+                  )}
                   {profile.avatar_url ? (
                     <img
                       src={profile?.avatar_url}
@@ -200,7 +205,7 @@ export function Navbar() {
                           className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] hover:text-[var(--color-text-primary)] transition-colors"
                         >
                           <LayoutDashboard size={14} /> {"Dashboard"}
-                          {buyerUnreadCount > 0 && (
+                          {count > 0 && (
                             <span className="ml-auto w-2 h-2 rounded-full bg-red-500"></span>
                           )}
                         </Link>
