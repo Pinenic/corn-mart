@@ -42,6 +42,7 @@ export const messageSchemas = {
   sendMessage: Joi.object({
     body:     Joi.string().max(5000).trim().min(1).required(),
     order_id: uuid.allow(null),
+    reference: Joi.object().allow("", null),
   }),
 
   // PATCH /stores/:storeId/conversations/:id/status

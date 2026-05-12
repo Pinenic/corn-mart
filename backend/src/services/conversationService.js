@@ -25,7 +25,7 @@ import { supabaseAdmin } from "../config/supabase.js";
 
 const MESSAGE_FIELDS = `
   id, conversation_id, sender_id, sender_type,
-  type, body, order_id, is_read, created_at
+  type, body, order_id, is_read, created_at, reference
 `.trim();
 
 const CONVERSATION_BASE = `
@@ -334,25 +334,28 @@ const conversationService = {
   // BUYER — start or retrieve conversation
   // ─────────────────────────────────────────────────────────
 
-  async buyerStartConversation(buyerId, { storeId, topic, body, orderId }) {
+  async buyerStartConversation(buyerId, { store_id, topic, body, order_id }) {
+    console.log("startting conv...", store_id)
     const { data: store } = await supabaseAdmin
       .from("stores")
       .select("id")
-      .eq("id", storeId)
-      .single();
+      .eq("id", store_id)
+      .maybeSingle();
 
+      console.log("debug break: ", store);
     if (!store) return null;
 
     // Upsert — one thread per buyer+store
     const { data: conversation, error: convErr } = await supabaseAdmin
       .from("conversations")
       .upsert(
-        { store_id: storeId, customer_id: buyerId, topic: topic ?? null },
+        { store_id: store_id, customer_id: buyerId, topic: topic ?? null },
         { onConflict: "store_id,customer_id", ignoreDuplicates: false }
       )
       .select(CONVERSATION_BASE)
       .single();
 
+      console.log("debug break",convErr)
     if (convErr) throw convErr;
 
     // Insert opening message if provided
@@ -363,18 +366,18 @@ const conversationService = {
         sender_type:     "customer",
         type:            "text",
         body:            body.trim(),
-        order_id:        orderId ?? null,
+        order_id:        order_id ?? null,
       });
 
       // Attach order_ref card if this message references an order
-      if (orderId) {
+      if (order_id) {
         await supabaseAdmin.from("messages").insert({
           conversation_id: conversation.id,
           sender_id:       null,
           sender_type:     "system",
           type:            "order_ref",
           body:            "Order associated with this conversation",
-          order_id:        orderId,
+          order_id:        order_id,
         });
       }
     }
@@ -386,7 +389,7 @@ const conversationService = {
   // BUYER — send message
   // ─────────────────────────────────────────────────────────
 
-  async buyerSendMessage(buyerId, conversationId, { body, orderId }) {
+  async buyerSendMessage(buyerId, conversationId, { body, reference,  orderId }) {
     const { data: conversation } = await supabaseAdmin
       .from("conversations")
       .select("id, status")
@@ -413,6 +416,7 @@ const conversationService = {
         type:            "text",
         body:            body.trim(),
         order_id:        orderId ?? null,
+        reference: reference ?? null,
       })
       .select(MESSAGE_FIELDS)
       .single();

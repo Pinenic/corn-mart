@@ -162,3 +162,14 @@ export const buyerSendMessage = asyncHandler(async (req, res) => {
   if (!message) return response.notFound(res, "Conversation not found");
   return response.created(res, message);
 });
+// PATCH /api/v1/marketplace/conversations/:conversationId/read
+// Marks all unread customer messages as read.
+// Called when the store owner opens a conversation.
+export const buyerMarkAllRead = asyncHandler(async (req, res) => {
+  const ok = await conversationService.buyerMarkAllRead(
+    req.user.id,
+    req.params.conversationId
+  );
+  if (!ok) return response.notFound(res, "Conversation not found");
+  return response.ok(res, { read: true });
+});

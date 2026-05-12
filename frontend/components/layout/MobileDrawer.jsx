@@ -6,10 +6,12 @@ import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/nav";
 import { useDrawer } from "@/lib/DrawerContext";
+import { useStoreUnreadCount } from "@/lib/hooks/useStoreMessages";
 
-export function MobileDrawer() {
+export function MobileDrawer({ count }) {
   const { isOpen, close } = useDrawer();
   const pathname = usePathname();
+  // const count = useStoreUnreadCount();
 
   // Close on route change
   useEffect(() => {
@@ -67,9 +69,33 @@ export function MobileDrawer() {
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <rect x="1" y="1" width="5" height="5" rx="1.5" fill="white" />
-              <rect x="8" y="1" width="5" height="5" rx="1.5" fill="white" opacity="0.6" />
-              <rect x="1" y="8" width="5" height="5" rx="1.5" fill="white" opacity="0.6" />
-              <rect x="8" y="8" width="5" height="5" rx="1.5" fill="white" opacity="0.3" />
+              <rect
+                x="8"
+                y="1"
+                width="5"
+                height="5"
+                rx="1.5"
+                fill="white"
+                opacity="0.6"
+              />
+              <rect
+                x="1"
+                y="8"
+                width="5"
+                height="5"
+                rx="1.5"
+                fill="white"
+                opacity="0.6"
+              />
+              <rect
+                x="8"
+                y="8"
+                width="5"
+                height="5"
+                rx="1.5"
+                fill="white"
+                opacity="0.3"
+              />
             </svg>
           </div>
           <span
@@ -114,17 +140,25 @@ export function MobileDrawer() {
                   color: active
                     ? "var(--color-accent-text)"
                     : "var(--color-text-secondary)",
-                  background: active ? "var(--color-accent-subtle)" : "transparent",
+                  background: active
+                    ? "var(--color-accent-subtle)"
+                    : "transparent",
                 }}
               >
-                <Icon size={18} style={{ opacity: active ? 1 : 0.65, flexShrink: 0 }} />
+                <Icon
+                  size={18}
+                  style={{ opacity: active ? 1 : 0.65, flexShrink: 0 }}
+                />
                 <span className="flex-1">{item.label}</span>
-                {item.badge && (
+                {item.key === "messages" && count > 0 && (
                   <span
-                    className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
-                    style={{ background: "var(--color-danger)", color: "#fff" }}
+                    className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center sidebar-label-text"
+                    style={{
+                      background: "var(--color-danger)",
+                      color: "#fff",
+                    }}
                   >
-                    {item.badge}
+                    {count > 9 ? "9+" : count}
                   </span>
                 )}
               </Link>
@@ -153,7 +187,10 @@ export function MobileDrawer() {
             >
               Store Admin
             </p>
-            <p className="text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>
+            <p
+              className="text-[11px]"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               admin@storely.com
             </p>
           </div>

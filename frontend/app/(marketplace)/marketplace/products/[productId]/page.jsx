@@ -10,10 +10,17 @@ import { useCartStore } from "@/lib/store/cartStore";
 import { toast } from "@/lib/store/toastStore";
 import { formatPrice, truncate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { MessageSquare } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { usePendingMessageRef } from "@/lib/store/usePendingMessageRef";
+import { useStartConversation } from "@/lib/hooks/useBuyerMessages";
 
 export default function ProductDetailPage({ params }) {
   const { productId } = use(params);
   const { product, isLoading, error } = useProduct(productId);
+  const router = useRouter();
+  const setMessageRef = usePendingMessageRef((s) => s.setMessageRef);
+    const { startConversation, starting } = useStartConversation();
 
   const [selectedVariant, setVariant] = useState(null);
   const [qty, setQty] = useState(1);
@@ -67,6 +74,23 @@ export default function ProductDetailPage({ params }) {
     toast.success(`${truncate(product.name, 28)} added to cart`);
     openCart();
   };
+
+  const handleChat = async () => {
+    setMessageRef({
+      productId: productId,
+      image_url: product.thumbnail_url,
+      name: product.name,
+      link: `/marketplace/products/${productId}`
+    });
+   const conv = await startConversation({
+     storeId: product.store_id,
+     topic:   "",
+     body:    "",
+     orderId: null,
+   });
+   if (conv) router.push(`/account/messages/${conv.id}`);
+
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
@@ -188,7 +212,7 @@ export default function ProductDetailPage({ params }) {
           )}
 
           {/* Qty + Add to cart */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="grid grid-cols-2 md:flex items-center gap-3 pt-2">
             <div className="flex items-center border border-[var(--color-border-md)] rounded-xl overflow-hidden">
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -215,6 +239,15 @@ export default function ProductDetailPage({ params }) {
             >
               <ShoppingCart size={17} />
               {outOfStock ? "Unavailable" : "Add to cart"}
+            </Button>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="flex-1 text-[var(--color-primary)]"
+              onClick={handleChat}
+            >
+              <MessageSquare size={17} />
+              Chat Now
             </Button>
           </div>
 

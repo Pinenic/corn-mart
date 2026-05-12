@@ -6,7 +6,7 @@ import { MoreHorizontal } from "lucide-react";
 import { BOTTOM_TAB_ITEMS } from "@/lib/nav";
 import { useDrawer } from "@/lib/DrawerContext";
 
-export function BottomNav() {
+export function BottomNav({ msgCount }) {
   const pathname = usePathname();
   const { toggle } = useDrawer();
 
@@ -34,7 +34,13 @@ export function BottomNav() {
             >
               <div className="relative">
                 <Icon size={21} strokeWidth={active ? 2 : 1.75} />
-                {item.badge && (
+                {/* {item.badge && (
+                  <span
+                    className="absolute -top-1 -right-2 w-2 h-2 rounded-full border-[1.5px] border-white"
+                    style={{ background: "var(--color-danger)" }}
+                  />
+                )} */}
+                {item.key === "messages" && msgCount > 0 && (
                   <span
                     className="absolute -top-1 -right-2 w-2 h-2 rounded-full border-[1.5px] border-white"
                     style={{ background: "var(--color-danger)" }}

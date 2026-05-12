@@ -22,7 +22,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import useSWR, { mutate as globalMutate } from "swr";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { apiClient, swrFetcher } from "@/lib/api/client";
 import { ApiError }              from "@/lib/api/errors";
 import { toast }                 from "@/lib/store/toastStore";
@@ -131,10 +131,29 @@ export function useStoreConversation(conversationId) {
   useEffect(() => {
     if (!conversation || !storeId || markedRef.current) return;
     markedRef.current = true;
+    
+    // Optimistically mark all messages as read
+    mutate(prev => {
+      if (!prev?.data) return prev;
+      return {
+        ...prev,
+        data: {
+          ...prev.data,
+          messages: (prev.data.messages || []).map(m => ({
+            ...m,
+            is_read: true
+          }))
+        }
+      };
+    }, false);
+    
     apiClient
       .patch(`/stores/${storeId}/conversations/${conversationId}/read`, {})
-      .catch(() => { /* non-fatal */ });
-  }, [conversation, storeId, conversationId]);
+      .catch(() => {
+        // Revalidate to restore accurate state on error
+        mutate();
+      });
+  }, [conversation, storeId, conversationId, mutate]);
 
   // Realtime: subscribe to new messages in this specific conversation
   useEffect(() => {
@@ -352,39 +371,46 @@ export function useQuickReplies() {
 export function useStoreUnreadCount() {
   const storeId = useAuthStore(s => s.storeId);
 
-  // Fetch ALL open conversations (high limit) to sum unread counts
   const key = storeId
-    ? [`/stores/${storeId}/conversations`, { page: 1, limit: 100, status: "open" }]
+    ? [`/stores/${storeId}/conversations`, { page: 1, limit: 40, status: "open" }]
     : null;
 
-  const { data } = useSWR(key, swrFetcher, {
+  const { data, mutate } = useSWR(key, swrFetcher, {
     ...SWR_OPTS,
     refreshInterval: 60_000,
   });
 
-  const count = (data?.data ?? []).reduce(
-    (sum, c) => sum + (c.unread_count ?? 0), 0
-  );
+  const count = useMemo(() => {
+    if (!Array.isArray(data?.data)) return null;
 
-  // Realtime bump — subscribe to the same conversations UPDATE event
-  // as the list hook so the badge updates without polling
-  const { mutate } = useSWR(key);
+    return data.data.reduce(
+      (sum, c) => sum + Number(c.unread_count ?? 0),
+      0
+    );
+  }, [data]);
+
   useEffect(() => {
     if (!storeId) return;
+
     const channel = supabase
       .channel(`store-unread-badge-${storeId}`)
       .on(
         "postgres_changes",
         {
-          event:  "UPDATE",
+          event: "UPDATE",
           schema: "public",
-          table:  "conversations",
+          table: "conversations",
           filter: `store_id=eq.${storeId}`,
         },
-        () => { mutate(); }
+        () => {
+          mutate(); // triggers refetch
+        }
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [storeId, mutate]);
 
   return count;

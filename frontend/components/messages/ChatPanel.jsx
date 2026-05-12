@@ -2,22 +2,38 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  ArrowLeft, MoreHorizontal, CheckCircle, Clock,
-  Zap, Send, ChevronDown, X, ShoppingBag, Mail, Phone,
-  ExternalLink
+  ArrowLeft,
+  MoreHorizontal,
+  CheckCircle,
+  Clock,
+  Zap,
+  Send,
+  ChevronDown,
+  X,
+  ShoppingBag,
+  Mail,
+  Phone,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge, Button } from "@/components/ui";
 import { OrderContextCard } from "./OrderContextCard";
 import { formatMessageTimeFull } from "@/lib/messages-data";
-import { useBuyerConversation, useBuyerConversations } from "@/lib/hooks/useBuyerMessages";
+import {
+  useBuyerConversation,
+  useBuyerConversations,
+} from "@/lib/hooks/useBuyerMessages";
 import { useProfile } from "@/lib/store/useProfile";
+import { usePendingMessageRef } from "@/lib/store/usePendingMessageRef";
 
 function SystemMessage({ msg }) {
   if (msg.type === "order_ref") {
     return (
       <div className="flex flex-col items-center gap-2 my-3">
-        <p className="text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>
+        <p
+          className="text-[11px]"
+          style={{ color: "var(--color-text-tertiary)" }}
+        >
           {formatMessageTimeFull(msg.created_at)}
         </p>
         <OrderContextCard orderId={msg.order_id} />
@@ -29,7 +45,11 @@ function SystemMessage({ msg }) {
     <div className="flex justify-center my-3">
       <span
         className="text-[11px] px-3 py-1 rounded-full"
-        style={{ background: "var(--color-bg)", color: "var(--color-text-tertiary)", border: "0.5px solid var(--color-border)" }}
+        style={{
+          background: "var(--color-bg)",
+          color: "var(--color-text-tertiary)",
+          border: "0.5px solid var(--color-border)",
+        }}
       >
         {msg.body}
       </span>
@@ -37,26 +57,51 @@ function SystemMessage({ msg }) {
   );
 }
 
-function MessageBubble({ msg, store, showTime, userSide = "buyer" }) {
+function MessageBubble({ msg, sending, store, showTime, userSide = "buyer", avatar }) {
   // Perspective: from buyer's view vs store's view
-  const isCurrentUser = userSide === "buyer" 
-    ? msg.sender_type === "customer" 
-    : msg.sender_type === "store";
+  const isCurrentUser =
+    userSide === "buyer"
+      ? msg.sender_type === "customer"
+      : msg.sender_type === "store";
   const isOtherUser = !isCurrentUser;
+  // console.log("in bubble: ", store);
 
   return (
-    <div className={`flex items-end gap-2 ${isCurrentUser ? "justify-end" : "justify-start"}`}>
+    <div
+      className={`flex items-end gap-2 ${
+        isCurrentUser ? "justify-end" : "justify-start"
+      }`}
+    >
       {/* Other user avatar */}
       {isOtherUser && (
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-semibold flex-shrink-0 self-end mb-0.5"
-          style={{ background: "var(--color-accent-subtle)", color: "var(--color-accent-text)" }}
+          style={{
+            background: "var(--color-accent-subtle)",
+            color: "var(--color-accent-text)",
+          }}
         >
-          {store ? <img src={userSide === "buyer" ? store?.customer_avatar : store?.store_logo} alt="store" className="w-full h-full rounded-full" /> : "SK"}
+          {userSide == "buyer" ? (
+            <img
+              src={store?.store_logo}
+              alt="store"
+              className="w-full h-full rounded-full"
+            />
+          ) : (
+            <img
+              src={store?.customer_avatar}
+              alt="customer"
+              className="w-full h-full rounded-full"
+            />
+          )}
         </div>
       )}
 
-      <div className={`flex flex-col gap-1 max-w-[75%] ${isCurrentUser ? "items-end" : "items-start"}`}>
+      <div
+        className={`flex flex-col gap-1 max-w-[75%] ${
+          isCurrentUser ? "items-end" : "items-start"
+        }`}
+      >
         {/* Order reference pill (compact) for regular messages with order_id */}
         {msg.order_id && msg.type !== "order_ref" && (
           <OrderContextCard orderId={msg.order_id} compact />
@@ -67,18 +112,42 @@ function MessageBubble({ msg, store, showTime, userSide = "buyer" }) {
           className="px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed"
           style={
             isCurrentUser
-              ? { background: "var(--color-accent)", color: "white", borderBottomRightRadius: 4 }
-              : { background: "white", color: "var(--color-text-primary)", border: "0.5px solid var(--color-border)", borderBottomLeftRadius: 4 }
+              ? {
+                  background: "var(--color-accent)",
+                  color: "white",
+                  borderBottomRightRadius: 4,
+                }
+              : {
+                  background: "white",
+                  color: "var(--color-text-primary)",
+                  border: "0.5px solid var(--color-border)",
+                  borderBottomLeftRadius: 4,
+                }
           }
         >
+          {msg.reference && (
+            <Link href={msg.reference.link} >
+              <div className="flex gap-3 items-center bg-black/10 p-3 rounded-sm">
+                <img
+                  src={msg.reference.image_url}
+                  alt="ref_image"
+                  className="w-20 rounded-lg"
+                />
+                <p>{msg.reference.name}</p>
+              </div>
+            </Link>
+          )}
           {msg.body}
         </div>
 
         {/* Timestamp */}
         {showTime && (
-          <p className="text-[10px] px-1" style={{ color: "var(--color-text-tertiary)" }}>
-            {formatMessageTimeFull(msg.created_at)}
-            {isCurrentUser && " · You"}
+          <p
+            className="text-[10px] px-1"
+            style={{ color: "var(--color-text-tertiary)" }}
+          >
+            {sending ? "sending" : formatMessageTimeFull(msg.created_at)}
+            {sending ? "" : isCurrentUser && " · You"}
           </p>
         )}
       </div>
@@ -87,33 +156,43 @@ function MessageBubble({ msg, store, showTime, userSide = "buyer" }) {
       {isCurrentUser && (
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-semibold flex-shrink-0 self-end mb-0.5"
-          style={{ background: "var(--color-bg)", color: "var(--color-text-primary)" }}
+          style={{
+            background: "var(--color-bg)",
+            color: "var(--color-text-primary)",
+          }}
         >
-          {/* Use buyer initials or something */}
-          Y
+          <img
+              src={avatar}
+              alt="avatar"
+              className="w-full h-full rounded-full"
+            />
         </div>
       )}
     </div>
   );
 }
 
-export function ChatPanel({ 
-  convId, 
-  conversation, 
-  messages, 
-  isLoading, 
-  sending, 
-  sendMessage, 
+export function ChatPanel({
+  convId,
+  conversation,
+  messages,
+  isLoading,
+  sending,
+  sendMessage,
   markAllRead,
-  onBack, 
-  userSide = "buyer" 
+  onBack,
+  userSide = "buyer",
+  avatar
 }) {
   const [text, setText] = useState("");
   const bottomRef = useRef(null);
+  const messageRef = usePendingMessageRef((s) => s.messageRef);
+  const clear = usePendingMessageRef((s) => s.clear);
 
   // Re-load when convId changes
   useEffect(() => {
     setText("");
+    // markAllRead();
   }, [convId]);
 
   useEffect(() => {
@@ -130,8 +209,9 @@ export function ChatPanel({
 
   const handleSendMessage = () => {
     if (!text.trim()) return;
-    sendMessage({ body: text });
+    sendMessage({ body: text, reference: messageRef });
     setText("");
+    clear();
     // mutate(); // Hook handles revalidation
   };
 
@@ -144,48 +224,76 @@ export function ChatPanel({
   // };
 
   // Assume status config, or hardcode for now
-  const statusCfg = { label: conversation.status === "open" ? "Open" : "Resolved" };
+  const statusCfg = {
+    label: conversation.status === "open" ? "Open" : "Resolved",
+  };
 
   return (
     <div className="flex-1 flex min-w-0 overflow-hidden">
-
       {/* ── Main chat area ── */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
-
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b flex-shrink-0"
-          style={{ borderColor: "var(--color-border)" }}>
+        <div
+          className="flex items-center gap-3 px-4 py-3 border-b flex-shrink-0"
+          style={{ borderColor: "var(--color-border)" }}
+        >
           {/* Mobile back */}
-          <button onClick={onBack} className="md:hidden flex items-center gap-1 text-[13px] font-medium flex-shrink-0"
-            style={{ color: "var(--color-accent)" }}>
+          <button
+            onClick={onBack}
+            className="md:hidden flex items-center gap-1 text-[13px] font-medium flex-shrink-0"
+            style={{ color: "var(--color-accent)" }}
+          >
             <ArrowLeft size={14} />
           </button>
 
           {/* Avatar */}
           <div className="relative flex-shrink-0">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold"
-              >
-              <img src={userSide == "buyer" ? conversation?.store_logo : conversation?.customer_avatar} alt="s_logo" className="w-full h-full" />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold">
+              <img
+                src={
+                  userSide == "buyer"
+                    ? conversation?.store_logo
+                    : conversation?.customer_avatar
+                }
+                alt="s_logo"
+                className="w-full h-full"
+              />
             </div>
             {conversation.status === "open" && (
-              <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full border-[1.5px] border-white"
-                style={{ background: "var(--color-success)" }} />
+              <span
+                className="absolute bottom-0 right-0 w-2 h-2 rounded-full border-[1.5px] border-white"
+                style={{ background: "var(--color-success)" }}
+              />
             )}
           </div>
 
           {/* Name + topic */}
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold truncate" style={{ color: "var(--color-text-primary)" }}>
-              {userSide == "buyer" ? conversation?.store_name : conversation?.customer_name}
+            <p
+              className="text-[13px] font-semibold truncate"
+              style={{ color: "var(--color-text-primary)" }}
+            >
+              {userSide == "buyer"
+                ? conversation?.store_name
+                : conversation?.customer_name}
             </p>
-            <p className="text-[11px] truncate" style={{ color: "var(--color-text-tertiary)" }}>
+            <p
+              className="text-[11px] truncate"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               {conversation.topic}
             </p>
           </div>
 
           {/* Status badge */}
           <Badge
-            variant={conversation.status === "open" ? "info" : conversation.status === "resolved" ? "success" : "warning"}
+            variant={
+              conversation.status === "open"
+                ? "info"
+                : conversation.status === "resolved"
+                ? "success"
+                : "warning"
+            }
           >
             {statusCfg.label}
           </Badge>
@@ -193,10 +301,14 @@ export function ChatPanel({
           {/* Actions */}
           <div className="flex items-center gap-1 flex-shrink-0">
             {conversation.status === "open" && (
-              <button 
+              <button
                 className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-[11px] font-medium transition-colors hover:bg-[var(--color-success-bg)]"
-                style={{ borderColor: "var(--color-border-md)", color: "var(--color-text-secondary)" }}
-                title="Mark as resolved">
+                style={{
+                  borderColor: "var(--color-border-md)",
+                  color: "var(--color-text-secondary)",
+                }}
+                title="Mark as resolved"
+              >
                 <CheckCircle size={13} />
                 <span className="hidden sm:inline">Resolve</span>
               </button>
@@ -205,15 +317,29 @@ export function ChatPanel({
         </div>
 
         {/* Messages */}
-        <div className="flex-1 min-h-0 overflow-y-scroll px-4 py-4 space-y-3"
-          style={{ background: "var(--color-bg)" }}>
+        <div
+          className="flex-1 min-h-0 overflow-y-scroll px-4 py-4 space-y-3"
+          style={{ background: "var(--color-bg)" }}
+        >
           {messages.map((msg, i) => {
-            if (msg.type === "system") return <SystemMessage key={msg.id} msg={msg} />;
+            if (msg.type === "system")
+              return <SystemMessage key={msg.id} msg={msg} />;
             // Show timestamp if last message or sender changes
             const next = messages[i + 1];
-            const showTime = !next || next.sender_type !== msg.sender_type || next.type === "system";
+            const showTime =
+              !next ||
+              next.sender_type !== msg.sender_type ||
+              next.type === "system";
             return (
-              <MessageBubble key={msg.id} msg={msg} store={conversation} showTime={showTime} userSide={userSide} />
+              <MessageBubble
+                key={msg.id}
+                msg={msg}
+                sending={sending}
+                store={conversation}
+                showTime={showTime}
+                userSide={userSide}
+                avatar={avatar}
+              />
             );
           })}
           <div ref={bottomRef} />
@@ -240,28 +366,77 @@ export function ChatPanel({
         )} */}
 
         {/* Compose */}
-        <div className="flex items-end gap-2 p-3 border-t flex-shrink-0"
-          style={{ borderColor: "var(--color-border)", background: "white" }}>
-          {/* Text input */}
-          <textarea
-            value={text}
-            onChange={(e) => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; }}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
-            placeholder={conversation.status === "resolved" ? "This conversation is resolved. Type to reopen…" : "Type a reply… (Enter to send, Shift+Enter for new line)"}
-            rows={1}
-            className="flex-1 px-3 py-2 rounded-lg border text-[13px] outline-none transition-colors resize-none overflow-hidden focus:border-[var(--color-accent)]"
-            style={{ borderColor: "var(--color-border-md)", color: "var(--color-text-primary)", minHeight: 36, maxHeight: 120, lineHeight: "1.5" }}
-          />
-
-          {/* Send */}
-          <button
-            onClick={handleSendMessage}
-            disabled={!text.trim() || sending}
-            className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0 transition-all disabled:opacity-40"
-            style={{ background: text.trim() && !sending ? "var(--color-accent)" : "var(--color-bg)", color: text.trim() && !sending ? "white" : "var(--color-text-tertiary)" }}
+        <div className="flex flex-col">
+          {messageRef && (
+            <div className="flex p-2 items-center justify-between">
+              <div className="flex gap-3 items-center">
+                <img
+                  src={messageRef.image_url}
+                  alt="ref_image"
+                  className="w-20 rounded-lg"
+                />
+                <p>{messageRef.name}</p>
+              </div>
+              <X
+                className="text[-var(--color-danger)] w-3 h-3"
+                onClick={() => clear()}
+              />
+            </div>
+          )}
+          <div
+            className="flex items-end gap-2 p-3 border-t flex-shrink-0"
+            style={{ borderColor: "var(--color-border)", background: "white" }}
           >
-            <Send size={14} />
-          </button>
+            {/* Text input */}
+            <textarea
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height =
+                  Math.min(e.target.scrollHeight, 120) + "px";
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              placeholder={
+                conversation.status === "resolved"
+                  ? "This conversation is resolved. Type to reopen…"
+                  : "Type a reply… "
+              }
+              rows={1}
+              className="flex-1 px-3 py-2 rounded-lg border text-[13px] outline-none transition-colors resize-none overflow-hidden focus:border-[var(--color-accent)]"
+              style={{
+                borderColor: "var(--color-border-md)",
+                color: "var(--color-text-primary)",
+                minHeight: 36,
+                maxHeight: 120,
+                lineHeight: "1.5",
+              }}
+            />
+
+            {/* Send */}
+            <button
+              onClick={handleSendMessage}
+              disabled={!text.trim() || sending}
+              className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0 transition-all disabled:opacity-40"
+              style={{
+                background:
+                  text.trim() && !sending
+                    ? "var(--color-accent)"
+                    : "var(--color-bg)",
+                color:
+                  text.trim() && !sending
+                    ? "white"
+                    : "var(--color-text-tertiary)",
+              }}
+            >
+              <Send size={14} />
+            </button>
+          </div>
         </div>
       </div>
 

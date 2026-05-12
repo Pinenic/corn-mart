@@ -5,6 +5,7 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 import { MobileDrawer } from "./MobileDrawer";
+import { useStoreUnreadCount } from "@/lib/hooks/useStoreMessages";
 
 /**
  * DashboardShell
@@ -24,6 +25,7 @@ import { MobileDrawer } from "./MobileDrawer";
  *   + Slide-in drawer overlay
  */
 export function DashboardShell({ children }) {
+  const count = useStoreUnreadCount();
   return (
     <DrawerProvider>
       <div
@@ -31,7 +33,7 @@ export function DashboardShell({ children }) {
         style={{ background: "var(--color-bg)" }}
       >
         {/* Desktop/Tablet Sidebar */}
-        <Sidebar />
+        <Sidebar count={count}/>
 
         {/* Main column */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -46,11 +48,11 @@ export function DashboardShell({ children }) {
           </main>
 
           {/* Mobile bottom tab bar */}
-          <BottomNav />
+          <BottomNav msgCount={count}/>
         </div>
 
         {/* Mobile slide-in drawer (portals above everything) */}
-        <MobileDrawer />
+        <MobileDrawer count={count} />
       </div>
     </DrawerProvider>
   );

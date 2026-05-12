@@ -12,6 +12,7 @@ import {
   buyerStartConversation,
   buyerGetConversation,
   buyerSendMessage,
+  buyerMarkAllRead,
 } from "../controllers/conversationController.js";
 
 const router = express.Router();
@@ -151,5 +152,11 @@ router.post(
   validateBody(messageSchemas.sendMessage),
   buyerSendMessage
 );
-
+// PATCH /api/v1/marketplace/conversations/:conversationId/read
+// Must be BEFORE /:conversationId to avoid "read" matching as an id
+router.patch(
+  "/:conversationId/read",
+  writeLimiter,
+  buyerMarkAllRead
+);
 export default router;
