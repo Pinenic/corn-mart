@@ -101,6 +101,7 @@ export function CartDrawer() {
     city: "",
     country: "",
   });
+  const [delivery, setDelivery] = useState(false);
   const [step, setStep] = useState("cart"); // cart | shipping | confirm
 
   const handleCheckout = async () => {
@@ -212,13 +213,13 @@ export function CartDrawer() {
                   field: "phone",
                   placeholder: "+260 900 0000",
                 },
-                {
-                  label: "Address",
-                  field: "address",
-                  placeholder: "Street address",
-                },
-                { label: "City", field: "city", placeholder: "City" },
-                { label: "Country", field: "country", placeholder: "Country" },
+                // {
+                //   label: "Address",
+                //   field: "address",
+                //   placeholder: "Street address",
+                // },
+                // { label: "City", field: "city", placeholder: "City" },
+                // { label: "Country", field: "country", placeholder: "Country" },
               ].map(({ label, field, placeholder }) => (
                 <div key={field}>
                   <label className="text-[11px] font-medium text-[var(--color-text-secondary)] block mb-1">
@@ -236,6 +237,90 @@ export function CartDrawer() {
                   />
                 </div>
               ))}
+              {delivery ? (
+                <>
+                  {[
+                    {
+                      label: "Address",
+                      field: "address",
+                      placeholder: "Street address",
+                    },
+                    { label: "City", field: "city", placeholder: "City" },
+                    {
+                      label: "Country",
+                      field: "country",
+                      placeholder: "Country",
+                    },
+                  ].map(({ label, field, placeholder }) => (
+                    <div key={field}>
+                      <label className="text-[11px] font-medium text-[var(--color-text-secondary)] block mb-1">
+                        {label}
+                        {field == "name" || field == "phone" ? "  *" : ""}
+                      </label>
+                      <input
+                        value={shipping[field]}
+                        onChange={(e) =>
+                          setShipping((s) => ({
+                            ...s,
+                            [field]: e.target.value,
+                          }))
+                        }
+                        placeholder={placeholder}
+                        required
+                        className="w-full h-10 px-3 rounded-xl border border-[var(--color-border-md)] bg-white text-[13px] outline-none focus:border-[var(--color-primary)] placeholder:text-[var(--color-text-muted)]"
+                      />
+                    </div>
+                  ))}<div className="flex gap-4">
+                  <button
+                    className={cn(
+                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
+                      delivery
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
+                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                    )}
+                    onClick={() => setDelivery(true)}
+                  >
+                    Delivery
+                  </button>{" "}
+                  <button
+                    className={cn(
+                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
+                      !delivery
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
+                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                    )}
+                    onClick={() => setDelivery(false)}
+                  >
+                    Self pick
+                  </button>
+                </div>
+                </>
+              ) : (
+                <div className="flex gap-4">
+                  <button
+                    className={cn(
+                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
+                      delivery
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
+                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                    )}
+                    onClick={() => setDelivery(true)}
+                  >
+                    Delivery
+                  </button>{" "}
+                  <button
+                    className={cn(
+                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
+                      !delivery
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
+                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                    )}
+                    onClick={() => setDelivery(false)}
+                  >
+                    Self pick
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -243,7 +328,7 @@ export function CartDrawer() {
             <div className="space-y-4 pt-2">
               <div className="bg-[var(--color-bg)] rounded-2xl p-4 space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
-                  Delivering to
+                  {delivery ? "Delivering to" : "Contact"}
                 </p>
                 {Object.entries(shipping)
                   .filter(([, v]) => v)

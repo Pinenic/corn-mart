@@ -300,6 +300,48 @@ export function useStoreConversation(conversationId) {
     markAllRead,
   };
 }
+// ── useStartConversation ──────────────────────────────────────
+export function useStoreStartConversation() {
+  const token = useAuthStore((s) => s.token);
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState(null);
+
+  const storeStartConversation = useCallback(
+    async ({ storeId, customerId, topic = null, body = null, orderId = null }) => {
+      if (!token) {
+        toast.info("Please sign in to message the seller");
+        return null;
+      }
+
+      setStarting(true);
+      setError(null);
+
+      try {
+        const result = await apiClient.post(`/stores/${storeId}/conversations`, {
+          store_id: storeId,
+          customer_id: customerId,
+          topic: topic || null,
+          body: body || null,
+          order_id: orderId || null,
+        });
+        return result?.data ?? null;
+      } catch (err) {
+        const msg =
+          err instanceof ApiError
+            ? err.message
+            : "Could not start conversation";
+        setError(msg);
+        toast.error(msg);
+        return null;
+      } finally {
+        setStarting(false);
+      }
+    },
+    [token]
+  );
+
+  return { storeStartConversation, starting, error };
+}
 
 // ── useQuickReplies ───────────────────────────────────────────
 

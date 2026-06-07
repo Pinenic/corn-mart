@@ -2,6 +2,7 @@ import { DM_Sans } from "next/font/google";
 // import "./globals.css";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Providers } from "@/components/providers/Providers";
+import DashboardGuard from "@/components/auth/DashboardGuard";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -20,7 +21,9 @@ export default function RootLayout({ children }) {
     <html lang="en" className={dmSans.variable}>
       <body>
         <Providers>
-          <DashboardShell>{children}</DashboardShell>
+          <DashboardGuard>
+            <DashboardShell>{children}</DashboardShell>
+          </DashboardGuard>
         </Providers>
       </body>
     </html>

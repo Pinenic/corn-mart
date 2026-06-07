@@ -2,12 +2,39 @@
 
 import { useState } from "react";
 import {
-  Store, Bell, CreditCard, Shield, User, LogOut,
-  Globe, Truck, ChevronRight, ChevronDown, Check,
-  Plus, Trash2, Eye, EyeOff, AlertTriangle, Copy,
-  Smartphone, Mail, Lock, Package
+  Store,
+  Bell,
+  CreditCard,
+  Shield,
+  User,
+  LogOut,
+  Globe,
+  Truck,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  Plus,
+  Trash2,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  Copy,
+  Smartphone,
+  Mail,
+  Lock,
+  Package,
+  MapPin,
 } from "lucide-react";
 import { Card, PageHeader, Badge, Button } from "@/components/ui";
+import { useStoreStore } from "@/lib/store/useStore";
+import { MapIcon } from "lucide-react";
+import {
+  useCreateLocation,
+  useUpdateLocation,
+  useUpdateStore,
+} from "@/lib/hooks/useStore";
+import { toast } from "@/lib/store/toastStore";
+import useAuthStore from "@/lib/store/useAuthStore";
 
 // ── Reusable primitives ───────────────────────────────────────
 function Toggle({ value, onChange }) {
@@ -17,7 +44,11 @@ function Toggle({ value, onChange }) {
       role="switch"
       aria-checked={value}
       className="relative flex-shrink-0 rounded-full transition-colors duration-200"
-      style={{ width: 36, height: 20, background: value ? "var(--color-accent)" : "var(--color-border-md)" }}
+      style={{
+        width: 36,
+        height: 20,
+        background: value ? "var(--color-accent)" : "var(--color-border-md)",
+      }}
     >
       <span
         className="absolute top-[3px] w-[14px] h-[14px] rounded-full bg-white transition-transform duration-200"
@@ -31,12 +62,18 @@ function SettingsSection({ title, children }) {
   return (
     <div className="mb-5">
       {title && (
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-2 px-0.5"
-          style={{ color: "var(--color-text-tertiary)" }}>
+        <p
+          className="text-[11px] font-semibold uppercase tracking-wider mb-2 px-0.5"
+          style={{ color: "var(--color-text-tertiary)" }}
+        >
           {title}
         </p>
       )}
-      <Card noPadding className="overflow-hidden divide-y" style={{ borderColor: "var(--color-border)" }}>
+      <Card
+        noPadding
+        className="overflow-hidden divide-y"
+        style={{ borderColor: "var(--color-border)" }}
+      >
         {children}
       </Card>
     </div>
@@ -51,29 +88,53 @@ function ExpandableRow({ icon: Icon, label, value, badge, danger, children }) {
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--color-bg)]"
-        style={{ color: danger ? "var(--color-danger)" : "var(--color-text-primary)" }}
+        style={{
+          color: danger ? "var(--color-danger)" : "var(--color-text-primary)",
+        }}
       >
         {Icon && (
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{
               background: danger ? "var(--color-danger-bg)" : "var(--color-bg)",
-              color:      danger ? "var(--color-danger)"    : "var(--color-text-secondary)",
-            }}>
+              color: danger
+                ? "var(--color-danger)"
+                : "var(--color-text-secondary)",
+            }}
+          >
             <Icon size={14} />
           </div>
         )}
         <span className="flex-1 text-[13.5px] font-medium">{label}</span>
         {badge && <Badge variant="warning">{badge}</Badge>}
         {value && (
-          <span className="text-[12px] mr-1" style={{ color: "var(--color-text-tertiary)" }}>{value}</span>
+          <span
+            className="text-[12px] mr-1"
+            style={{ color: "var(--color-text-tertiary)" }}
+          >
+            {value}
+          </span>
         )}
-        {open
-          ? <ChevronDown size={15} style={{ color: "var(--color-text-tertiary)", flexShrink: 0 }} />
-          : <ChevronRight size={15} style={{ color: "var(--color-text-tertiary)", flexShrink: 0 }} />
-        }
+        {open ? (
+          <ChevronDown
+            size={15}
+            style={{ color: "var(--color-text-tertiary)", flexShrink: 0 }}
+          />
+        ) : (
+          <ChevronRight
+            size={15}
+            style={{ color: "var(--color-text-tertiary)", flexShrink: 0 }}
+          />
+        )}
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 border-t" style={{ borderColor: "var(--color-border)", background: "var(--color-bg)" }}>
+        <div
+          className="px-4 pb-4 pt-1 border-t"
+          style={{
+            borderColor: "var(--color-border)",
+            background: "var(--color-bg)",
+          }}
+        >
           {children}
         </div>
       )}
@@ -85,15 +146,30 @@ function ToggleRow({ icon: Icon, label, description, value, onChange }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3.5">
       {Icon && (
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: "var(--color-bg)", color: "var(--color-text-secondary)" }}>
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{
+            background: "var(--color-bg)",
+            color: "var(--color-text-secondary)",
+          }}
+        >
           <Icon size={14} />
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-[13.5px] font-medium" style={{ color: "var(--color-text-primary)" }}>{label}</p>
+        <p
+          className="text-[13.5px] font-medium"
+          style={{ color: "var(--color-text-primary)" }}
+        >
+          {label}
+        </p>
         {description && (
-          <p className="text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>{description}</p>
+          <p
+            className="text-[11px]"
+            style={{ color: "var(--color-text-tertiary)" }}
+          >
+            {description}
+          </p>
         )}
       </div>
       <Toggle value={value} onChange={onChange} />
@@ -104,7 +180,10 @@ function ToggleRow({ icon: Icon, label, description, value, onChange }) {
 function InlineField({ label, children }) {
   return (
     <div className="mb-3">
-      <label className="text-[11px] font-medium block mb-1" style={{ color: "var(--color-text-secondary)" }}>
+      <label
+        className="text-[11px] font-medium block mb-1"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         {label}
       </label>
       {children}
@@ -112,57 +191,159 @@ function InlineField({ label, children }) {
   );
 }
 
-const inputCls = "w-full h-9 px-3 rounded-lg border text-[13px] outline-none transition-colors focus:border-[var(--color-accent)]";
-const inputStyle = { borderColor: "var(--color-border-md)", color: "var(--color-text-primary)", background: "white" };
+const inputCls =
+  "w-full h-9 px-3 rounded-lg border text-[13px] outline-none transition-colors focus:border-[var(--color-accent)]";
+const inputStyle = {
+  borderColor: "var(--color-border-md)",
+  color: "var(--color-text-primary)",
+  background: "white",
+};
 
 function SaveBtn({ onClick }) {
   const [saved, setSaved] = useState(false);
-  const handle = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); onClick?.(); };
+  const handle = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+    onClick?.();
+  };
   return (
-    <button onClick={handle}
+    <button
+      onClick={handle}
       className="flex items-center gap-1.5 h-8 px-4 rounded-lg text-[12px] font-semibold text-white transition-colors mt-3"
-      style={{ background: "var(--color-accent)" }}>
-      {saved ? <><Check size={12} /> Saved</> : "Save changes"}
+      style={{ background: "var(--color-accent)" }}
+    >
+      {saved ? (
+        <>
+          <Check size={12} /> Saved
+        </>
+      ) : (
+        "Save changes"
+      )}
     </button>
   );
 }
 
 // ── Main page ─────────────────────────────────────────────────
 export default function SettingsPage() {
+  const { user, signOut } = useAuthStore();
+  const { store, updateStore: storeUpdates } = useStoreStore();
+  const { update: handleUpdate, loading: updating } = useUpdateStore();
+  const { create: handleCreate, loading: creating } = useCreateLocation();
+  const { update: handleUpdateLoc, loading: updatingLoc } = useUpdateLocation();
+  const [storeForm, setStoreForm] = useState({
+    name: store?.name,
+    description: store?.description,
+  });
+  const locationInfo = store.location.length > 0 ? store?.location[0] : {};
+  const locationId = store.location.length > 0 ? store?.location[0].id : null;
+  const [locationForm, setLocationForm] = useState({
+    address: locationInfo.address || "",
+    city: locationInfo.city || "",
+    province: locationInfo.province || "",
+    country: locationInfo.country || "",
+    latitude: locationInfo.latitude || 0.01,
+    longitude: locationInfo.longitude || 0.01,
+    delivery_enabled: locationInfo.delivery_enabled || false,
+    delivery_fee: locationInfo.delivery_fee || 0,
+    delivery_radius: locationInfo.delivery_radius || 1,
+    delivery_methods: locationInfo.delivery_methods || [],
+  });
+  // console.log(store);
+
   // Notification toggles
   const [notifs, setNotifs] = useState({
-    new_orders:    true,
-    messages:      true,
-    low_stock:     false,
-    weekly_email:  true,
-    promo_tips:    false,
+    new_orders: true,
+    messages: true,
+    low_stock: false,
+    weekly_email: true,
+    promo_tips: false,
     order_shipped: true,
-    refunds:       true,
+    refunds: true,
   });
 
+  const update = (field, value) => {
+    setStoreForm((f) => ({ ...f, [field]: value }));
+  };
+
+  const updateLocation = (field, value) => {
+    setLocationForm((f) => ({ ...f, [field]: value }));
+  };
+  const toggleStatus = (key) =>
+    setLocationForm((n) => ({ ...n, [key]: !n[key] }));
+
+  const updateStore = async () => {
+    const result = await handleUpdate(storeForm);
+    // console.log(result);
+  };
+
+  const handleLocationAndShipping = async () => {
+    if (!locationId) {
+      if (
+        locationForm.address == "" ||
+        locationForm.city == "" ||
+        locationForm.province == "" ||
+        locationForm.country == ""
+      ) {
+        toast.warning("Please add location info first.");
+        return;
+      }
+      const result = await handleCreate(locationForm);
+      // fetchStore();
+      // console.log("creation: ",result);
+      storeUpdates({ location: [result] });
+      return;
+    }
+    const result = await handleUpdateLoc(locationId, locationForm);
+    console.log(result);
+  };
+
   // 2FA
-  const [twofa, setTwofa]           = useState(true);
+  const [twofa, setTwofa] = useState(true);
   // const [showApiKey, setShowApiKey] = useState(false);
 
   // Payment methods
-  const [payMethods] = useState([
-    { id: "pm1", type: "Visa",       last4: "4291", expiry: "08/27", primary: true  },
-    { id: "pm2", type: "Mastercard", last4: "7732", expiry: "12/26", primary: false },
-  ]);
+  // const [payMethods] = useState([
+  //   { id: "pm1", type: "Visa", last4: "4291", expiry: "08/27", primary: true },
+  //   {
+  //     id: "pm2",
+  //     type: "Mastercard",
+  //     last4: "7732",
+  //     expiry: "12/26",
+  //     primary: false,
+  //   },
+  // ]);
 
   // Shipping zones
-  const [zones] = useState([
-    { id: "z1", name: "Domestic (US)",       rate: "Free over $50 · $5.99 standard" },
-    { id: "z2", name: "North America",        rate: "$12.99 flat rate"               },
-    { id: "z3", name: "International",        rate: "$24.99 flat rate"               },
-  ]);
+  // const [zones] = useState([
+  //   { id: "z1", name: "Domestic (US)", rate: "Free over $50 · $5.99 standard" },
+  //   { id: "z2", name: "North America", rate: "$12.99 flat rate" },
+  //   { id: "z3", name: "International", rate: "$24.99 flat rate" },
+  // ]);
 
-  // Sessions
-  const [sessions] = useState([
-    { id: "s1", device: "MacBook Pro — Chrome",  location: "San Francisco, CA", current: true,  lastSeen: "Now"           },
-    { id: "s2", device: "iPhone 15 — Safari",    location: "San Francisco, CA", current: false, lastSeen: "2 hours ago"   },
-    { id: "s3", device: "Windows PC — Firefox",  location: "New York, NY",      current: false, lastSeen: "3 days ago"    },
-  ]);
+  // // Sessions
+  // const [sessions] = useState([
+  //   {
+  //     id: "s1",
+  //     device: "MacBook Pro — Chrome",
+  //     location: "San Francisco, CA",
+  //     current: true,
+  //     lastSeen: "Now",
+  //   },
+  //   {
+  //     id: "s2",
+  //     device: "iPhone 15 — Safari",
+  //     location: "San Francisco, CA",
+  //     current: false,
+  //     lastSeen: "2 hours ago",
+  //   },
+  //   {
+  //     id: "s3",
+  //     device: "Windows PC — Firefox",
+  //     location: "New York, NY",
+  //     current: false,
+  //     lastSeen: "3 days ago",
+  //   },
+  // ]);
 
   const toggleNotif = (key) => setNotifs((n) => ({ ...n, [key]: !n[key] }));
 
@@ -174,7 +355,7 @@ export default function SettingsPage() {
       />
 
       {/* Profile card */}
-      <Card className="flex items-center gap-4 mb-6 flex-wrap">
+      {/* <Card className="flex items-center gap-4 mb-6 flex-wrap">
         <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0"
           style={{ background: "var(--color-accent-subtle)", color: "var(--color-accent-text)" }}>
           SK
@@ -187,26 +368,35 @@ export default function SettingsPage() {
           <Badge variant="success">Pro plan</Badge>
           <Button variant="secondary" size="sm">Manage plan</Button>
         </div>
-      </Card>
+      </Card> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5">
-
         {/* ── LEFT COLUMN ── */}
         <div>
           {/* Store */}
           <SettingsSection title="Store">
-            <ExpandableRow icon={Store} label="Store name" value="Corn Mart Shop">
+            <ExpandableRow icon={Store} label="Store name" value={store?.name}>
               <InlineField label="Store name">
-                <input defaultValue="Corn Mart Shop" className={inputCls} style={inputStyle} />
+                <input
+                  value={storeForm.name}
+                  onChange={(e) => update("name", e.target.value)}
+                  className={inputCls}
+                  style={inputStyle}
+                />
               </InlineField>
               <InlineField label="Store description">
-                <textarea defaultValue="Premium lifestyle products curated for the modern shopper." rows={2}
-                  className={`${inputCls} h-auto resize-none py-2`} style={inputStyle} />
+                <textarea
+                  value={storeForm.description}
+                  onChange={(e) => update("description", e.target.value)}
+                  rows={2}
+                  className={`${inputCls} h-auto resize-none py-2`}
+                  style={inputStyle}
+                />
               </InlineField>
-              <SaveBtn />
+              <SaveBtn onClick={updateStore} />
             </ExpandableRow>
 
-            <ExpandableRow icon={Globe} label="Currency" value="USD ($)">
+            {/* <ExpandableRow icon={Globe} label="Currency" value="USD ($)">
               <InlineField label="Currency">
                 <select className={`${inputCls} cursor-pointer`} style={inputStyle} defaultValue="USD">
                   {[["USD","US Dollar ($)"],["GBP","British Pound (£)"],["EUR","Euro (€)"],["GHS","Ghanaian Cedi (₵)"],["CAD","Canadian Dollar (C$)"]].map(([v, l]) => (
@@ -247,58 +437,179 @@ export default function SettingsPage() {
                 </select>
               </InlineField>
               <SaveBtn />
-            </ExpandableRow>
+            </ExpandableRow> */}
           </SettingsSection>
 
           {/* Shipping */}
-          <SettingsSection title="Shipping & fulfilment">
-            <ExpandableRow icon={Truck} label="Shipping zones" value={`${zones.length} zones`}>
+          <SettingsSection title="Location & Shipping">
+            <ExpandableRow
+              icon={MapPin}
+              label="Location"
+              value={locationForm.city + ", " + locationForm.country}
+            >
+              <InlineField label="Address">
+                <input
+                  value={locationForm.address || "Adress"}
+                  onChange={(e) => updateLocation("address", e.target.value)}
+                  className={inputCls}
+                  style={inputStyle}
+                />
+              </InlineField>
+              <InlineField label="City">
+                <input
+                  value={locationForm.city || "City"}
+                  onChange={(e) => updateLocation("city", e.target.value)}
+                  className={inputCls}
+                  style={inputStyle}
+                />
+              </InlineField>
+              <InlineField label="Province">
+                <input
+                  value={locationForm.province || "Province"}
+                  onChange={(e) => updateLocation("province", e.target.value)}
+                  className={inputCls}
+                  style={inputStyle}
+                />
+              </InlineField>
+              <InlineField label="Country">
+                <input
+                  value={locationForm.country || "Country"}
+                  onChange={(e) => updateLocation("country", e.target.value)}
+                  className={inputCls}
+                  style={inputStyle}
+                />
+              </InlineField>
+              <SaveBtn onClick={handleLocationAndShipping} />
+            </ExpandableRow>
+            <ExpandableRow
+              icon={Truck}
+              label="Delivery"
+              value={locationForm.delivery_enabled ? "On" : "Off"}
+            >
+              <ToggleRow
+                icon={Truck}
+                label="Delivery status"
+                description="Toggle delivery on and off"
+                value={locationForm.delivery_enabled}
+                onChange={() => toggleStatus("delivery_enabled")}
+              />
+              <InlineField label="Shipping fee (K)">
+                <input
+                  type="number"
+                  value={locationForm.delivery_fee}
+                  onChange={(e) =>
+                    updateLocation("delivery_fee", e.target.value)
+                  }
+                  min={0}
+                  className={inputCls}
+                  style={inputStyle}
+                />
+              </InlineField>
+              {/* <InlineField label="Estimated delivery (business days)">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    defaultValue={2}
+                    min={1}
+                    max={30}
+                    className={`${inputCls} flex-1`}
+                    style={inputStyle}
+                  />
+                  <span
+                    className="text-[13px]"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    to
+                  </span>
+                  <input
+                    type="number"
+                    defaultValue={5}
+                    min={1}
+                    max={30}
+                    className={`${inputCls} flex-1`}
+                    style={inputStyle}
+                  />
+                </div>
+              </InlineField> */}
+              <SaveBtn onClick={handleLocationAndShipping} />
+            </ExpandableRow>
+
+            <ExpandableRow
+              icon={Truck}
+              label="Shipping Methods"
+              value={`${locationForm.delivery_methods.length || "0"} methods`}
+            >
               <div className="space-y-2 mt-1 mb-3">
-                {zones.map((z) => (
-                  <div key={z.id} className="flex items-start gap-2 p-3 rounded-xl border"
-                    style={{ borderColor: "var(--color-border)", background: "white" }}>
+                {locationForm.delivery_methods.map((z) => (
+                  <div
+                    key={z}
+                    className="flex items-start gap-2 p-3 rounded-xl border"
+                    style={{
+                      borderColor: "var(--color-border)",
+                      background: "white",
+                    }}
+                  >
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold" style={{ color: "var(--color-text-primary)" }}>{z.name}</p>
-                      <p className="text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>{z.rate}</p>
+                      <p
+                        className="text-[12px] font-semibold"
+                        style={{ color: "var(--color-text-primary)" }}
+                      >
+                        {z}
+                      </p>
+                      {/* <p
+                        className="text-[11px]"
+                        style={{ color: "var(--color-text-tertiary)" }}
+                      >
+                        {z.rate}
+                      </p> */}
                     </div>
-                    <button className="text-[11px] font-medium" style={{ color: "var(--color-accent)" }}>Edit</button>
+                    {/* <button
+                      className="text-[11px] font-medium"
+                      style={{ color: "var(--color-accent)" }}
+                    >
+                      Edit
+                    </button> */}
                   </div>
                 ))}
               </div>
-              <button className="flex items-center gap-1.5 text-[12px] font-medium"
-                style={{ color: "var(--color-accent)" }}>
+              <button
+                className="flex items-center gap-1.5 text-[12px] font-medium"
+                style={{ color: "var(--color-accent)" }}
+              >
                 <Plus size={13} /> Add zone
               </button>
             </ExpandableRow>
 
-            <ExpandableRow icon={Package} label="Free shipping threshold" value="$50">
+            {/* <ExpandableRow
+              icon={Package}
+              label="Shipping fees"
+              value={"K" + locationForm.delivery_fee}
+            >
               <InlineField label="Free shipping on orders over ($)">
-                <input type="number" defaultValue={50} min={0}
-                  className={inputCls} style={inputStyle} />
+                <input
+                  type="number"
+                  defaultValue={50}
+                  min={0}
+                  className={inputCls}
+                  style={inputStyle}
+                />
               </InlineField>
               <InlineField label="Standard shipping rate ($)">
-                <input type="number" defaultValue={5.99} min={0} step={0.01}
-                  className={inputCls} style={inputStyle} />
+                <input
+                  type="number"
+                  defaultValue={5.99}
+                  min={0}
+                  step={0.01}
+                  className={inputCls}
+                  style={inputStyle}
+                />
               </InlineField>
               <SaveBtn />
-            </ExpandableRow>
-
-            <ExpandableRow icon={Truck} label="Delivery estimates" value="2–5 days">
-              <InlineField label="Estimated delivery (business days)">
-                <div className="flex items-center gap-2">
-                  <input type="number" defaultValue={2} min={1} max={30}
-                    className={`${inputCls} flex-1`} style={inputStyle} />
-                  <span className="text-[13px]" style={{ color: "var(--color-text-secondary)" }}>to</span>
-                  <input type="number" defaultValue={5} min={1} max={30}
-                    className={`${inputCls} flex-1`} style={inputStyle} />
-                </div>
-              </InlineField>
-              <SaveBtn />
-            </ExpandableRow>
+            </ExpandableRow> */}
           </SettingsSection>
 
           {/* Payments */}
-          <SettingsSection title="Payments">
+          {/* <SettingsSection title="Payments">
             <ExpandableRow icon={CreditCard} label="Payment methods" value={`${payMethods.length} active`}>
               <div className="space-y-2 mt-1 mb-3">
                 {payMethods.map((pm) => (
@@ -362,31 +673,46 @@ export default function SettingsPage() {
               </InlineField>
               <SaveBtn />
             </ExpandableRow>
-          </SettingsSection>
+          </SettingsSection> */}
         </div>
 
         {/* ── RIGHT COLUMN ── */}
         <div>
           {/* Notifications */}
           <SettingsSection title="Notifications">
-            <ToggleRow icon={Bell} label="New orders" description="Get alerted when a new order is placed"
-              value={notifs.new_orders} onChange={() => toggleNotif("new_orders")} />
-            <ToggleRow icon={Mail} label="Customer messages" description="Inbox messages from customers"
-              value={notifs.messages} onChange={() => toggleNotif("messages")} />
-            <ToggleRow icon={Package} label="Low stock alerts" description="When a variant hits its threshold"
-              value={notifs.low_stock} onChange={() => toggleNotif("low_stock")} />
-            <ToggleRow icon={Truck} label="Order shipped" description="Confirm when orders go out"
-              value={notifs.order_shipped} onChange={() => toggleNotif("order_shipped")} />
-            <ToggleRow icon={CreditCard} label="Refund activity" description="When refunds are initiated or completed"
-              value={notifs.refunds} onChange={() => toggleNotif("refunds")} />
-            <ToggleRow icon={Mail} label="Weekly summary email" description="Revenue and order recap every Monday"
-              value={notifs.weekly_email} onChange={() => toggleNotif("weekly_email")} />
-            <ToggleRow icon={Bell} label="Promotional tips" description="Suggestions from Corn Mart"
-              value={notifs.promo_tips} onChange={() => toggleNotif("promo_tips")} />
+            <ToggleRow
+              icon={Bell}
+              label="New orders"
+              description="Get alerted when a new order is placed"
+              value={notifs.new_orders}
+              onChange={() => toggleNotif("new_orders")}
+            />
+            <ToggleRow
+              icon={Mail}
+              label="Customer messages"
+              description="Inbox messages from customers"
+              value={notifs.messages}
+              onChange={() => toggleNotif("messages")}
+            />
+            {/* <ToggleRow icon={Package} label="Low stock alerts" description="When a variant hits its threshold"
+              value={notifs.low_stock} onChange={() => toggleNotif("low_stock")} /> */}
+            <ToggleRow
+              icon={Truck}
+              label="Order shipped"
+              description="Confirm when orders go out"
+              value={notifs.order_shipped}
+              onChange={() => toggleNotif("order_shipped")}
+            />
+            {/* <ToggleRow icon={CreditCard} label="Refund activity" description="When refunds are initiated or completed"
+              value={notifs.refunds} onChange={() => toggleNotif("refunds")} /> */}
+            {/* <ToggleRow icon={Mail} label="Weekly summary email" description="Revenue and order recap every Monday"
+              value={notifs.weekly_email} onChange={() => toggleNotif("weekly_email")} /> */}
+            {/* <ToggleRow icon={Bell} label="Promotional tips" description="Suggestions from Corn Mart"
+              value={notifs.promo_tips} onChange={() => toggleNotif("promo_tips")} /> */}
           </SettingsSection>
 
           {/* Account & security */}
-          <SettingsSection title="Account & security">
+          {/* <SettingsSection title="Account & security">
             <ExpandableRow icon={User} label="Email address" value="admin@storely.com">
               <InlineField label="Current email">
                 <input type="email" defaultValue="admin@storely.com" className={inputCls} style={inputStyle} />
@@ -457,16 +783,22 @@ export default function SettingsPage() {
                 </button>
               </div>
             </ExpandableRow>
-          </SettingsSection>
+          </SettingsSection> */}
 
           {/* Danger zone */}
           <SettingsSection title="Account">
             <button
               className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--color-danger-bg)]"
               style={{ color: "var(--color-danger)" }}
+              onClick={() => signOut()}
             >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: "var(--color-danger-bg)", color: "var(--color-danger)" }}>
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: "var(--color-danger-bg)",
+                  color: "var(--color-danger)",
+                }}
+              >
                 <LogOut size={14} />
               </div>
               <span className="flex-1 text-[13.5px] font-medium">Sign out</span>

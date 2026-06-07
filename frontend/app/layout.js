@@ -4,6 +4,7 @@ import { GeistMono } from 'geist/font/mono';
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
+import { Analytics } from '@vercel/analytics/next';
 
 // const inter = Inter({ 
 //   subsets: ["latin"], 
@@ -23,6 +24,8 @@ export default function RootLayout({ children }) {
         className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
       >
         <Providers>{children}</Providers>
+
+        <Analytics />
       </body>
     </html>
   );

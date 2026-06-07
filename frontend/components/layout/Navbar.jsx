@@ -30,6 +30,7 @@ const NAV_LINKS = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/marketplace/stores", label: "Stores" },
   { href: "/orders", label: "My Orders" },
+  { href: "/onboarding", label: "Start Selling" },
 ];
 
 export function Navbar() {
@@ -41,13 +42,14 @@ export function Navbar() {
   const [userMenuOpen, setUser] = useState(false);
 
   const toggleCart = useCartStore((s) => s.toggleCart);
-  const _cartCount = useCart((s) => s.count);
+  const _cartCount = useCartStore((s) => s.count);
   const cartCount = _cartCount();
   const { notifications } = useNotifications();
   const { user, storeId, isAuthenticated, signOut } = useAuthStore();
   const { profile } = useProfile();
   const buyerUnreadCount = useBuyerUnreadCount();
   const count = useStoreUnreadCount();
+  console.log(cartCount);
 
   const handleSearch = (e) => {
     e.preventDefault();

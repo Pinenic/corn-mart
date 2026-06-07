@@ -20,7 +20,7 @@ export default function ProductDetailPage({ params }) {
   const { product, isLoading, error } = useProduct(productId);
   const router = useRouter();
   const setMessageRef = usePendingMessageRef((s) => s.setMessageRef);
-    const { startConversation, starting } = useStartConversation();
+  const { startConversation, starting } = useStartConversation();
 
   const [selectedVariant, setVariant] = useState(null);
   const [qty, setQty] = useState(1);
@@ -80,17 +80,16 @@ export default function ProductDetailPage({ params }) {
       productId: productId,
       image_url: product.thumbnail_url,
       name: product.name,
-      link: `/marketplace/products/${productId}`
+      link: `/marketplace/products/${productId}`,
     });
-   const conv = await startConversation({
-     storeId: product.store_id,
-     topic:   "",
-     body:    "",
-     orderId: null,
-   });
-   if (conv) router.push(`/account/messages/${conv.id}`);
-
-  }
+    const conv = await startConversation({
+      storeId: product.store_id,
+      topic: "",
+      body: "",
+      orderId: null,
+    });
+    if (conv) router.push(`/account/messages/${conv.id}`);
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
@@ -144,8 +143,7 @@ export default function ProductDetailPage({ params }) {
                   />
                 )}
               </div>
-              More from {" "}
-              {product.store.name}
+              More from {product.store.name}
             </Link>
           )}
 

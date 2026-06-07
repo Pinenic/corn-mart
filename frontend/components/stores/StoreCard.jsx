@@ -19,7 +19,7 @@ export function StoreCard({ store }) {
         <div className="px-4 pb-4">
           {/* Logo + name row */}
           <div className="flex items-end gap-3 -mt-6 mb-3">
-            <div className="w-12 h-12 rounded-xl border-2 border-white bg-white shadow-sm overflow-hidden flex-shrink-0">
+            <div className=" z-10 w-12 h-12 rounded-xl border-2 border-white bg-white shadow-sm overflow-hidden flex-shrink-0">
               {store.logo
                 ? <img src={store.logo} alt={store.name} className="w-full h-full object-cover" />
                 : <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
