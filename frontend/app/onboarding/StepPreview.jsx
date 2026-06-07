@@ -50,8 +50,11 @@ export function StepPreview({ store }) {
 
   const bannerUrl = store?.banner;
   const logoUrl   = store?.logo;
-  const accentColor = "#0057ff";
+  const accentColor = "#16a34a";
   const initials  = (store?.name ?? "S")[0].toUpperCase();
+
+  console.log(bannerUrl, logoUrl)
+  console.log("store: ", store)
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

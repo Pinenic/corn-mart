@@ -52,7 +52,12 @@ export function useOrderCounts() {
 // ── Single order ──────────────────────────────────────────────
 export function useOrder(orderId) {
   const storeId = useAuthStore((s) => s.storeId);
+  const params = {
+    page:     1,
+    limit:    1,
+  };
   const path    = storeId && orderId ? `/stores/${storeId}/orders/${orderId}` : null;
+  // console.log(path);
 
   return useApi(path);
 }

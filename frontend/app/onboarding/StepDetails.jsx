@@ -94,7 +94,7 @@ function LivePreview({ form }) {
         <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
         <div className="flex-1 h-4 rounded-md bg-[var(--color-border-md)] mx-2 flex items-center px-2">
           <span className="text-[8px] text-[var(--color-text-muted)] truncate">
-            storely.com/store/{(form.name || "your-store").toLowerCase().replace(/\s+/g, "-")}
+            corn-maart.pinapps.net/store/{(form.name || "your-store").toLowerCase().replace(/\s+/g, "-")}
           </span>
         </div>
       </div>

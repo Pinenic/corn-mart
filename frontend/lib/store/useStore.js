@@ -15,7 +15,7 @@ export const useStoreStore = create(
         try {
           const { data: storeData, error: storeError } = await supabase
             .from("stores")
-            .select("*")
+            .select("*,location:store_locations(*)")
             .eq("owner_id", userId)
             .single();
           set({ store: storeData, loading: false });

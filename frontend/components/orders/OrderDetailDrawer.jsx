@@ -18,6 +18,9 @@ import { CheckCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { ArrowUpRightFromSquare } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { useStartConversation } from "@/lib/hooks/useBuyerMessages";
+import { useStoreStartConversation } from "@/lib/hooks/useStoreMessages";
+import { useRouter } from "next/navigation";
 
 function Avatar({ customer }) {
   return (
@@ -60,8 +63,28 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
     return () => window.removeEventListener("keydown", h);
   }, [onClose]);
 
+  const { storeStartConversation} = useStoreStartConversation();
+  const router = useRouter();
+
   const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.Processing;
   const totalItems = order.order_items.reduce((s, i) => s + i.qty, 0);
+
+  const handleChat = async (id) => {
+    // setMessageRef({
+    //   productId: productId,
+    //   image_url: product.thumbnail_url,
+    //   name: product.name,
+    //   link: `/marketplace/products/${productId}`,
+    // });
+    const conv = await storeStartConversation({
+      storeId: order.store_id,
+      customerId: id,
+      topic: "",
+      body: "",
+      orderId: null,
+    });
+    if (conv) router.push(`/dashboard/messages/${conv.id}`);
+  };
 
   const handleStatusChange = async () => {
     order.status === "pending"
@@ -69,6 +92,10 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
       : order.status === "confirmed"
       ? onStatusChange(order.id, "processing")
       : onStatusChange(order.id, "shipped");
+  };
+
+  const handleCancel = async () => {
+    onStatusChange(order.id, "cancelled");
   };
 
   return (
@@ -176,6 +203,7 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
                   color: "var(--color-text-secondary)",
                 }}
                 title="Message customer"
+                onClick={() => handleChat(order.customer.id)}
               >
                 <MessageSquare size={14} />
               </button>
@@ -379,7 +407,11 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
             </Button>
           )}
           {order.status === "processing" && order.status !== "refunded" && (
-            <Button variant="primary" className="flex-1">
+            <Button
+              variant="primary"
+              className="flex-1"
+              onClick={() => handleStatusChange()}
+            >
               <Package size={14} /> Ship
             </Button>
           )}
@@ -389,7 +421,8 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
             </Button>
           )}
           {order.status !== "cancelled" && order.status !== "delivered" && (
-            <Button variant="danger">Cancel</Button>
+            <Button variant="danger"
+              onClick={() => handleCancel()}>Cancel</Button>
           )}
 
           <Button variant="secondary" className="flex-1">
