@@ -1,4 +1,5 @@
 "use client";
+import "../globals.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -22,7 +23,12 @@ import {
 import { toast } from "@/lib/store/toastStore";
 import { cn } from "@/lib/utils";
 import { useCategories } from "@/lib/hooks/useCategories";
-
+import useAuthStore from "@/lib/store/useAuthStore";
+import Link from "next/link";
+import { Button } from "@/components/ui";
+import { ShoppingBag } from "lucide-react";
+import { Header } from "@/components/layout/Header";
+import { Navbar } from "@/components/layout/Navbar";
 
 // ── Step config ───────────────────────────────────────────────
 const STEPS = [
@@ -188,6 +194,7 @@ function SkipModal({ open, onConfirm, onCancel }) {
 
 // ── Main page ─────────────────────────────────────────────────
 export default function OnboardingPage() {
+  const user = useAuthStore((s) => s.user);
   const router = useRouter();
 
   const [step, setStep] = useState(0);
@@ -288,7 +295,9 @@ export default function OnboardingPage() {
         description: productForm.description.trim() || undefined,
         category: productForm.category || undefined,
         brand: productForm.brand || undefined,
-        subcat_id: productForm.subcat_id ? Number(productForm.subcat_id) : undefined,
+        subcat_id: productForm.subcat_id
+          ? Number(productForm.subcat_id)
+          : undefined,
         is_active: true,
       },
       imageFiles: productForm.images,
@@ -329,6 +338,29 @@ export default function OnboardingPage() {
         </>
       );
   };
+
+  if (!user) {
+    return (
+      <div>
+        <Navbar />
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-20 text-center">
+          <ShoppingBag
+            size={48}
+            className="text-[var(--color-text-muted)] mx-auto mb-4"
+          />
+          <h2 className="text-[20px] font-bold text-[var(--color-text-primary)] mb-2">
+            Sign in to view your orders
+          </h2>
+          <p className="text-[13px] text-[var(--color-text-secondary)] mb-6">
+            Track your purchases and order history in one place
+          </p>
+          <Link href="/auth/sign-in">
+            <Button>Sign in</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

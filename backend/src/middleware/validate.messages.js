@@ -37,6 +37,16 @@ export const messageSchemas = {
     order_id: uuid.allow(null),
   }),
 
+  // POST /stores/:storeId/conversations  — start a new conversation
+  storeStartConversation: Joi.object({
+    store_id: uuid.required(),
+    customer_id: uuid.required(),
+    topic:    Joi.string().max(200).allow("", null),
+    // Optional opening message
+    body:     Joi.string().max(5000).allow("", null),
+    order_id: uuid.allow(null),
+  }),
+
   // POST /stores/:storeId/conversations/:id/messages
   // POST /marketplace/conversations/:id/messages
   sendMessage: Joi.object({

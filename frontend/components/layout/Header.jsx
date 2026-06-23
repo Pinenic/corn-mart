@@ -12,6 +12,7 @@ import { Home } from "lucide-react";
 import useAuthStore from "@/lib/store/useAuthStore";
 import { LucideShoppingBag } from "lucide-react";
 import Link from "next/link";
+import { useNotifications } from "@/lib/hooks/useNotifications";
 
 function getPageTitle(pathname) {
   const match = NAV_ITEMS.find((n) => pathname.startsWith(n.href));
@@ -25,6 +26,7 @@ export function Header() {
   const { user, storeId, isAuthenticated, signOut } = useAuthStore();
   const { profile } = useProfile();
   const { toggle } = useDrawer();
+  const { unread } = useNotifications();
   const title = getPageTitle(pathname);
 
   return (
@@ -73,10 +75,12 @@ export function Header() {
           aria-label="Notifications"
         >
           <Bell size={15} />
-          <span
-            className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full border-[1.5px] border-white"
-            style={{ background: "var(--color-danger)" }}
-          />
+          {unread > 0 && (
+            <span
+              className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full border-[1.5px] border-white"
+              style={{ background: "var(--color-danger)" }}
+            />
+          )}
         </button>
 
         {/* Avatar */}

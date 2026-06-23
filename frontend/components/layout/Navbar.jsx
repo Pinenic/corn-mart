@@ -14,7 +14,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
-import { useCart } from "@/lib/store/useCart";
 import useAuthStore from "@/lib/store/useAuthStore";
 import { useNotifications } from "@/lib/hooks/useNotifications";
 import { useBuyerUnreadCount } from "@/lib/hooks/useBuyerMessages";
@@ -42,14 +41,14 @@ export function Navbar() {
   const [userMenuOpen, setUser] = useState(false);
 
   const toggleCart = useCartStore((s) => s.toggleCart);
-  const _cartCount = useCartStore((s) => s.count);
-  const cartCount = _cartCount();
-  const { notifications } = useNotifications();
+  // s.count() is a function-on-state getter — calling it inside the
+  // selector makes Zustand re-render the navbar whenever items change.
+  const cartCount  = useCartStore((s) => s.count());
+  const { unread: unreadNotifs } = useNotifications();
   const { user, storeId, isAuthenticated, signOut } = useAuthStore();
   const { profile } = useProfile();
   const buyerUnreadCount = useBuyerUnreadCount();
   const count = useStoreUnreadCount();
-  console.log(cartCount);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -127,6 +126,11 @@ export function Navbar() {
               className="relative w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
             >
               <Bell size={18} />
+              {unreadNotifs > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                </span>
+              )}
             </button>
 
             {/* Cart */}

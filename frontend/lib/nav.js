@@ -58,14 +58,14 @@ export const NAV_ITEMS = [
     badge: 7,
     section: "store",
   },
-  //  {
-  //    key: "branding",
-  //    label: "Branding",
-  //    href: "/dashboard/branding",
-  //    icon: Palette,
-  //    bottomTab: false,
-  //    section: "store",
-  //  },
+    // {
+    //   key: "branding",
+    //   label: "Branding",
+    //   href: "/dashboard/branding",
+    //   icon: Palette,
+    //   bottomTab: false,
+    //   section: "store",
+    // },
   {
     key: "settings",
     label: "Settings",

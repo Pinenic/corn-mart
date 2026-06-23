@@ -18,12 +18,20 @@ import useAuthStore   from "@/lib/store/useAuthStore";
 
 // Global SWR config — applied to all hooks built on useApi
 export const SWR_CONFIG = {
-  // Revalidate when window regains focus (user switches tabs and comes back)
-  revalidateOnFocus: false,
+  // Revalidate when window/tab regains focus. This was previously off
+  // with nothing else to fill the gap for most dashboard data (orders,
+  // products, analytics have no realtime subscription and no polling),
+  // so a stale dashboard tab only ever updated via an explicit mutate()
+  // call from a local action, or a hard page reload. Re-enabling this
+  // is the cheapest fix for "I had to refresh the page to see X".
+  revalidateOnFocus: true,
   // Revalidate when network reconnects
   revalidateOnReconnect: true,
-  // Don't revalidate on mount if data is already cached
-  revalidateIfStale: false,
+  // Revalidate stale cached data on mount (e.g. navigating back to a
+  // page you already visited this session). Previously off, which
+  // meant a dashboard page could silently show minutes/hours-old data
+  // every time you returned to it within the same tab.
+  revalidateIfStale: true,
   // Deduplicate requests within 5s (reduced from 2s to prevent duplicate requests)
   dedupingInterval: 5000,
   // How long to keep cached data before treating it as stale (30s)

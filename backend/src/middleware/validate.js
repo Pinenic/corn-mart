@@ -29,7 +29,7 @@ function validate(source, schema) {
     }
 
     // Replace with sanitised/coerced value
-   // ✅ For query/params (read-only getters), mutate the existing object.
+    // ✅ For query/params (read-only getters), mutate the existing object.
     // For body (writable), direct assignment still works but Object.assign
     // is consistent and safe for all three sources.
     if (source === "query" || source === "params") {
@@ -126,7 +126,7 @@ const productQuerySchema = paginationSchema.keys({
 // ── Variant schemas ───────────────────────────────────────────
 const createVariantSchema = Joi.object({
   name: Joi.string().min(1).max(200).required(),
-  sku: Joi.string().max(100).allow("",null),
+  sku: Joi.string().max(100).allow("", null),
   price: Joi.number().positive().precision(2).allow(null),
   stock: Joi.number().integer().min(0).default(0),
   reserved_stock: Joi.number().integer().min(0).default(0),
@@ -163,10 +163,10 @@ const reorderImagesSchema = Joi.object({
 
 // ── Location schemas ──────────────────────────────────────────
 const locationSchema = Joi.object({
-  address: Joi.string().max(500).allow(null),
-  city: Joi.string().max(100).allow(null),
-  province: Joi.string().max(100).allow(null),
-  country: Joi.string().max(100).allow(null),
+  address: Joi.string().max(500).allow("", null),
+  city: Joi.string().max(100).allow("", null),
+  province: Joi.string().max(100).allow("", null),
+  country: Joi.string().max(100).allow("", null),
   latitude: Joi.number().min(-90).max(90).allow(null),
   longitude: Joi.number().min(-180).max(180).allow(null),
   delivery_enabled: Joi.boolean().default(false),

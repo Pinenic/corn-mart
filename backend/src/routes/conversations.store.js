@@ -18,6 +18,7 @@ import {
   storeCreateQuickReply,
   storeUpdateQuickReply,
   storeDeleteQuickReply,
+  storeStartConversation,
 } from "../controllers/conversationController.js";
 
 const router = express.Router({ mergeParams: true });
@@ -33,6 +34,13 @@ router.get(
   readLimiter,
   validateQuery(messageSchemas.conversationListQuery),
   storeListConversations
+);
+
+router.post(
+  "/conversations",
+  writeLimiter,
+  validateBody(messageSchemas.storeStartConversation),
+  storeStartConversation
 );
 
 // GET /api/v1/stores/:storeId/conversations/:conversationId

@@ -1,22 +1,37 @@
 "use client";
-// lib/stores/useCart.js
+// lib/store/cartStore.js
 // ─────────────────────────────────────────────────────────────
-// Unified cart store.
+// Unified cart store — authenticated users AND guests.
 //
-// Source of truth: Supabase (carts + cart_items tables).
-// Local state:     Zustand (items array, drawer state, totals).
-// Persistence:     cartId and items persisted to localStorage so
-//                  the cart survives a page refresh without a
-//                  full re-fetch. Items are rehydrated from DB
-//                  on sign-in via getCart().
+// GUEST CART
+//   Unauthenticated users get a fully optimistic local cart.
+//   Items live only in Zustand state (persisted to localStorage
+//   by zustand/middleware/persist so they survive page reloads).
+//   All mutate actions (addItem, updateQty, removeItem, clearCart)
+//   work identically in guest mode — they just skip the Supabase
+//   calls and operate on local state only.
 //
-// Item shape (what lives in state.items):
+// SYNC ON SIGN-IN
+//   When a user signs in, useAuthStore calls:
+//     useCartStore.getState().syncGuestCart(userId)
+//   which merges any guest items into the user's Supabase cart via
+//   the existing `add_to_cart` RPC (one call per unique item), then
+//   does a full getCart() to reconcile everything from the DB.
+//   Guest items already in the DB cart are deduplicated by the RPC.
+//
+// AUTHENTICATED CART
+//   Source of truth: Supabase (carts + cart_items tables).
+//   Optimistic updates are applied immediately; errors roll back.
+//   Re-sync (getCart) runs after every successful mutation to keep
+//   DB ids accurate.
+//
+// Item shape:
 // {
 //   key:           "product-uuid::variant-uuid" | "product-uuid"
-//   id:            string (cart_items DB row id — needed for RPCs)
+//   id:            string | null   (DB row id; null for guest items)
 //   product_id:    string
 //   variant_id:    string | null
-//   name:          string  (product name)
+//   name:          string
 //   variant_name:  string | null
 //   price:         number
 //   quantity:      number
@@ -24,30 +39,19 @@
 //   store_id:      string
 //   store_name:    string | null
 // }
-//
-// Key design decisions:
-//   - addItem()    → optimistic add → RPC → re-sync from DB
-//   - updateQty()  → optimistic update → RPC → re-sync
-//   - removeItem() → accepts composite key OR DB id → optimistic → DB delete
-//   - clearCart()  → optimistic clear → DB delete
-//   - All mutations rollback on error and show a toast
 // ─────────────────────────────────────────────────────────────
 
-import { create }   from "zustand";
-import { persist }  from "zustand/middleware";
-import { toast }    from "@/lib/store/toastStore";
+import { create }  from "zustand";
+import { persist } from "zustand/middleware";
+import { toast }   from "@/lib/store/toastStore";
 import { supabase } from "@/lib/supabaseClient";
 
-// ── DB → item shape normaliser ────────────────────────────────
-// Converts a raw cart_items row (with joined relations) into the
-// flat shape the UI and byStore() grouping expect.
+// ── DB row → flat item ────────────────────────────────────────
 function normaliseItem(row) {
   return {
-    // Composite key for deduplication — same product+variant = same slot
     key:           row.variant_id
                      ? `${row.product_id}::${row.variant_id}`
                      : row.product_id,
-    // DB id — needed for update/delete RPCs
     id:            row.id,
     product_id:    row.product_id,
     variant_id:    row.variant_id ?? null,
@@ -61,17 +65,14 @@ function normaliseItem(row) {
   };
 }
 
-// ── Optimistic item builder ───────────────────────────────────
-// Used before the DB confirms, so the UI updates immediately.
-// The DB `id` is not available yet — it's filled in after re-sync.
+// ── Optimistic item (before DB confirms) ─────────────────────
 function buildOptimisticItem(product, variant, quantity) {
   const key = variant?.id
     ? `${product.id}::${variant.id}`
     : product.id;
-
   return {
     key,
-    id:            null,                          // filled in after getCart()
+    id:            null,
     product_id:    product.id,
     variant_id:    variant?.id    ?? null,
     name:          product.name,
@@ -89,34 +90,31 @@ function buildOptimisticItem(product, variant, quantity) {
 export const useCartStore = create(
   persist(
     (set, get) => ({
-      // ── State ───────────────────────────────────────────────
-      cartId:    null,
-      userId:    null,
-      items:     [],
-      loading:   false,
-      isOpen:    false,   // cart drawer / sheet visibility
+      // ── State ─────────────────────────────────────────────
+      cartId:  null,
+      userId:  null,     // null = guest
+      items:   [],
+      loading: false,
+      isOpen:  false,
 
-      // ── Drawer controls ─────────────────────────────────────
+      // ── Drawer controls ───────────────────────────────────
       openCart:   () => set({ isOpen: true  }),
       closeCart:  () => set({ isOpen: false }),
       toggleCart: () => set(s => ({ isOpen: !s.isOpen })),
 
-      // ── Derived values (callable functions) ─────────────────
-      // Zustand doesn't support computed getters natively,
-      // so these are plain functions that read from state.
+      // ── Derived values ────────────────────────────────────
 
-      // Total item count (sum of all quantities)
+      // Total number of units across all line items.
+      // (items.length would only count distinct lines.)
       count() {
-        return get().items.length;
+        return get().items.reduce((sum, i) => sum + i.quantity, 0);
       },
 
-      // Total price
       subtotal() {
         return get().items.reduce((sum, i) => sum + i.price * i.quantity, 0);
       },
 
-      // Items grouped by store — used by checkout to create one
-      // store_order per store involved in the cart.
+      // Items grouped by store — used by checkout.
       // Returns: { [storeId]: { store_name, items: [...] } }
       byStore() {
         return get().items.reduce((groups, item) => {
@@ -128,8 +126,7 @@ export const useCartStore = create(
         }, {});
       },
 
-      // ── Fetch cart from DB ───────────────────────────────────
-      // Call on sign-in and after any mutation to stay in sync.
+      // ── Fetch cart from DB (authenticated only) ───────────
       getCart: async (userId) => {
         if (!userId) return;
         set({ loading: true, userId });
@@ -154,41 +151,79 @@ export const useCartStore = create(
           .maybeSingle();
 
         if (error) {
-          console.error("[useCart] getCart error:", error.message);
+          console.error("[cartStore] getCart error:", error.message);
           set({ loading: false });
           return;
         }
 
         const items = (cart?.cart_items ?? []).map(normaliseItem);
-
-        set({
-          cartId:  cart?.id ?? null,
-          items,
-          loading: false,
-        });
+        set({ cartId: cart?.id ?? null, items, loading: false });
       },
 
-      // ── Add item ─────────────────────────────────────────────
-      // Optimistic: immediately updates UI, then calls the RPC.
-      // If the RPC fails, rolls back and shows an error toast.
+      // ── Sync guest cart → DB on sign-in ──────────────────
+      // Merges any locally-stored guest items into the user's
+      // Supabase cart, then does a full re-sync. Called by
+      // useAuthStore after a successful sign-in/sign-up.
+      syncGuestCart: async (userId) => {
+        const guestItems = get().items.filter(i => i.id === null);
+
+        if (guestItems.length === 0) {
+          // Nothing to merge — just load the user's existing cart
+          await get().getCart(userId);
+          return;
+        }
+
+        set({ loading: true, userId });
+
+        // Fire all add_to_cart RPCs in parallel. The RPC upserts
+        // (adds quantity if the item already exists in the DB cart),
+        // so duplicate items are handled automatically.
+        const results = await Promise.allSettled(
+          guestItems.map(item =>
+            supabase.rpc("add_to_cart", {
+              p_product_id: item.product_id,
+              p_variant_id: item.variant_id ?? null,
+              p_quantity:   item.quantity,
+            })
+          )
+        );
+
+        const failed = results.filter(r => r.status === "rejected" || r.value?.error);
+        if (failed.length > 0) {
+          console.warn(`[cartStore] syncGuestCart: ${failed.length} item(s) failed to sync`);
+        }
+
+        // Full re-sync from DB to get accurate ids and merged state
+        await get().getCart(userId);
+
+        if (guestItems.length > 0) {
+          toast.success(
+            "Cart synced",
+            { description: `${guestItems.length} item${guestItems.length !== 1 ? "s" : ""} from your guest session were added to your cart.` }
+          );
+        }
+      },
+
+      // ── Add item ──────────────────────────────────────────
+      // Works for both guest and authenticated users.
+      // Guests: optimistic only (no DB call).
+      // Auth:   optimistic → RPC → re-sync.
       //
-      // Parameters:
-      //   product  — { id, name, price, thumbnail_url, store_id, store }
+      //   product  — { id, name, price, thumbnail_url, store_id, store? }
       //   variant  — { id, name, price } | null
       //   quantity — number (default 1)
-      //   stock    — available_stock from the variant (for guard)
+      //   stock    — number (default Infinity)
       addItem: async (product, variant, quantity = 1, stock = Infinity) => {
         const prevItems = get().items;
         const key = variant?.id
           ? `${product.id}::${variant.id}`
           : product.id;
 
-        // Stock guard — prevent adding more than available
-        const existing = prevItems.find(i => i.key === key);
+        // Stock guard
+        const existing   = prevItems.find(i => i.key === key);
         const currentQty = existing?.quantity ?? 0;
-
         if (currentQty + quantity > stock) {
-          toast.error("Cannot add item, stock limit will be exceeded", {
+          toast.error("Cannot add item — stock limit will be exceeded", {
             description: `Only ${stock} in stock (you already have ${currentQty} in your cart).`,
           });
           return;
@@ -207,7 +242,15 @@ export const useCartStore = create(
           }));
         }
 
-        // DB call
+        // Guest: stop here — item lives in local state only until sign-in
+        if (!get().userId) {
+          toast.success("Added to cart", {
+            description: `${product.name}${variant?.name ? ` — ${variant.name}` : ""} added. Sign in to save your cart.`,
+          });
+          return;
+        }
+
+        // Authenticated: persist to DB
         const { error } = await supabase.rpc("add_to_cart", {
           p_product_id: product.id,
           p_variant_id: variant?.id ?? null,
@@ -215,7 +258,6 @@ export const useCartStore = create(
         });
 
         if (error) {
-          // Rollback
           set({ items: prevItems });
           toast.error("Failed to add item", {
             description: "Not enough stock or an error occurred.",
@@ -227,13 +269,12 @@ export const useCartStore = create(
           description: `${product.name}${variant?.name ? ` — ${variant.name}` : ""} added.`,
         });
 
-        // Re-sync to get the real DB id on the new item
+        // Re-sync to get the DB id on the new row
         await get().getCart(get().userId);
       },
 
-      // ── Update quantity ──────────────────────────────────────
-      // Accepts the composite key (from UI) or the DB id.
-      // Optimistic update with rollback.
+      // ── Update quantity ───────────────────────────────────
+      // Delegates to removeItem when quantity reaches 0.
       updateQty: async (keyOrId, quantity) => {
         if (quantity < 1) {
           await get().removeItem(keyOrId);
@@ -244,15 +285,18 @@ export const useCartStore = create(
         const item = prevItems.find(i => i.key === keyOrId || i.id === keyOrId);
         if (!item) return;
 
-        // Optimistic update
+        // Optimistic
         set(s => ({
           items: s.items.map(i =>
             (i.key === keyOrId || i.id === keyOrId) ? { ...i, quantity } : i
           ),
         }));
 
+        // Guest: no DB call
+        if (!get().userId) return;
+
         const { error } = await supabase.rpc("update_cart_quantity", {
-          p_item_id: item.id,
+          p_item_id:  item.id,
           p_quantity: quantity,
         });
 
@@ -265,16 +309,21 @@ export const useCartStore = create(
         await get().getCart(get().userId);
       },
 
-      // ── Remove item ──────────────────────────────────────────
-      // Accepts the composite key ("product::variant") or the DB row id.
-      // Optimistic removal with rollback.
+      // ── Remove item ───────────────────────────────────────
+      // Accepts composite key ("product::variant") or DB row id.
       removeItem: async (keyOrId) => {
         const prevItems = get().items;
         const item = prevItems.find(i => i.key === keyOrId || i.id === keyOrId);
         if (!item) return;
 
-        // Optimistic removal
+        // Optimistic
         set(s => ({ items: s.items.filter(i => i.key !== item.key) }));
+
+        // Guest: no DB call
+        if (!get().userId) {
+          toast.success("Removed from cart");
+          return;
+        }
 
         const { error } = await supabase
           .from("cart_items")
@@ -288,23 +337,20 @@ export const useCartStore = create(
         }
 
         toast.success("Removed from cart");
-
-        // Sync totals — no need for full getCart() on a simple remove
-        // but we still call it to keep the DB id map accurate
         await get().getCart(get().userId);
       },
 
-      // ── Clear cart ───────────────────────────────────────────
-      // Removes all items from both local state and the DB.
-      // Note: the checkout_cart RPC deletes cart_items itself, so
-      // call this only for explicit "empty cart" user actions.
+      // ── Clear cart ────────────────────────────────────────
       clearCart: async () => {
         const { cartId, userId } = get();
-        if (!cartId) return;
+
+        // Guest or no DB cart yet
+        if (!userId || !cartId) {
+          set({ items: [] });
+          return;
+        }
 
         const prevItems = get().items;
-
-        // Optimistic clear
         set({ items: [] });
 
         const { error } = await supabase
@@ -319,14 +365,13 @@ export const useCartStore = create(
         }
 
         toast.success("Cart cleared");
-
-        // Re-sync to confirm empty state
         await get().getCart(userId);
       },
 
-      // ── Reset (on sign-out) ──────────────────────────────────
-      // Clears local state without touching the DB.
-      // The cart rows stay in DB and are reloaded on next sign-in.
+      // ── Reset (on sign-out) ───────────────────────────────
+      // Clears local state. DB cart rows are kept so they
+      // reload on next sign-in. Guest items in localStorage
+      // are cleared too since the user is now signed out.
       resetCart: () => set({
         cartId:  null,
         userId:  null,
@@ -337,14 +382,13 @@ export const useCartStore = create(
     }),
     {
       name: "cm-cart",
-      // Only persist what's needed to avoid a full re-fetch on refresh.
-      // Items are persisted so the cart appears immediately on page load
-      // before getCart() completes (hydration flash prevention).
-      // DB ids (item.id) may be stale after a server-side change, but
-      // getCart() corrects them before any mutation is attempted.
+      // Persist items and cartId so the cart survives a page reload
+      // without a full re-fetch (hydration flash prevention).
+      // Guest items are also persisted here until sign-in syncs them.
       partialize: (s) => ({
         cartId: s.cartId,
         items:  s.items,
+        userId: s.userId,
       }),
     }
   )
