@@ -34,7 +34,6 @@ const CONVERSATION_BASE = `
 `.trim();
 
 const conversationService = {
-
   // ─────────────────────────────────────────────────────────
   // STORE — list conversations
   // ─────────────────────────────────────────────────────────
@@ -90,7 +89,8 @@ const conversationService = {
     // Fetch messages with optional order context
     const { data: messages, error: msgErr } = await supabaseAdmin
       .from("messages")
-      .select(`
+      .select(
+        `
         ${MESSAGE_FIELDS},
         order:order_id (
           id, status, subtotal,
@@ -99,7 +99,8 @@ const conversationService = {
             product:product_id ( name, thumbnail_url )
           )
         )
-      `)
+      `
+      )
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true });
 
@@ -135,13 +136,80 @@ const conversationService = {
     // trigger, which fires the Realtime event the frontend listens for
     await supabaseAdmin.from("messages").insert({
       conversation_id: conversationId,
-      sender_id:       null,
-      sender_type:     "system",
-      type:            "system",
-      body:            `Conversation marked as ${status}`,
+      sender_id: null,
+      sender_type: "system",
+      type: "system",
+      body: `Conversation marked as ${status}`,
     });
 
     return data;
+  },
+
+
+  // ─────────────────────────────────────────────────────────
+  // STORE — start or retrieve conversation
+  // ─────────────────────────────────────────────────────────
+
+  async storeStartConversation(
+    { store_id, customer_id, topic, body, order_id }
+  ) {
+    console.log("starting conv as store...", customer_id);
+
+    // Validate customer exists
+    const { data: customer } = await supabaseAdmin
+      .from("users") // or "users" depending on your schema
+      .select("id")
+      .eq("id", customer_id)
+      .maybeSingle();
+
+    console.log("debug break: ", customer);
+    if (!customer) return null;
+
+    // Upsert — one thread per store + customer
+    const { data: conversation, error: convErr } = await supabaseAdmin
+      .from("conversations")
+      .upsert(
+        {
+          store_id: store_id,
+          customer_id: customer_id,
+          topic: topic ?? null,
+        },
+        {
+          onConflict: "store_id,customer_id",
+          ignoreDuplicates: false,
+        }
+      )
+      .select(CONVERSATION_BASE)
+      .single();
+
+    console.log("debug break", convErr);
+    if (convErr) throw convErr;
+
+    // Insert opening message if provided
+    if (body?.trim()) {
+      await supabaseAdmin.from("messages").insert({
+        conversation_id: conversation.id,
+        sender_id: store_id,
+        sender_type: "store", // 🔥 key difference
+        type: "text",
+        body: body.trim(),
+        order_id: order_id ?? null,
+      });
+
+      // Attach order reference if provided
+      if (order_id) {
+        await supabaseAdmin.from("messages").insert({
+          conversation_id: conversation.id,
+          sender_id: null,
+          sender_type: "system",
+          type: "order_ref",
+          body: "Order associated with this conversation",
+          order_id: order_id,
+        });
+      }
+    }
+
+    return conversation;
   },
 
   // ─────────────────────────────────────────────────────────
@@ -173,11 +241,11 @@ const conversationService = {
       .from("messages")
       .insert({
         conversation_id: conversationId,
-        sender_id:       senderId,
-        sender_type:     "store",
-        type:            "text",
-        body:            body.trim(),
-        order_id:        orderId ?? null,
+        sender_id: senderId,
+        sender_type: "store",
+        type: "text",
+        body: body.trim(),
+        order_id: orderId ?? null,
       })
       .select(MESSAGE_FIELDS)
       .single();
@@ -247,7 +315,7 @@ const conversationService = {
 
     const update = {};
     if (payload.label) update.label = payload.label.trim();
-    if (payload.body)  update.body  = payload.body.trim();
+    if (payload.body) update.body = payload.body.trim();
     update.updated_at = new Date().toISOString();
 
     const { data, error } = await supabaseAdmin
@@ -312,7 +380,8 @@ const conversationService = {
 
     const { data: messages, error: msgErr } = await supabaseAdmin
       .from("messages")
-      .select(`
+      .select(
+        `
         ${MESSAGE_FIELDS},
         order:order_id (
           id, status, subtotal,
@@ -321,7 +390,8 @@ const conversationService = {
             product:product_id ( name, thumbnail_url )
           )
         )
-      `)
+      `
+      )
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true });
 
@@ -335,14 +405,14 @@ const conversationService = {
   // ─────────────────────────────────────────────────────────
 
   async buyerStartConversation(buyerId, { store_id, topic, body, order_id }) {
-    console.log("startting conv...", store_id)
+    console.log("startting conv...", store_id);
     const { data: store } = await supabaseAdmin
       .from("stores")
       .select("id")
       .eq("id", store_id)
       .maybeSingle();
 
-      console.log("debug break: ", store);
+    console.log("debug break: ", store);
     if (!store) return null;
 
     // Upsert — one thread per buyer+store
@@ -355,29 +425,29 @@ const conversationService = {
       .select(CONVERSATION_BASE)
       .single();
 
-      console.log("debug break",convErr)
+    console.log("debug break", convErr);
     if (convErr) throw convErr;
 
     // Insert opening message if provided
     if (body?.trim()) {
       await supabaseAdmin.from("messages").insert({
         conversation_id: conversation.id,
-        sender_id:       buyerId,
-        sender_type:     "customer",
-        type:            "text",
-        body:            body.trim(),
-        order_id:        order_id ?? null,
+        sender_id: buyerId,
+        sender_type: "customer",
+        type: "text",
+        body: body.trim(),
+        order_id: order_id ?? null,
       });
 
       // Attach order_ref card if this message references an order
       if (order_id) {
         await supabaseAdmin.from("messages").insert({
           conversation_id: conversation.id,
-          sender_id:       null,
-          sender_type:     "system",
-          type:            "order_ref",
-          body:            "Order associated with this conversation",
-          order_id:        order_id,
+          sender_id: null,
+          sender_type: "system",
+          type: "order_ref",
+          body: "Order associated with this conversation",
+          order_id: order_id,
         });
       }
     }
@@ -389,7 +459,11 @@ const conversationService = {
   // BUYER — send message
   // ─────────────────────────────────────────────────────────
 
-  async buyerSendMessage(buyerId, conversationId, { body, reference,  orderId }) {
+  async buyerSendMessage(
+    buyerId,
+    conversationId,
+    { body, reference, orderId }
+  ) {
     const { data: conversation } = await supabaseAdmin
       .from("conversations")
       .select("id, status")
@@ -411,11 +485,11 @@ const conversationService = {
       .from("messages")
       .insert({
         conversation_id: conversationId,
-        sender_id:       buyerId,
-        sender_type:     "customer",
-        type:            "text",
-        body:            body.trim(),
-        order_id:        orderId ?? null,
+        sender_id: buyerId,
+        sender_type: "customer",
+        type: "text",
+        body: body.trim(),
+        order_id: orderId ?? null,
         reference: reference ?? null,
       })
       .select(MESSAGE_FIELDS)
@@ -433,7 +507,7 @@ const conversationService = {
     // Use the RPC defined in views.sql for security
     const { error } = await supabaseAdmin.rpc("mark_buyer_messages_read", {
       p_conversation_id: conversationId,
-      p_buyer_id:        buyerId,
+      p_buyer_id: buyerId,
     });
     if (error) throw error;
     return true;

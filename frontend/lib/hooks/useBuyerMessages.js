@@ -71,7 +71,18 @@ export function useBuyerConversations(filters = {}) {
   );
 
   // Realtime: revalidate the list when a new message arrives in any
-  // of this buyer's conversations (last_message_at changes → resort).
+  // of this buyer's conversations.
+  //
+  // We subscribe to `conversations` UPDATE (not `messages` INSERT) and
+  // filter by customer_id — same pattern as useStoreConversations.
+  // The DB trigger touches conversations.last_message_at on every
+  // message insert, and that row carries customer_id, so this scopes
+  // cleanly to just this buyer's threads.
+  //
+  // Subscribing to unfiltered `messages` INSERT (the previous approach)
+  // has no buyer-scoping column to filter on, so it fired — and forced
+  // a refetch — for every message sent by every buyer to every store on
+  // the whole platform.
   const userId = useAuthStore((s) => s.user?.id);
   useEffect(() => {
     if (!userId) return;
@@ -81,9 +92,10 @@ export function useBuyerConversations(filters = {}) {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "UPDATE",
           schema: "public",
-          table: "messages",
+          table: "conversations",
+          filter: `customer_id=eq.${userId}`,
         },
         () => {
           mutate();
@@ -94,7 +106,7 @@ export function useBuyerConversations(filters = {}) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, mutate]);
 
   return {
     conversations: data?.data ?? [],
@@ -330,8 +342,9 @@ export function useBuyerUnreadCount() {
     0
   );
 
-  // Realtime bump — subscribe to the same messages INSERT event
-  // as the list hook so the badge updates without polling
+  // Realtime bump — subscribe to conversations UPDATE scoped to this
+  // buyer (same pattern as useBuyerConversations), not unfiltered
+  // messages INSERT across the whole platform.
   const userId = useAuthStore((s) => s.user?.id);
   const { mutate } = useSWR(key);
   useEffect(() => {
@@ -341,9 +354,10 @@ export function useBuyerUnreadCount() {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "UPDATE",
           schema: "public",
-          table: "messages",
+          table: "conversations",
+          filter: `customer_id=eq.${userId}`,
         },
         () => {
           mutate();

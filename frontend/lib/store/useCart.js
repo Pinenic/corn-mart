@@ -31,10 +31,13 @@ export const useCart = create(
       set({ subtotal, itemCount });
     },
 
-    count:() => {
-      const itemsCount = get().items.reduce((count, item) => count + item.quantity, 0);
-        return itemsCount;
-      },
+    count: () => {
+      const itemsCount = get().items.reduce(
+        (count, item) => count + item.quantity,
+        0
+      );
+      return itemsCount;
+    },
     // -------------------------
     // Fetch Cart
     // -------------------------

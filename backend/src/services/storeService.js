@@ -50,12 +50,12 @@ const storeService = {
   async createStore(payload) {
     const { data, error } = await supabaseAdmin
       .from("stores")
-      .insert({ payload })
+      .insert({ ...payload })
       .select()
       .single();
 
-      if(error) throw error;
-      return data;
+    if (error) throw error;
+    return data;
   },
 
   // Update store fields

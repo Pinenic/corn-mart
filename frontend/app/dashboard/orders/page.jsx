@@ -72,7 +72,7 @@ export default function OrdersPage() {
   ].flat().length;
 
   // ── Data ────────────────────────────────────────────────────
-  const { data: counts } = useOrderCounts();
+  const { data: counts, mutate: mutateCounts } = useOrderCounts();
 
   const {
     data: ordersRaw,
@@ -116,6 +116,7 @@ export default function OrdersPage() {
     const updated = await updateStatus(orderId, status);
     if (updated) {
       mutate(); // revalidate the list
+      mutateCounts(); // status tab counts were going stale until a reload
       setSelected(null);
     }
   };

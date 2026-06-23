@@ -107,7 +107,10 @@ const useAuthStore = create((set, get) => ({
       const storeMod = await getPeerStore(() => import("@/lib/store/useStore"));
 
       await profileMod?.useProfile?.getState()?.fetchProfile?.(userId);
-      await cartMod?.useCartStore?.getState()?.getCart?.(userId);
+      // syncGuestCart merges any guest items into the DB cart first,
+      // then falls through to getCart(). If there are no guest items
+      // it's equivalent to a plain getCart() call.
+      await cartMod?.useCartStore?.getState()?.syncGuestCart?.(userId);
       await storeMod?.useStoreStore?.getState()?.fetchStore?.(userId);
     } catch (err) {
       console.warn(
@@ -153,7 +156,10 @@ const useAuthStore = create((set, get) => ({
       getPeerStore("@/lib/stores/useProfile")
         ?.useProfile?.getState()
         ?.clearProfile?.();
-      getPeerStore("@/lib/stores/useCart")?.useCart?.getState()?.clearCart?.();
+      // Use the correct module path for cartStore (not the old useCart path)
+      import("@/lib/store/cartStore")
+        .then(m => m?.useCartStore?.getState()?.resetCart?.())
+        .catch(() => {});
       getPeerStore("@/lib/stores/useStore")
         ?.useStoreStore?.getState()
         ?.clearStore?.();

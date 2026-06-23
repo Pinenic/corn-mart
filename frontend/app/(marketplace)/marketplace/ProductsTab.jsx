@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { ProductCard } from "@/components/products/ProductCard";
+import { ProductCard, ProductCard2 } from "@/components/products/ProductCard";
 import { ProductPreviewModal } from "@/components/products/ProductPreviewModal";
 import { Button, Select, Skeleton, EmptyState } from "@/components/ui";
 import { useMarketplaceProducts } from "@/lib/hooks/useMarketplace";
@@ -51,7 +51,8 @@ export function ProductsTab() {
   });
 
   const { data:CATEGORIES, error} = useCategoriesFlat()
-  // console.log(CATEGORIES);
+
+  const topRef = useRef(null);
 
 
   const hasFilters = query || category || minPrice || maxPrice;
@@ -70,8 +71,13 @@ export function ProductsTab() {
     setPage(1);
   };
 
+  useEffect(()=>{
+    topRef.current?.scrollIntoView({behavior: "smooth"});
+  },[page])
+
   return (
     <div>
+      <div ref={topRef}/>
       {/* Search + filter bar */}
       <div className="flex flex-wrap gap-3 mb-6">
         <form onSubmit={handleSearch} className="flex-1 min-w-[200px] relative">
@@ -213,9 +219,11 @@ export function ProductsTab() {
         </p>
       )}
 
+      
+
       {/* Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
           {Array.from({ length: 24 }).map((_, i) => (
             <div
               key={i}
@@ -249,12 +257,12 @@ export function ProductsTab() {
       ) : (
         <div
           className={cn(
-            "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 transition-opacity",
+            "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 transition-opacity",
             isRefreshing && "opacity-60"
           )}
         >
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} onQuickView={setPreview} />
+            <ProductCard2 key={p.id} product={p} onQuickView={setPreview} />
           ))}
         </div>
       )}

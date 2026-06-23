@@ -1,6 +1,15 @@
 "use client";
 import { useState } from "react";
-import { X, Trash2, ShoppingBag, Plus, Minus, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import {
+  X,
+  Trash2,
+  ShoppingBag,
+  Plus,
+  Minus,
+  ArrowRight,
+  LogIn,
+} from "lucide-react";
 import { Drawer } from "@/components/ui/Modal";
 import { Button, Spinner } from "@/components/ui";
 import { formatPrice, truncate, cn } from "@/lib/utils";
@@ -8,8 +17,9 @@ import { useCartStore } from "@/lib/store/cartStore";
 import useAuthStore from "@/lib/store/useAuthStore";
 import { usePlaceOrder } from "@/lib/hooks/useBuyerOrders";
 import { toast } from "@/lib/store/toastStore";
-import { useCart } from "@/lib/store/useCart";
 
+const ZAMBIA_PHONE_REGEX = /^(\+260|0)(7|9|5)\d{8}$/;
+// ── Cart line item ────────────────────────────────────────────
 function CartItem({ item }) {
   const updateQty = useCartStore((s) => s.updateQty);
   const removeItem = useCartStore((s) => s.removeItem);
@@ -81,6 +91,40 @@ function CartItem({ item }) {
   );
 }
 
+// ── Guest sign-in nudge ───────────────────────────────────────
+// Shown at the bottom of the cart when the user isn't signed in.
+// Lets them keep browsing while gently prompting to sign in so
+// the cart is saved and they can actually check out.
+function GuestBanner({ onClose }) {
+  return (
+    <div className="mx-4 mb-4 rounded-2xl border border-[var(--color-border-md)] bg-[var(--color-bg)] p-4 flex flex-col gap-3">
+      <div>
+        <p className="text-[13px] font-semibold text-[var(--color-text-primary)]">
+          Sign in to check out
+        </p>
+        <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5 leading-relaxed">
+          Your cart is saved locally. Sign in or create an account and
+          it&apos;ll be waiting for you.
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <Link href="/auth/sign-in" onClick={onClose} className="flex-1">
+          <button className="w-full h-9 rounded-xl bg-[var(--color-primary)] text-white text-[13px] font-semibold flex items-center justify-center gap-1.5 hover:bg-[var(--color-primary-hover)] transition-colors">
+            <LogIn size={14} />
+            Sign in
+          </button>
+        </Link>
+        <Link href="/auth/sign-up" onClick={onClose} className="flex-1">
+          <button className="w-full h-9 rounded-xl border border-[var(--color-border-md)] text-[var(--color-text-secondary)] text-[13px] font-medium flex items-center justify-center hover:bg-white transition-colors">
+            Create account
+          </button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ── Main drawer ───────────────────────────────────────────────
 export function CartDrawer() {
   const cartId = useCartStore((s) => s.cartId);
   const isOpen = useCartStore((s) => s.isOpen);
@@ -91,7 +135,10 @@ export function CartDrawer() {
   const _byStore = useCartStore((s) => s.byStore);
   const subtotal = _subtotal();
   const byStore = _byStore();
-  const token = useAuthStore((s) => s.token);
+
+  const { user } = useAuthStore();
+  const isGuest = !user;
+
   const { place, loading } = usePlaceOrder();
 
   const [shipping, setShipping] = useState({
@@ -101,12 +148,38 @@ export function CartDrawer() {
     city: "",
     country: "",
   });
+  const [errors, setErrors] = useState({});
   const [delivery, setDelivery] = useState(false);
-  const [step, setStep] = useState("cart"); // cart | shipping | confirm
+  const [step, setStep] = useState("cart");
+
+  // ✅ Validation
+  const validateShipping = () => {
+    const newErrors = {};
+
+    if (!shipping.name.trim()) newErrors.name = "Name is required";
+
+    if (!shipping.phone.trim()) {
+      newErrors.phone = "Phone is required";
+    } else if (!ZAMBIA_PHONE_REGEX.test(shipping.phone)) {
+      newErrors.phone = "Enter a valid number";
+    }
+
+    if (delivery) {
+      if (!shipping.address.trim()) newErrors.address = "Address is required";
+      if (!shipping.city.trim()) newErrors.city = "City is required";
+      if (!shipping.country.trim()) newErrors.country = "Country is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  // const [delivery, setDelivery] = useState(false);
+  // const [step, setStep]         = useState("cart"); // cart | shipping | confirm
 
   const handleCheckout = async () => {
-    if (!token) {
-      toast.info("Please sign in to place an order");
+    // Guests can't place orders — the GuestBanner already prompts them
+    if (isGuest) {
+      toast.info("Sign in to place an order");
       return;
     }
     if (step === "cart") {
@@ -114,16 +187,10 @@ export function CartDrawer() {
       return;
     }
     if (step === "shipping") {
+      if (!validateShipping()) return;
       setStep("confirm");
       return;
     }
-
-    // Place order
-    const orderItems = items.map((i) => ({
-      product_id: i.product_id,
-      variant_id: i.variant_id,
-      quantity: i.quantity,
-    }));
 
     const result = await place({
       cart_id: cartId,
@@ -190,7 +257,6 @@ export function CartDrawer() {
               </div>
             ) : (
               <div>
-                {/* Group by store */}
                 {Object.entries(byStore).map(([storeId, group]) => (
                   <div key={storeId} className="mb-4">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
@@ -213,18 +279,11 @@ export function CartDrawer() {
                   field: "phone",
                   placeholder: "+260 900 0000",
                 },
-                // {
-                //   label: "Address",
-                //   field: "address",
-                //   placeholder: "Street address",
-                // },
-                // { label: "City", field: "city", placeholder: "City" },
-                // { label: "Country", field: "country", placeholder: "Country" },
               ].map(({ label, field, placeholder }) => (
                 <div key={field}>
                   <label className="text-[11px] font-medium text-[var(--color-text-secondary)] block mb-1">
                     {label}
-                    {field == "name" || field == "phone" ? "  *" : ""}
+                    {"  *"}
                   </label>
                   <input
                     value={shipping[field]}
@@ -235,9 +294,35 @@ export function CartDrawer() {
                     required
                     className="w-full h-10 px-3 rounded-xl border border-[var(--color-border-md)] bg-white text-[13px] outline-none focus:border-[var(--color-primary)] placeholder:text-[var(--color-text-muted)]"
                   />
+                  {errors[field] && (
+                    <p className="text-red-500 text-xs">{errors[field]}</p>
+                  )}
                 </div>
               ))}
-              {delivery ? (
+
+              {/* Delivery toggle */}
+              <div className="flex gap-4">
+                {[
+                  { label: "Delivery", value: true },
+                  { label: "Self pick", value: false },
+                ].map(({ label, value }) => (
+                  <button
+                    key={label}
+                    onClick={() => setDelivery(value)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
+                      delivery === value
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
+                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Extra address fields — only shown for delivery */}
+              {delivery && (
                 <>
                   {[
                     {
@@ -255,7 +340,6 @@ export function CartDrawer() {
                     <div key={field}>
                       <label className="text-[11px] font-medium text-[var(--color-text-secondary)] block mb-1">
                         {label}
-                        {field == "name" || field == "phone" ? "  *" : ""}
                       </label>
                       <input
                         value={shipping[field]}
@@ -266,60 +350,14 @@ export function CartDrawer() {
                           }))
                         }
                         placeholder={placeholder}
-                        required
                         className="w-full h-10 px-3 rounded-xl border border-[var(--color-border-md)] bg-white text-[13px] outline-none focus:border-[var(--color-primary)] placeholder:text-[var(--color-text-muted)]"
                       />
+                      {errors[field] && (
+                        <p className="text-red-500 text-xs">{errors[field]}</p>
+                      )}
                     </div>
-                  ))}<div className="flex gap-4">
-                  <button
-                    className={cn(
-                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
-                      delivery
-                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
-                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                    )}
-                    onClick={() => setDelivery(true)}
-                  >
-                    Delivery
-                  </button>{" "}
-                  <button
-                    className={cn(
-                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
-                      !delivery
-                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
-                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                    )}
-                    onClick={() => setDelivery(false)}
-                  >
-                    Self pick
-                  </button>
-                </div>
+                  ))}
                 </>
-              ) : (
-                <div className="flex gap-4">
-                  <button
-                    className={cn(
-                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
-                      delivery
-                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
-                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                    )}
-                    onClick={() => setDelivery(true)}
-                  >
-                    Delivery
-                  </button>{" "}
-                  <button
-                    className={cn(
-                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
-                      !delivery
-                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
-                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                    )}
-                    onClick={() => setDelivery(false)}
-                  >
-                    Self pick
-                  </button>
-                </div>
               )}
             </div>
           )}
@@ -362,15 +400,20 @@ export function CartDrawer() {
                 ))}
               </div>
               <p className="text-[11px] text-[var(--color-text-muted)] text-center leading-relaxed px-2">
-                Payment is arranged directly with the seller. You'll be
+                Payment is arranged directly with the seller. You&apos;ll be
                 contacted to complete your purchase.
               </p>
             </div>
           )}
         </div>
 
-        {/* Footer CTA */}
-        {items.length > 0 && (
+        {/* Guest sign-in nudge — shown below items, above footer CTA */}
+        {step === "cart" && items.length > 0 && isGuest && (
+          <GuestBanner onClose={closeCart} />
+        )}
+
+        {/* Footer CTA — hidden for guests (GuestBanner is the CTA instead) */}
+        {items.length > 0 && !isGuest && (
           <div className="border-t border-[var(--color-border)] px-4 py-4 flex-shrink-0 space-y-3">
             {step === "cart" && (
               <div className="flex justify-between text-[13px] font-semibold text-[var(--color-text-primary)]">
@@ -390,29 +433,37 @@ export function CartDrawer() {
               className="w-full"
               loading={loading}
               disabled={
-                step == "shipping" &&
-                (shipping.name == "" || shipping.phone == "")
-              }
+              step === "shipping" &&
+              (
+                !shipping.name.trim() ||
+                !ZAMBIA_PHONE_REGEX.test(shipping.phone) ||
+                (delivery && (
+                  !shipping.address.trim() ||
+                  !shipping.city.trim() ||
+                  !shipping.country.trim()
+                ))
+              )
+            }
               onClick={handleCheckout}
             >
-              {step === "cart" ? (
+              {step === "cart" && (
                 <>
                   <span>Proceed to delivery info</span>
                   <ArrowRight size={15} />
                 </>
-              ) : null}
-              {step === "shipping" ? (
+              )}
+              {step === "shipping" && (
                 <>
                   <span>Review order</span>
                   <ArrowRight size={15} />
                 </>
-              ) : null}
-              {step === "confirm" ? (
+              )}
+              {step === "confirm" && (
                 <>
                   <span>Place order</span>
                   <ArrowRight size={15} />
                 </>
-              ) : null}
+              )}
             </Button>
           </div>
         )}

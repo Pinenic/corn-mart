@@ -26,6 +26,16 @@ export const storeListConversations = asyncHandler(async (req, res) => {
     response.pageMeta({ page: req.query.page, limit: req.query.limit, total })
   );
 });
+// POST /api/v1/stores/:storeId/conversations
+// Start a new conversation with a store (or return the existing one).
+export const storeStartConversation = asyncHandler(async (req, res) => {
+  // console.log(req.user.id , req.body)
+  const conv = await conversationService.storeStartConversation(
+    req.body
+  );
+  if (!conv) return response.notFound(res, "Store not found");
+  return response.created(res, conv);
+});
 
 // GET /api/v1/stores/:storeId/conversations/:conversationId
 export const storeGetConversation = asyncHandler(async (req, res) => {
@@ -133,7 +143,7 @@ export const buyerListConversations = asyncHandler(async (req, res) => {
 // POST /api/v1/marketplace/conversations
 // Start a new conversation with a store (or return the existing one).
 export const buyerStartConversation = asyncHandler(async (req, res) => {
-  console.log(req.user.id , req.body)
+  // console.log(req.user.id , req.body)
   const conv = await conversationService.buyerStartConversation(
     req.user.id,
     req.body

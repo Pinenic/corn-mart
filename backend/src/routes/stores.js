@@ -1,11 +1,12 @@
 // src/routes/stores.js
 import express from "express";
-import storeController              from "../controllers/storeController.js";
-import { authenticate }             from "../middleware/auth.js";
-import { requireStoreAccess }       from "../middleware/storeAccess.js";
-import { validateBody }             from "../middleware/validate.js";
-import { schemas }                  from "../middleware/validate.js";
+import storeController from "../controllers/storeController.js";
+import { authenticate } from "../middleware/auth.js";
+import { requireStoreAccess } from "../middleware/storeAccess.js";
+import { validateBody } from "../middleware/validate.js";
+import { schemas } from "../middleware/validate.js";
 import { writeLimiter, readLimiter } from "../middleware/rateLimit.js";
+import { storeImageRoutes } from "./imageRoutes.js";
 
 const router = express.Router();
 
@@ -17,11 +18,16 @@ router.use(authenticate);
 // GET /api/v1/stores/mine
 // Returns all stores owned by the current user.
 // Must be defined before /:storeId to avoid "mine" being treated as an ID.
-router.post("/onboarding", readLimiter, storeController.createOne)
+router.post("/onboarding", readLimiter, storeController.createOne);
 router.get("/mine", readLimiter, storeController.getMine);
 
 // GET /api/v1/stores/:storeId
-router.get("/:storeId", readLimiter, requireStoreAccess, storeController.getOne);
+router.get(
+  "/:storeId",
+  readLimiter,
+  requireStoreAccess,
+  storeController.getOne
+);
 
 // PATCH /api/v1/stores/:storeId
 router.patch(
@@ -68,4 +74,9 @@ router.delete(
   storeController.deleteLocation
 );
 
+
+// ── Logo and Banner ───────────────────────────────────────────
+// mounts:
+// /api/v1/stores/:storeId/assets/*
+router.use("/:storeId/assets", storeImageRoutes)
 export default router;
