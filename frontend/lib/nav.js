@@ -1,5 +1,6 @@
 "use client";
 
+import { Package } from "lucide-react";
 import {
   LayoutGrid,
   ShoppingBag,
@@ -75,10 +76,10 @@ export const NAV_ITEMS = [
     section: "store",
   },
   {
-    key: "coming",
-    label: "Coming Soon",
-    href: "#",
-    icon: Palette,
+    key: "stock",
+    label: "Stock Journal",
+    href: "/dashboard/stock",
+    icon: Package,
     bottomTab: false,
     section: "store",
   },
