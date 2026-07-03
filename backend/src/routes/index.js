@@ -28,6 +28,7 @@ import orderRoutes from "./orders.js";
 import productRoutes from "./products.js";
 import categoryRoutes from "./categories.js";
 import analyticsRoutes from "./analytics.js";
+import stockRoutes from "./stock.js"
 
 // Marketplace
 import marketplaceStoreRoutes from "./marketplace/stores.js";
@@ -50,6 +51,7 @@ router.use("/stores", storeRoutes);
 router.use("/stores/:storeId/orders", orderRoutes);
 router.use("/stores/:storeId/products", productRoutes);
 router.use("/stores/:storeId/analytics", analyticsRoutes);
+router.use("/stores/:storeId/stock", stockRoutes);
 
 // ── Marketplace: public browse ────────────────────────────────
 router.use("/marketplace/stores", marketplaceStoreRoutes);

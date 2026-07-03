@@ -108,13 +108,13 @@ function GuestBanner({ onClose }) {
         </p>
       </div>
       <div className="flex gap-2">
-        <Link href="/auth/sign-in" onClick={onClose} className="flex-1">
+        <Link href="/sign-in" onClick={onClose} className="flex-1">
           <button className="w-full h-9 rounded-xl bg-[var(--color-primary)] text-white text-[13px] font-semibold flex items-center justify-center gap-1.5 hover:bg-[var(--color-primary-hover)] transition-colors">
             <LogIn size={14} />
             Sign in
           </button>
         </Link>
-        <Link href="/auth/sign-up" onClick={onClose} className="flex-1">
+        <Link href="/sign-up" onClick={onClose} className="flex-1">
           <button className="w-full h-9 rounded-xl border border-[var(--color-border-md)] text-[var(--color-text-secondary)] text-[13px] font-medium flex items-center justify-center hover:bg-white transition-colors">
             Create account
           </button>
