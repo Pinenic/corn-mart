@@ -46,7 +46,7 @@ export function useStockLock() {
   // Whether a PIN has been configured for this store
   const [hasPIN, setHasPIN] = useState(false);
   // Whether the current session is unlocked
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(true);
   // Error message shown when wrong PIN is entered
   const [pinError, setPinError] = useState("");
   // Working state for async hash operations
@@ -57,7 +57,7 @@ export function useStockLock() {
     if (!storeId) return;
     const stored = localStorage.getItem(STORAGE_KEY(storeId));
     setHasPIN(Boolean(stored));
-    console.log(stored);
+    // console.log(stored);
     // If no PIN is set, grant access immediately
     setUnlocked(false);
   }, [storeId]);

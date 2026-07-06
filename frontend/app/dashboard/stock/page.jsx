@@ -103,7 +103,7 @@ function PinManagementModal({ onClose, lock }) {
   const handleRemove = async () => {
     setBusy(true);
     setErr(null);
-    const ok = await lock.removePin(cur);
+    const ok = await lock.removePIN(cur);
     setBusy(false);
     if (ok) {
       setDone(true);
@@ -352,7 +352,7 @@ export default function StockJournalPage() {
   const { create, loading: creating, fieldErrors } = useCreateStockEntry();
   const { update, loading: updating } = useUpdateStockEntry();
   const { remove, loading: deleting } = useDeleteStockEntry();
-  console.log("summary",summary)
+  // console.log("summary",summary)
 
   const openAdd = () => {
     setEditEntry(null);
@@ -413,7 +413,7 @@ export default function StockJournalPage() {
             <Lock size={13} /> Lock
           </button>
           {/* PIN settings */}
-          {lock.hasPin && (
+          {lock.hasPIN && (
             <button
               onClick={() => setPinModal(true)}
               className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-medium transition-colors hover:bg-[var(--color-bg)]"
