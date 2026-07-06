@@ -12,14 +12,21 @@ import { useStockLock }        from "@/lib/hooks/useStockLock";
 import { cn }                  from "@/lib/utils";
 
 // ── PIN input — single digit boxes ────────────────────────────
-function PinInput({ value, onChange, onSubmit, label, error, autoFocus }) {
-  const digits = 4;
-  const chars  = value.split("");
+import { useRef } from "react";
 
-  const handleKey = (e) => {
-    if (e.key === "Enter") { onSubmit?.(); return; }
-    if (e.key === "Backspace") { onChange(value.slice(0, -1)); return; }
-    if (/^\d$/.test(e.key) && value.length < digits) { onChange(value + e.key); }
+function PinInput({ value, onChange, onSubmit, label, error, autoFocus }) {
+  const digits   = 4;
+  const chars    = value.split("");
+  const inputRef = useRef(null);
+
+  const handleChange = (e) => {
+    // Strip non-digits, enforce max length
+    const clean = e.target.value.replace(/\D/g, "").slice(0, digits);
+    onChange(clean);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") onSubmit?.();
   };
 
   return (
@@ -30,14 +37,30 @@ function PinInput({ value, onChange, onSubmit, label, error, autoFocus }) {
           {label}
         </p>
       )}
+
+      {/* Tap anywhere on the boxes to focus the hidden input */}
       <div
-        className="flex gap-3 justify-center"
-        tabIndex={0}
-        onKeyDown={handleKey}
-        autoFocus={autoFocus}
-        onClick={e => e.currentTarget.focus()}
-        style={{ outline: "none" }}
+        className="flex gap-3 justify-center relative cursor-text"
+        onClick={() => inputRef.current?.focus()}
       >
+        {/* Hidden real input — receives keyboard events and triggers mobile keyboard */}
+        <input
+          ref={inputRef}
+          type="number"          /* numeric keyboard on iOS/Android */
+          inputMode="numeric"    /* numeric keyboard on Android Chrome */
+          pattern="[0-9]*"       /* helps iOS show numeric pad */
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          autoFocus={autoFocus}
+          autoComplete="one-time-code"  /* offers SMS OTP autofill as a bonus */
+          maxLength={digits}
+          className="absolute opacity-0 w-0 h-0 pointer-events-none"
+          aria-label={label ?? "PIN input"}
+          style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
+        />
+
+        {/* Visual boxes */}
         {Array.from({ length: digits }).map((_, i) => (
           <div
             key={i}
@@ -48,14 +71,15 @@ function PinInput({ value, onChange, onSubmit, label, error, autoFocus }) {
                 : chars[i] ? "border-[var(--color-border-md)]" : "border-[var(--color-border)]"
             )}
             style={{
-              background:  chars[i] ? "var(--color-accent-subtle)" : "white",
-              color:       "var(--color-text-primary)",
+              background: chars[i] ? "var(--color-accent-subtle)" : "white",
+              color: "var(--color-text-primary)",
             }}
           >
             {chars[i] ? "●" : ""}
           </div>
         ))}
       </div>
+
       {error && (
         <div className="flex items-center justify-center gap-1.5 text-[12px]"
           style={{ color: "var(--color-danger)" }}>
@@ -202,7 +226,7 @@ function SetupScreen({ onSetPin, error, loading, clearError }) {
 
           <p className="text-[11px] text-center leading-relaxed"
             style={{ color: "var(--color-text-muted)" }}>
-            The PIN is stored locally on this device.<br />
+            {/* The PIN is stored locally on this device.<br /> */}
             You can change or remove it later from the journal.
           </p>
         </div>
@@ -215,7 +239,7 @@ function SetupScreen({ onSetPin, error, loading, clearError }) {
 export default function StockLayout({ children }) {
   const { status, hasPIN, pinError:error, working:loading, setPIN, unlocked,  unlock, clearError } = useStockLock();
 
-  if (!hasPIN) {
+  if (!hasPIN && !unlocked) {
     return <SetupScreen onSetPin={setPIN} error={error} loading={loading} clearError={clearError} />;
   }
 
