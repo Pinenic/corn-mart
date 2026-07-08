@@ -39,6 +39,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { setTokenAccessor } from "@/lib/api/client";
 import { storeService } from "@/lib/api/services";
 import { useProfile } from "./useProfile.js";
+import { createProfile } from "@/app/actions/profileAction.js";
 
 // ── Peer store accessors ──────────────────────────────────────
 // Imported lazily inside functions so the dashboard works even when
@@ -158,7 +159,7 @@ const useAuthStore = create((set, get) => ({
         ?.clearProfile?.();
       // Use the correct module path for cartStore (not the old useCart path)
       import("@/lib/store/cartStore")
-        .then(m => m?.useCartStore?.getState()?.resetCart?.())
+        .then((m) => m?.useCartStore?.getState()?.resetCart?.())
         .catch(() => {});
       getPeerStore("@/lib/stores/useStore")
         ?.useStoreStore?.getState()
@@ -258,6 +259,12 @@ const useAuthStore = create((set, get) => ({
         },
       });
       if (error) throw error;
+
+      if (data.user) {
+        const encoded = encodeURIComponent(firstname + " " + lastname);
+        const url = `https://api.dicebear.com/9.x/initials/svg?seed=${encoded}&backgroundColor=c5c5c5&textColor=ffffff`;
+        await createProfile(data.user, url, phone);
+      }
 
       if (data.session) {
         // Email confirmation is off — user is immediately signed in

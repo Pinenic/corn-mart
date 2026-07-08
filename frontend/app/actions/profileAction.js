@@ -8,7 +8,8 @@ export async function createProfile(user, url, phone) {
   const { error } = await supabase.from("users").insert([
     {
       id: user.id,
-      full_name: user.user_metadata.first_name + " " + user.user_metadata.last_name,
+      full_name:
+        user.user_metadata.first_name + " " + user.user_metadata.last_name,
       email: user.email,
       phone: phone,
       avatar_url: url,
