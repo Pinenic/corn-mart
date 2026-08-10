@@ -1,7 +1,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/providers/Providers";
+// import { Providers } from "@/components/providers/Providers";
 import { Navbar }    from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 
@@ -17,6 +18,7 @@ export default function MarketplaceLayout({ children }) {
       <main className="min-h-[calc(100vh-64px)]">
         {children}
       </main>
+      <Footer />
     </>
   );
 }

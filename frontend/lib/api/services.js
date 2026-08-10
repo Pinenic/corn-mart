@@ -112,6 +112,11 @@ export const orderService = {
   // GET /stores/:storeId/orders/:orderId/history
   getHistory: (storeId, orderId) =>
     apiClient.get(`/stores/${storeId}/orders/${orderId}/history`),
+
+  // GET /stores/:storeId/orders/delivery-pricing
+  // Size/price options for the ship-confirmation dialog.
+  getDeliveryPricing: (storeId) =>
+    apiClient.get(`/stores/${storeId}/orders/delivery-pricing`),
 };
 
 // ── Analytics ─────────────────────────────────────────────────

@@ -82,6 +82,11 @@ const updateOrderStatusSchema = Joi.object({
     .valid(...orderStatusValues)
     .required(),
   comment: Joi.string().max(500).allow("", null),
+  // NEW — only meaningful on processing → shipped for
+  // platform_delivery orders; the delivery platform validates it
+  // against the client's actual tier keys, so this only needs a
+  // loose shape check here.
+  parcel_size: Joi.string().max(50).allow("", null),
 });
 
 const orderQuerySchema = paginationSchema.keys({
@@ -173,6 +178,19 @@ const locationSchema = Joi.object({
   delivery_radius_km: Joi.number().positive().allow(null),
   delivery_fee: Joi.number().min(0).allow(null),
   delivery_methods: Joi.array().items(Joi.string()).default([]),
+  // NEW — added in 007_delivery_fee_and_contact_phone.sql. This is
+  // what a rider actually calls on pickup; without it in this schema
+  // there was no validated way for a seller to set it. Required
+  // when delivery is enabled — deliveryIntegrationService.js
+  // otherwise only discovers the gap at dispatch time, which is a
+  // worse place to find out.
+  contact_phone: Joi.string()
+    .max(30)
+    .when("delivery_enabled", {
+      is: true,
+      then: Joi.required(),
+      otherwise: Joi.allow("", null),
+    }),
 });
 
 // ── Analytics schemas ─────────────────────────────────────────
@@ -217,6 +235,16 @@ const placeOrderSchema = Joi.object({
     city: Joi.string().max(100).allow("", null),
     country: Joi.string().max(100).allow("", null),
   }).allow(null),
+
+  // NEW — was missing entirely, so stripUnknown was silently dropping
+  // it from every request before it reached the controller. Values
+  // must match the check constraint on store_orders.fulfillment_method
+  // (006_store_orders_delivery_integration.sql) and
+  // VALID_FULFILLMENT_METHODS in marketplaceBuyerService.js — if this
+  // list ever changes, update all three together.
+  fulfillment_method: Joi.string()
+    .valid("platform_delivery", "self_arranged")
+    .default("self_arranged"),
 
   // Note to the seller
   note: Joi.string().max(1000).allow("", null),

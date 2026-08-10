@@ -70,6 +70,14 @@ export function useOrderHistory(orderId) {
   return useApi(path);
 }
 
+// ── Delivery pricing (for the ship-confirmation dialog) ─────────
+export function useDeliveryPricing() {
+  const storeId = useAuthStore((s) => s.storeId);
+  const path    = storeId ? `/stores/${storeId}/orders/delivery-pricing` : null;
+
+  return useApi(path);
+}
+
 // ── Update status mutation ────────────────────────────────────
 export function useUpdateOrderStatus() {
   const storeId            = useAuthStore((s) => s.storeId);
@@ -85,21 +93,32 @@ export function useUpdateOrderStatus() {
     refunded:   "refunded",
   };
 
-  const updateStatus = useCallback(async (orderId, status, comment = "") => {
+  const updateStatus = useCallback(async (orderId, status, comment = "", extra = {}) => {
     if (!storeId) return null;
     setLoad(true);
     setError(null);
 
     try {
-      const payload = { status };
+      const payload = { status, ...extra };
       if (comment) payload.comment = comment;
       const result = await orderService.updateStatus(storeId, orderId, payload);
       toast.success(`Order has been ${STATUS_LABELS[status] ?? status}.`);
       return result?.data ?? null;
     } catch (err) {
+      // PARCEL_SIZE_REQUIRED comes with a `tiers` list attached
+      // (details.tiers) — the ship-confirmation dialog uses this to
+      // recover gracefully (re-show the size picker with real
+      // options) instead of just showing a dead-end error toast.
+      const isParcelSizeError =
+        err instanceof ApiError && err.code === "PARCEL_SIZE_REQUIRED";
+
       const message = err instanceof ApiError ? err.message : "Could not update order status.";
       setError(err instanceof ApiError ? err : null);
-      toast.error(message);
+
+      if (!isParcelSizeError) {
+        toast.error(message);
+      }
+
       return null;
     } finally {
       setLoad(false);

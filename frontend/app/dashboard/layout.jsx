@@ -18,14 +18,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={dmSans.variable}>
-      <body>
-        <Providers>
-          <DashboardGuard>
-            <DashboardShell>{children}</DashboardShell>
-          </DashboardGuard>
-        </Providers>
-      </body>
-    </html>
+    <>
+      <Providers>
+        <DashboardGuard>
+          <DashboardShell>{children}</DashboardShell>
+        </DashboardGuard>
+      </Providers>
+    </>
   );
 }

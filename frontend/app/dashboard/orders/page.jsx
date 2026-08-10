@@ -121,6 +121,11 @@ export default function OrdersPage() {
     }
   };
 
+  const refresh = () => {
+    mutate(); // revalidate the list
+    mutateCounts(); // status tab counts were going stale until a reload
+  }
+
   return (
     <div>
       <PageHeader
@@ -511,6 +516,7 @@ export default function OrdersPage() {
           order={selectedOrder}
           onClose={() => setSelected(null)}
           onStatusChange={handleStatusUpdate}
+          refresh={refresh}
         />
       )}
       {showFilters && (

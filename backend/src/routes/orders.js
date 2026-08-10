@@ -16,6 +16,10 @@ router.use(authenticate, requireStoreAccess);
 // Must be defined BEFORE /:orderId to prevent "status-counts" matching as an ID
 router.get("/status-counts", readLimiter, orderController.getStatusCounts);
 
+// GET /api/v1/stores/:storeId/orders/delivery-pricing
+// NEW — must also be defined BEFORE /:orderId, same reasoning.
+router.get("/delivery-pricing", readLimiter, orderController.getDeliveryPricing);
+
 // GET /api/v1/stores/:storeId/orders
 router.get(
   "/",

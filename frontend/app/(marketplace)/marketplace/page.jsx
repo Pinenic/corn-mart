@@ -1,18 +1,18 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Grid, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductsTab } from "./ProductsTab";
-import { StoresTab }   from "./StoresTab";
+import { StoresTab } from "./StoresTab";
 
 const TABS = [
-  { key: "products", label: "Products", Icon: Grid  },
-  { key: "stores",   label: "Stores",   Icon: Store },
+  { key: "products", label: "Products", Icon: Grid },
+  { key: "stores", label: "Stores", Icon: Store },
 ];
 
 function MarketplaceTabs() {
-  const router       = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState(searchParams.get("tab") ?? "products");
 
@@ -28,8 +28,16 @@ function MarketplaceTabs() {
       {/* Tab bar */}
       <div className="flex gap-1 p-1 bg-white rounded-2xl border border-[var(--color-border)] w-fit mb-6">
         {TABS.map(({ key, label, Icon }) => (
-          <button key={key} onClick={() => switchTab(key)}
-            className={cn("flex items-center gap-2 px-5 py-2 rounded-xl text-[13px] font-semibold transition-all", tab === key ? "bg-[var(--color-primary)] text-white shadow-sm" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)]")}>
+          <button
+            key={key}
+            onClick={() => switchTab(key)}
+            className={cn(
+              "flex items-center gap-2 px-5 py-2 rounded-xl text-[13px] font-semibold transition-all",
+              tab === key
+                ? "bg-[var(--color-primary)] text-white shadow-sm"
+                : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)]"
+            )}
+          >
             <Icon size={15} /> {label}
           </button>
         ))}
@@ -40,6 +48,7 @@ function MarketplaceTabs() {
 }
 
 export default function MarketplacePage() {
+  const topRef = useRef(null);
   return (
     <Suspense>
       <MarketplaceTabs />

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   X,
@@ -16,6 +16,7 @@ import { formatPrice, truncate, cn } from "@/lib/utils";
 import { useCartStore } from "@/lib/store/cartStore";
 import useAuthStore from "@/lib/store/useAuthStore";
 import { usePlaceOrder } from "@/lib/hooks/useBuyerOrders";
+import { useDeliveryEligibility } from "@/lib/hooks/useDeliveryEligibility";
 import { toast } from "@/lib/store/toastStore";
 
 const ZAMBIA_PHONE_REGEX = /^(\+260|0)(7|9|5)\d{8}$/;
@@ -141,6 +142,10 @@ export function CartDrawer() {
 
   const { place, loading } = usePlaceOrder();
 
+  const storeIds = Object.keys(byStore);
+  const { allDeliverable, totalDeliveryFee, loading: eligibilityLoading } =
+    useDeliveryEligibility(storeIds);
+
   const [shipping, setShipping] = useState({
     name: "",
     phone: "",
@@ -151,6 +156,19 @@ export function CartDrawer() {
   const [errors, setErrors] = useState({});
   const [delivery, setDelivery] = useState(false);
   const [step, setStep] = useState("cart");
+
+  // If the cart changes such that delivery is no longer available for
+  // every store (e.g. an item from a non-delivering store gets added),
+  // fall back to Self pick rather than let a stale "Delivery" choice
+  // through to checkout.
+  useEffect(() => {
+    if (delivery && !eligibilityLoading && !allDeliverable) {
+      setDelivery(false);
+    }
+  }, [delivery, eligibilityLoading, allDeliverable]);
+
+  const deliveryFee = delivery ? totalDeliveryFee : 0;
+  const total = subtotal + deliveryFee;
 
   // ✅ Validation
   const validateShipping = () => {
@@ -195,6 +213,7 @@ export function CartDrawer() {
     const result = await place({
       cart_id: cartId,
       shipping_info: shipping,
+      fulfillment_method: delivery ? "platform_delivery" : "self_arranged",
     });
 
     if (result) {
@@ -305,21 +324,38 @@ export function CartDrawer() {
                 {[
                   { label: "Delivery", value: true },
                   { label: "Self pick", value: false },
-                ].map(({ label, value }) => (
-                  <button
-                    key={label}
-                    onClick={() => setDelivery(value)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
-                      delivery === value
-                        ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
-                        : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
+                ].map(({ label, value }) => {
+                  const disabled = value === true && !allDeliverable;
+                  return (
+                    <button
+                      key={label}
+                      onClick={() => !disabled && setDelivery(value)}
+                      disabled={disabled}
+                      className={cn(
+                        "px-3 py-1.5 rounded-xl border text-[12px] font-medium transition-all",
+                        disabled
+                          ? "border-[var(--color-border)] text-[var(--color-text-muted)] opacity-50 cursor-not-allowed"
+                          : delivery === value
+                            ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
+                            : "border-[var(--color-border-md)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                      )}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
+              {!eligibilityLoading && !allDeliverable && storeIds.length > 0 && (
+                <p className="text-[11px] text-[var(--color-text-muted)]">
+                  Delivery isn&apos;t available for every seller in your cart
+                  yet — you can still arrange pickup directly with them.
+                </p>
+              )}
+              {delivery && totalDeliveryFee > 0 && (
+                <p className="text-[11px] text-[var(--color-text-secondary)]">
+                  Delivery fee: {formatPrice(totalDeliveryFee)}
+                </p>
+              )}
 
               {/* Extra address fields — only shown for delivery */}
               {delivery && (
@@ -398,6 +434,24 @@ export function CartDrawer() {
                     </span>
                   </div>
                 ))}
+                <div className="flex justify-between text-[12px] py-1 border-t border-[var(--color-border)] mt-2 pt-2">
+                  <span className="text-[var(--color-text-secondary)]">
+                    Subtotal
+                  </span>
+                  <span className="font-semibold text-[var(--color-text-primary)]">
+                    {formatPrice(subtotal)}
+                  </span>
+                </div>
+                {delivery && (
+                  <div className="flex justify-between text-[12px] py-1">
+                    <span className="text-[var(--color-text-secondary)]">
+                      Delivery fee
+                    </span>
+                    <span className="font-semibold text-[var(--color-text-primary)]">
+                      {deliveryFee > 0 ? formatPrice(deliveryFee) : "Free"}
+                    </span>
+                  </div>
+                )}
               </div>
               <p className="text-[11px] text-[var(--color-text-muted)] text-center leading-relaxed px-2">
                 Payment is arranged directly with the seller. You&apos;ll be
@@ -425,7 +479,7 @@ export function CartDrawer() {
               <div className="flex justify-between text-[14px] font-bold text-[var(--color-text-primary)]">
                 <span>Total</span>
                 <span className="text-[var(--color-primary)]">
-                  {formatPrice(subtotal)}
+                  {formatPrice(total)}
                 </span>
               </div>
             )}

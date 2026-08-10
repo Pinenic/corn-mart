@@ -13,6 +13,14 @@
 // The buyer contacts the seller externally to complete payment.
 // The seller then uses the dashboard to move the order through the
 // status machine (pending → confirmed → processing → shipped → delivered).
+//
+// DELIVERY INTEGRATION (new):
+// fulfillment_method now flows through to the checkout_cart_v2 RPC,
+// which is the actual authoritative validation point (re-checks
+// delivery eligibility server-side — see checkout_cart_v2_delivery_
+// update.sql). This service only does a cheap whitelist check before
+// calling the RPC, since there's no reason to make a DB round-trip
+// for an obviously invalid value.
 
 import { supabaseAdmin } from "../../config/supabase.js";
 
@@ -26,191 +34,63 @@ const STORE_ORDER_FIELDS = `
   id, order_id, store_id, buyer_id,
   subtotal, platform_fee, net_amount,
   status, payout_status, shipping_info,
+  fulfillment_method, buyer_delivery_fee,
+  delivery_order_id, delivery_status,
   created_at, updated_at
 `.trim();
+
+const VALID_FULFILLMENT_METHODS = ["platform_delivery", "self_arranged"];
 
 // ── Cancellable statuses ──────────────────────────────────────
 // A buyer can only cancel orders that haven't been picked up yet.
 const BUYER_CANCELLABLE_STATUSES = ["pending", "confirmed"];
 
 const marketplaceBuyerService = {
-
   // ── Place an order ────────────────────────────────────────────
-  // Items can span multiple stores. We:
-  //   1. Validate every product/variant exists and is active
-  //   2. Create the parent `orders` record
-  //   3. Group items by store and create one `store_orders` + `order_items` per store
-  //
-  // Stock is NOT decremented here — that should happen when the store
-  // confirms the order (reserved_stock on variants). Keeping it
-  // decrement-on-confirm avoids ghost reservations on unpaid orders.
-  async placeOrder(buyerId, { cart_id, shipping_info, note }) {
+  // Items can span multiple stores. All the real work — stock
+  // locking, per-store splitting, delivery eligibility, fee
+  // calculation — happens inside the checkout_cart_v2 RPC as a single
+  // transaction. This function's job is just to validate the
+  // fulfillment_method value and pass everything through.
+  async placeOrder(
+    buyerId,
+    { cart_id, shipping_info, fulfillment_method, note }
+  ) {
+    const method = fulfillment_method ?? "self_arranged";
 
-    const { data, error } = await supabaseAdmin.rpc("checkout_cart", {
+    if (!VALID_FULFILLMENT_METHODS.includes(method)) {
+      const err = new Error(
+        `fulfillment_method must be one of: ${VALID_FULFILLMENT_METHODS.join(
+          ", "
+        )}`
+      );
+      err.statusCode = 422;
+      err.code = "INVALID_FULFILLMENT_METHOD";
+      throw err;
+    }
+
+    const { data, error } = await supabaseAdmin.rpc("checkout_cart_v2", {
       p_cart_id: cart_id,
       p_buyer_id: buyerId,
       p_shipping_info: shipping_info,
+      p_fulfillment_method: method,
     });
 
-    if(error) throw error;
-    // ── 1. Fetch and validate all products/variants ──────────
-    // const productIds = [...new Set(items.map((i) => i.product_id))];
-    // const variantIds = items.map((i) => i.variant_id).filter(Boolean);
-
-    // const { data: products, error: pErr } = await supabaseAdmin
-    //   .from("products")
-    //   .select("id, store_id, name, price, is_active")
-    //   .in("id", productIds);
-
-    // if (pErr) throw pErr;
-
-    // // Build lookup maps
-    // const productMap = Object.fromEntries((products ?? []).map((p) => [p.id, p]));
-
-    // // Validate variants if any were requested
-    // let variantMap = {};
-    // if (variantIds.length > 0) {
-    //   const { data: variants, error: vErr } = await supabaseAdmin
-    //     .from("product_variants")
-    //     .select("id, product_id, name, price, available_stock, is_active")
-    //     .in("id", variantIds);
-
-    //   if (vErr) throw vErr;
-    //   variantMap = Object.fromEntries((variants ?? []).map((v) => [v.id, v]));
-    // }
-
-    // // Check every item is valid and active
-    // for (const item of items) {
-    //   const product = productMap[item.product_id];
-    //   if (!product) {
-    //     const err = new Error(`Product ${item.product_id} not found`);
-    //     err.statusCode = 422;
-    //     err.code = "PRODUCT_NOT_FOUND";
-    //     throw err;
-    //   }
-    //   if (!product.is_active) {
-    //     const err = new Error(`"${product.name}" is no longer available`);
-    //     err.statusCode = 422;
-    //     err.code = "PRODUCT_UNAVAILABLE";
-    //     throw err;
-    //   }
-    //   if (item.variant_id) {
-    //     const variant = variantMap[item.variant_id];
-    //     if (!variant || variant.product_id !== item.product_id) {
-    //       const err = new Error(`Variant ${item.variant_id} not found`);
-    //       err.statusCode = 422;
-    //       err.code = "VARIANT_NOT_FOUND";
-    //       throw err;
-    //     }
-    //     if (!variant.is_active) {
-    //       const err = new Error(`Variant "${variant.name}" is no longer available`);
-    //       err.statusCode = 422;
-    //       err.code = "VARIANT_UNAVAILABLE";
-    //       throw err;
-    //     }
-    //     // Check stock — warn but don't block (contact-seller model)
-    //     // In a payment-first model you'd hard-block here.
-    //     if (variant.available_stock < item.quantity) {
-    //       const err = new Error(
-    //         `Only ${variant.available_stock} units of "${variant.name}" are available`
-    //       );
-    //       err.statusCode = 422;
-    //       err.code = "INSUFFICIENT_STOCK";
-    //       throw err;
-    //     }
-    //   }
-    // }
-
-    // // ── 2. Compute totals and group by store ─────────────────
-    // let totalAmount = 0;
-    // const storeGroups = {};
-
-    // for (const item of items) {
-    //   const product = productMap[item.product_id];
-    //   const variant = item.variant_id ? variantMap[item.variant_id] : null;
-    //   // Variant price overrides product price if set
-    //   const unitPrice = Number(variant?.price ?? product.price);
-    //   const itemSubtotal = unitPrice * item.quantity;
-    //   totalAmount += itemSubtotal;
-
-    //   if (!storeGroups[product.store_id]) {
-    //     storeGroups[product.store_id] = { subtotal: 0, items: [] };
-    //   }
-    //   storeGroups[product.store_id].subtotal += itemSubtotal;
-    //   storeGroups[product.store_id].items.push({
-    //     product_id: item.product_id,
-    //     variant_id: item.variant_id ?? null,
-    //     quantity:   item.quantity,
-    //     unit_price: unitPrice,
-    //   });
-    // }
-
-    // // ── 3. Create parent order ────────────────────────────────
-    // const { data: parentOrder, error: orderErr } = await supabaseAdmin
-    //   .from("orders")
-    //   .insert({
-    //     buyer_id:       buyerId,
-    //     total_amount:   Math.round(totalAmount * 100) / 100,
-    //     status:         "pending",
-    //     payment_status: "unpaid",
-    //   })
-    //   .select(PARENT_ORDER_FIELDS)
-    //   .single();
-
-    // if (orderErr) throw orderErr;
-
-    // // ── 4. Create store_orders + order_items per store ────────
-    // const createdStoreOrders = [];
-
-    // for (const [storeId, group] of Object.entries(storeGroups)) {
-    //   // Create store_order
-    //   const { data: storeOrder, error: soErr } = await supabaseAdmin
-    //     .from("store_orders")
-    //     .insert({
-    //       order_id:     parentOrder.id,
-    //       store_id:     storeId,
-    //       buyer_id:     buyerId,
-    //       subtotal:     Math.round(group.subtotal * 100) / 100,
-    //       status:       "pending",
-    //       payout_status:"pending",
-    //       shipping_info: shipping_info ?? {},
-    //     })
-    //     .select(STORE_ORDER_FIELDS)
-    //     .single();
-
-    //   if (soErr) {
-    //     // Best-effort: try to mark the parent order cancelled
-    //     await supabaseAdmin
-    //       .from("orders")
-    //       .update({ status: "cancelled" })
-    //       .eq("id", parentOrder.id);
-    //     throw soErr;
-    //   }
-
-    //   // Create order_items for this store_order
-    //   const orderItems = group.items.map((item) => ({
-    //     store_order_id: storeOrder.id,
-    //     product_id:     item.product_id,
-    //     variant_id:     item.variant_id,
-    //     quantity:       item.quantity,
-    //     unit_price:     item.unit_price,
-    //   }));
-
-    //   const { error: itemErr } = await supabaseAdmin
-    //     .from("order_items")
-    //     .insert(orderItems);
-
-    //   if (itemErr) throw itemErr;
-
-    //   createdStoreOrders.push({
-    //     ...storeOrder,
-    //     items: group.items,
-    //   });
-    // }
+    if (error) {
+      // The RPC raises a specific error (P0004) when platform_delivery
+      // is requested but a store in the cart can't fulfill it — surface
+      // that as a clean 422 rather than a generic 500.
+      if (error.code === "P0004") {
+        const err = new Error(error.message);
+        err.statusCode = 422;
+        err.code = "DELIVERY_NOT_AVAILABLE";
+        throw err;
+      }
+      throw error;
+    }
 
     return {
-      order:        data,
-      // store_orders: createdStoreOrders,
+      order: data,
       note: "Payment is handled offline. Contact the seller to arrange payment.",
     };
   },
@@ -220,7 +100,8 @@ const marketplaceBuyerService = {
   async listOrders(buyerId, { page, limit, status }) {
     let query = supabaseAdmin
       .from("orders")
-      .select(`
+      .select(
+        `
         ${PARENT_ORDER_FIELDS},
         store_orders(
           ${STORE_ORDER_FIELDS},
@@ -231,7 +112,9 @@ const marketplaceBuyerService = {
             variant:variant_id(id, name)
           )
         )
-      `, { count: "exact" })
+      `,
+        { count: "exact" }
+      )
       .eq("buyer_id", buyerId);
 
     if (status && status !== "all") {
@@ -254,7 +137,8 @@ const marketplaceBuyerService = {
   async getOrder(buyerId, orderId) {
     const { data, error } = await supabaseAdmin
       .from("orders")
-      .select(`
+      .select(
+        `
         ${PARENT_ORDER_FIELDS},
         store_orders(
           ${STORE_ORDER_FIELDS},
@@ -265,7 +149,8 @@ const marketplaceBuyerService = {
             variant:variant_id(id, name, sku)
           )
         )
-      `)
+      `
+      )
       .eq("id", orderId)
       .eq("buyer_id", buyerId)
       .single();
@@ -322,11 +207,14 @@ const marketplaceBuyerService = {
   async listNotifications(userId, { page, limit, type, is_read }) {
     let query = supabaseAdmin
       .from("notifications")
-      .select("id, title, message, type, metadata, is_read, channel, created_at", { count: "exact" })
+      .select(
+        "id, title, message, type, metadata, is_read, channel, created_at",
+        { count: "exact" }
+      )
       .eq("user_id", userId);
 
     if (type && type !== "all") query = query.eq("type", type);
-    if (is_read != null)        query = query.eq("is_read", is_read);
+    if (is_read != null) query = query.eq("is_read", is_read);
 
     const from = (page - 1) * limit;
     query = query
@@ -359,7 +247,11 @@ const marketplaceBuyerService = {
 
     const { error } = await supabaseAdmin
       .from("notifications")
-      .update({ is_read: true, viewed: true, updated_at: new Date().toISOString() })
+      .update({
+        is_read: true,
+        viewed: true,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", notificationId);
 
     if (error) throw error;
@@ -369,7 +261,11 @@ const marketplaceBuyerService = {
   async markAllNotificationsRead(userId) {
     const { error } = await supabaseAdmin
       .from("notifications")
-      .update({ is_read: true, viewed: true, updated_at: new Date().toISOString() })
+      .update({
+        is_read: true,
+        viewed: true,
+        updated_at: new Date().toISOString(),
+      })
       .eq("user_id", userId)
       .eq("is_read", false);
 

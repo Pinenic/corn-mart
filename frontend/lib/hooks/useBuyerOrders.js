@@ -11,7 +11,7 @@ const SWR_OPTS = { revalidateOnFocus: false, shouldRetryOnError: false };
 
 export function useBuyerOrders(filters = {}) {
   const token = useAuthStore(s => s.token);
-  const key   = token ? ["/marketplace/orders", { page: filters.page ?? 1, limit: 10 }] : null;
+  const key   = token ? ["/marketplace/orders", { page: filters.page ?? 1, limit: 10, status: filters.status ?? "all" }] : null;
   const { data, error, isLoading, mutate } = useSWR(key, swrFetcher, SWR_OPTS);
   return { orders: data?.data ?? [], meta: data?.meta ?? null, isLoading, error, mutate };
 }

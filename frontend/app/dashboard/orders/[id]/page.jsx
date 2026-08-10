@@ -16,8 +16,32 @@ import {
 import { Badge, Button, Card } from "@/components/ui";
 import { ORDERS, STATUS_CONFIG } from "@/lib/orders-data";
 import { notFound } from "next/navigation";
-import { useOrder } from "@/lib/hooks/useOrders";
+import { useOrder, useUpdateOrderStatus } from "@/lib/hooks/useOrders";
 import { Phone } from "lucide-react";
+import ShipConfirmationDialog from "@/components/ShipConfirmationDialog";
+
+// Mirrors the delivery platform's status_log values — kept separate
+// from STATUS_CONFIG since these are a different system's statuses,
+// not Corn Mart's own order statuses.
+const DELIVERY_STATUS_LABELS = {
+  pending: "Awaiting pickup",
+  assigned: "Rider assigned",
+  picked_up: "Picked up",
+  in_transit: "In transit",
+  delivered: "Delivered",
+  failed: "Delivery failed",
+  cancelled: "Delivery cancelled",
+};
+
+const DELIVERY_STATUS_VARIANTS = {
+  pending: "warning",
+  assigned: "warning",
+  picked_up: "warning",
+  in_transit: "warning",
+  delivered: "success",
+  failed: "danger",
+  cancelled: "danger",
+};
 
 function Section({ title, children }) {
   return (
@@ -46,7 +70,9 @@ function Avatar({ customer }) {
 
 export default function OrderDetailPage({ params }) {
   const { id } = use(params);
-  const { data, isLoading, error } = useOrder(id);
+  const { data, isLoading, error, mutate } = useOrder(id);
+  const { updateStatus: updateStatusDirect } = useUpdateOrderStatus();
+  const [shipDialogOpen, setShipDialogOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -69,6 +95,25 @@ export default function OrderDetailPage({ params }) {
 
   const order = data?.data ?? data;
   if (!order) notFound();
+
+  // Same split as OrderDetailDrawer: platform_delivery needs the
+  // confirmation dialog (parcel size determines the fee, and a real
+  // dispatch call happens), self_arranged has nothing to confirm.
+  const handleShip = async () => {
+    if (order.fulfillment_method === "platform_delivery") {
+      setShipDialogOpen(true);
+      return;
+    }
+    await updateStatusDirect(order.id, "shipped");
+    mutate();
+  };
+
+  const handleShipped = () => {
+    // Unlike the drawer (which had no mutate available and fell back
+    // to router.refresh()), this page's useOrder hook gives us the
+    // real thing — a targeted re-fetch of just this order.
+    mutate();
+  };
 
   const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.Processing;
   const totalItems = order?.order_items.reduce((s, i) => s + i.quantity, 0);
@@ -129,8 +174,11 @@ export default function OrderDetailPage({ params }) {
           {order.status !== "Cancelled" &&
             order.status !== "Delivered" &&
             order.status !== "Refunded" && (
-              <Button variant="primary">
-                <Package size={14} /> Mark as shipped
+              <Button variant="primary" onClick={handleShip}>
+                <Package size={14} />{" "}
+                {order.fulfillment_method === "platform_delivery"
+                  ? "Mark as shipped & dispatch rider"
+                  : "Mark as shipped"}
               </Button>
             )}
           {order.status === "Delivered" && (
@@ -446,6 +494,42 @@ export default function OrderDetailPage({ params }) {
             )}
           </Card>
 
+          {/* Delivery */}
+          {order.fulfillment_method === "platform_delivery" && (
+            <Card>
+              <Section title="Delivery">
+                <div className="flex items-center justify-between mt-1">
+                  <span
+                    className="text-[13px] font-medium"
+                    style={{ color: "var(--color-text-primary)" }}
+                  >
+                    Platform delivery
+                  </span>
+                  {order.delivery_status && (
+                    <Badge
+                      variant={
+                        DELIVERY_STATUS_VARIANTS[order.delivery_status] ??
+                        "warning"
+                      }
+                    >
+                      {DELIVERY_STATUS_LABELS[order.delivery_status] ??
+                        order.delivery_status}
+                    </Badge>
+                  )}
+                </div>
+                {!order.delivery_order_id && order.status === "Processing" && (
+                  <p
+                    className="text-[12px] mt-2"
+                    style={{ color: "var(--color-text-tertiary)" }}
+                  >
+                    A rider will be dispatched when this order is marked as
+                    shipped.
+                  </p>
+                )}
+              </Section>
+            </Card>
+          )}
+
           {/* Payment */}
           {/* <Card>
             <Section title="Payment">
@@ -487,6 +571,14 @@ export default function OrderDetailPage({ params }) {
           )}
         </div>
       </div>
+
+      {shipDialogOpen && (
+        <ShipConfirmationDialog
+          order={order}
+          onClose={() => setShipDialogOpen(false)}
+          onShipped={handleShipped}
+        />
+      )}
     </div>
   );
 }
