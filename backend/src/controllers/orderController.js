@@ -35,15 +35,31 @@ const orderController = {
   }),
 
   // PATCH /api/v1/stores/:storeId/orders/:orderId/status
+  // `req.store` (loaded by requireStoreAccess) is passed through so
+  // a platform_delivery dispatch has pickup contact info without an
+  // extra query — see orderService.updateStatus. req.body may now
+  // include `parcel_size`, set by the ship-confirmation dialog.
   updateStatus: asyncHandler(async (req, res) => {
     const updated = await orderService.updateStatus(
       req.store.id,
       req.params.orderId,
       req.body,
-      req.user.id   // actor for audit history
+      req.user.id,  // actor for audit history
+      req.store
     );
     if (!updated) return response.notFound(res, "Order not found");
     return response.ok(res, updated);
+  }),
+
+  // GET /api/v1/stores/:storeId/orders/delivery-pricing
+  // Feeds the ship-confirmation dialog's size picker. Must be
+  // registered BEFORE /:orderId in the router — same reasoning as
+  // status-counts, otherwise "delivery-pricing" gets matched as an
+  // orderId.
+  getDeliveryPricing: asyncHandler(async (req, res) => {
+    const pricing = await orderService.getDeliveryPricing();
+    console.log(pricing)
+    return response.ok(res, pricing);
   }),
 
   // GET /api/v1/stores/:storeId/orders/:orderId/history

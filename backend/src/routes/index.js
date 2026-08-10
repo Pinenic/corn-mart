@@ -39,6 +39,8 @@ import marketplaceBuyerRoutes from "./marketplace/buyer.js";
 import storeConversationRoutes from "./conversations.store.js";
 import buyerConversationRoutes from "./conversations.buyer.js";
 
+import webhookRoutes from "./webhooks.js";
+
 const router = express.Router();
 
 // ── Global reference data ─────────────────────────────────────
@@ -64,6 +66,9 @@ router.use("/marketplace", marketplaceBuyerRoutes);
 // ── Messages: for authenticated user ─────────────────────────────
 router.use("/stores/:storeId", storeConversationRoutes);
 router.use("/marketplace/conversations", buyerConversationRoutes);
+
+// ── Webhook: for recieving delivery statuses ─────────────────────────────
+router.use("/webhooks", webhookRoutes);
 
 // ── Health check (no auth required) ──────────────────────────
 /**

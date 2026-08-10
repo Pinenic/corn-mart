@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   X,
   MapPin,
@@ -21,6 +21,34 @@ import { Loader2 } from "lucide-react";
 import { useStartConversation } from "@/lib/hooks/useBuyerMessages";
 import { useStoreStartConversation } from "@/lib/hooks/useStoreMessages";
 import { useRouter } from "next/navigation";
+import ShipConfirmationDialog from "@/components/ShipConfirmationDialog";
+
+// Mirrors the delivery platform's status_log values. Kept as a
+// separate map from STATUS_CONFIG since these are Corn Mart's own
+// order statuses, not the delivery platform's — same word ("shipped")
+// can appear in both with different meaning, so don't merge them.
+const DELIVERY_STATUS_LABELS = {
+  pending: "Awaiting pickup",
+  assigned: "Rider assigned",
+  picked_up: "Picked up",
+  in_transit: "In transit",
+  delivered: "Delivered",
+  failed: "Delivery failed",
+  cancelled: "Delivery cancelled",
+};
+
+// Only using variants already proven to exist in this file
+// (STATUS_CONFIG's success/warning, and the danger seen on Button) —
+// avoids guessing at a Badge variant I haven't seen defined.
+const DELIVERY_STATUS_VARIANTS = {
+  pending: "warning",
+  assigned: "warning",
+  picked_up: "warning",
+  in_transit: "warning",
+  delivered: "success",
+  failed: "danger",
+  cancelled: "danger",
+};
 
 function Avatar({ customer }) {
   return (
@@ -47,7 +75,7 @@ function Section({ title, children }) {
   );
 }
 
-export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
+export function OrderDetailDrawer({ order, onClose, onStatusChange, refresh }) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -86,12 +114,37 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
     if (conv) router.push(`/dashboard/messages/${conv.id}`);
   };
 
+  const [shipDialogOpen, setShipDialogOpen] = useState(false);
+
   const handleStatusChange = async () => {
-    order.status === "pending"
-      ? onStatusChange(order.id, "confirmed")
-      : order.status === "confirmed"
-      ? onStatusChange(order.id, "processing")
-      : onStatusChange(order.id, "shipped");
+    if (order.status === "pending") {
+      onStatusChange(order.id, "confirmed");
+      return;
+    }
+    if (order.status === "confirmed") {
+      onStatusChange(order.id, "processing");
+      return;
+    }
+    // Shipping: platform_delivery needs the confirmation dialog
+    // (parcel size determines the fee, and there's a real dispatch
+    // call happening) — self_arranged has nothing to confirm, so it
+    // keeps the old one-click behavior.
+    if (order.fulfillment_method === "platform_delivery") {
+      setShipDialogOpen(true);
+      return;
+    }
+    onStatusChange(order.id, "shipped");
+  };
+
+  const handleShipped = () => {
+    // ⚠️ The dialog calls the delivery-aware updateStatus hook
+    // directly (it needs the tier-error recovery path), bypassing
+    // the onStatusChange prop this drawer otherwise uses. That means
+    // whatever refresh mechanism the parent page normally runs after
+    // onStatusChange (SWR mutate, etc.) won't fire automatically here.
+    // router.refresh() is a safe generic fallback — swap this for
+    // your actual order-list mutate() if the parent exposes one.
+    router.refresh();
   };
 
   const handleCancel = async () => {
@@ -337,6 +390,42 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
             </div>
           </div>
 
+          {/* Delivery */}
+          <Section title="Fulfillment">
+            <div
+              className="rounded-xl border p-3"
+              style={{ borderColor: "var(--color-border)" }}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span
+                  className="text-[12px] font-medium"
+                  style={{ color: "var(--color-text-primary)" }}
+                >
+                  {order.fulfillment_method === "platform_delivery"
+                    ? "Platform delivery"
+                    : "Self-arranged"}
+                </span>
+                {order.fulfillment_method === "platform_delivery" &&
+                  order.delivery_status && (
+                    <Badge variant={DELIVERY_STATUS_VARIANTS[order.delivery_status] ?? "warning"}>
+                      {DELIVERY_STATUS_LABELS[order.delivery_status] ??
+                        order.delivery_status}
+                    </Badge>
+                  )}
+              </div>
+              {order.fulfillment_method === "platform_delivery" &&
+                !order.delivery_order_id &&
+                order.status === "processing" && (
+                  <p
+                    className="text-[11px] mt-1"
+                    style={{ color: "var(--color-text-tertiary)" }}
+                  >
+                    A rider will be dispatched when you ship this order.
+                  </p>
+                )}
+            </div>
+          </Section>
+
           {/* Timeline will be integrated later */}
           {/* <Section title="Order timeline">
             <div>
@@ -412,7 +501,10 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
               className="flex-1"
               onClick={() => handleStatusChange()}
             >
-              <Package size={14} /> Ship
+              <Package size={14} />{" "}
+              {order.fulfillment_method === "platform_delivery"
+                ? "Ship & dispatch rider"
+                : "Ship"}
             </Button>
           )}
           {order.status === "delivered" && (
@@ -438,6 +530,14 @@ export function OrderDetailDrawer({ order, onClose, onStatusChange }) {
           to   { transform: translateX(0); opacity: 1; }
         }
       `}</style>
+
+      {shipDialogOpen && (
+        <ShipConfirmationDialog
+          order={order}
+          onClose={() => setShipDialogOpen(false)}
+          onShipped={handleShipped}
+        />
+      )}
     </>
   );
 }
