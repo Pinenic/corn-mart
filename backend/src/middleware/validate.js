@@ -64,6 +64,8 @@ const updateStoreSchema = Joi.object({
   description: Joi.string().max(1000).allow("", null),
   logo: Joi.string().uri().allow(null),
   banner: Joi.string().uri().allow(null),
+  config: Joi.object().allow(null),
+  stock_pin_hash: Joi.string().min(4).max(100),
 }).min(1); // at least one field required
 
 // ── Order schemas ─────────────────────────────────────────────

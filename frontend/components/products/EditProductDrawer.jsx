@@ -26,13 +26,11 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
   const [progressMap, setProgressMap] = useState({});
 
   const { data: categories, isLoading: categoriesLoading } = useCategories();
-  
+
   // Initialize image upload hook
   const storeId = product.store_id;
-  const { upload, remove, abort, uploading, removing, progress, error } = useImageUpload(
-    storeId,
-    product.id
-  );
+  const { upload, remove, abort, uploading, removing, progress, error } =
+    useImageUpload(storeId, product.id);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -62,7 +60,7 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
     const result = await upload({
       file,
       variantId,
-      endpoint:`/stores/${storeId}/products/${product.id}/images`,
+      endpoint: `/stores/${storeId}/products/${product.id}/images`,
       field: "images",
       successMessage: `Image uploaded to slot ${slotIndex + 1}`,
       onSuccess: (data) => {
@@ -76,8 +74,7 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
 
         const existingIndex = form.images.findIndex(
           (img) =>
-            img.variant_id === variantId &&
-            (img.sort_order ?? 0) === slotIndex
+            img.variant_id === variantId && (img.sort_order ?? 0) === slotIndex
         );
 
         const updatedImages =

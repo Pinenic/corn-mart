@@ -60,10 +60,16 @@ export function VariantImageManager({
   return (
     <div className={cn("space-y-6", className)}>
       {variants.map((variant) => (
-        <div key={variant.id} className="rounded-3xl border border-[var(--color-border)] p-5">
+        <div
+          key={variant.id}
+          className="rounded-3xl border border-[var(--color-border)] p-5"
+        >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
             <div>
-              <p className="text-sm font-semibold" style={{ color: "var(--color-text-primary)" }}>
+              <p
+                className="text-sm font-semibold"
+                style={{ color: "var(--color-text-primary)" }}
+              >
                 {variant.name || "Variant"}
               </p>
               {/* {variant.sku && (
@@ -72,7 +78,10 @@ export function VariantImageManager({
                 </p>
               )} */}
             </div>
-            <p className="text-[11px] text-right" style={{ color: "var(--color-text-secondary)" }}>
+            <p
+              className="text-[11px] text-right"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
               Up to 3 images
             </p>
           </div>

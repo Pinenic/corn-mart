@@ -241,6 +241,7 @@ export default function SettingsPage() {
     city: locationInfo.city || "",
     province: locationInfo.province || "",
     country: locationInfo.country || "",
+    contact_phone: locationInfo.contact_phone || "",
     latitude: locationInfo.latitude || 0.01,
     longitude: locationInfo.longitude || 0.01,
     delivery_enabled: locationInfo.delivery_enabled || false,
@@ -379,6 +380,7 @@ export default function SettingsPage() {
               <InlineField label="Store name">
                 <input
                   value={storeForm.name}
+                  // placeholder={storeForm.name}
                   onChange={(e) => update("name", e.target.value)}
                   className={inputCls}
                   style={inputStyle}
@@ -449,7 +451,7 @@ export default function SettingsPage() {
             >
               <InlineField label="Address">
                 <input
-                  value={locationForm.address || "Adress"}
+                  value={locationForm.address}
                   onChange={(e) => updateLocation("address", e.target.value)}
                   className={inputCls}
                   style={inputStyle}
@@ -457,7 +459,7 @@ export default function SettingsPage() {
               </InlineField>
               <InlineField label="City">
                 <input
-                  value={locationForm.city || "City"}
+                  value={locationForm.city}
                   onChange={(e) => updateLocation("city", e.target.value)}
                   className={inputCls}
                   style={inputStyle}
@@ -465,7 +467,7 @@ export default function SettingsPage() {
               </InlineField>
               <InlineField label="Province">
                 <input
-                  value={locationForm.province || "Province"}
+                  value={locationForm.province}
                   onChange={(e) => updateLocation("province", e.target.value)}
                   className={inputCls}
                   style={inputStyle}
@@ -473,8 +475,16 @@ export default function SettingsPage() {
               </InlineField>
               <InlineField label="Country">
                 <input
-                  value={locationForm.country || "Country"}
+                  value={locationForm.country}
                   onChange={(e) => updateLocation("country", e.target.value)}
+                  className={inputCls}
+                  style={inputStyle}
+                />
+              </InlineField>
+              <InlineField label="Phone">
+                <input
+                  value={locationForm.contact_phone}
+                  onChange={(e) => updateLocation("contact_phone", e.target.value)}
                   className={inputCls}
                   style={inputStyle}
                 />

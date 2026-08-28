@@ -69,20 +69,20 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-white border-t border-[var(--color-border)] mt-auto">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
+    <footer className="bg-[var(--color-primary)] mt-auto">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-14">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Logo + description */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-[var(--color-primary)] flex items-center justify-center">
-                <ShoppingCart size={16} className="text-white" />
+              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center">
+                <ShoppingCart size={16} className="text-[var(--color-primary)]" />
               </div>
-              <span className="text-[16px] font-bold text-[var(--color-text-primary)]">
-                Corn Mart
+              <span className="text-[16px] font-bold text-white lowercase">
+                corn mart
               </span>
             </Link>
-            <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed max-w-xs mb-5">
+            <p className="text-[13px] text-white/60 leading-relaxed max-w-xs mb-5">
               A local marketplace connecting buyers with trusted stores.
               Discover products, support sellers, and shop with confidence.
             </p>
@@ -94,7 +94,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-7 h-7 rounded-xl flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors"
+                  className="w-7 h-7 rounded-full flex items-center justify-center bg-white text-[#0a0a0a] hover:bg-white/80 transition-colors"
                 >
                   <Icon size={12} />
                 </a>
@@ -104,7 +104,7 @@ export function Footer() {
 
           {/* Shop links */}
           <div>
-            <h3 className="text-[12px] font-semibold uppercase tracking-wide text-[var(--color-text-primary)] mb-4">
+            <h3 className="text-[13px] font-semibold text-white mb-4">
               Shop
             </h3>
             <ul className="space-y-2.5">
@@ -112,7 +112,7 @@ export function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-[13px] text-[var(--color-text-secondary)] hover:text-[var(--color-primary-text)] transition-colors"
+                    className="text-[13px] text-white/60 hover:text-white transition-colors"
                   >
                     {label}
                   </Link>
@@ -123,7 +123,7 @@ export function Footer() {
 
           {/* Company links */}
           <div>
-            <h3 className="text-[12px] font-semibold uppercase tracking-wide text-[var(--color-text-primary)] mb-4">
+            <h3 className="text-[13px] font-semibold text-white mb-4">
               Company
             </h3>
             <ul className="space-y-2.5">
@@ -131,7 +131,7 @@ export function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-[13px] text-[var(--color-text-secondary)] hover:text-[var(--color-primary-text)] transition-colors"
+                    className="text-[13px] text-white/60 hover:text-white transition-colors"
                   >
                     {label}
                   </Link>
@@ -142,19 +142,19 @@ export function Footer() {
 
           {/* Contact / legal */}
           <div>
-            <h3 className="text-[12px] font-semibold uppercase tracking-wide text-[var(--color-text-primary)] mb-4">
+            <h3 className="text-[13px] font-semibold text-white mb-4">
               Contact
             </h3>
             <ul className="space-y-2.5 mb-5">
-              <li className="flex items-start gap-2 text-[13px] text-[var(--color-text-secondary)]">
+              <li className="flex items-start gap-2 text-[13px] text-white/60">
                 <MapPin size={14} className="mt-0.5 flex-shrink-0" />
                 Kitwe, Zambia
               </li>
-              <li className="flex items-start gap-2 text-[13px] text-[var(--color-text-secondary)]">
+              <li className="flex items-start gap-2 text-[13px] text-white/60">
                 <Phone size={14} className="mt-0.5 flex-shrink-0" />
                 +260 764412659
               </li>
-              <li className="flex items-start gap-2 text-[13px] text-[var(--color-text-secondary)]">
+              <li className="flex items-start gap-2 text-[13px] text-white/60">
                 <Mail size={14} className="mt-0.5 flex-shrink-0" />
                 cornmart33@gmail.com
               </li>
@@ -164,7 +164,7 @@ export function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-[13px] text-[var(--color-text-secondary)] hover:text-[var(--color-primary-text)] transition-colors"
+                    className="text-[13px] text-white/60 hover:text-white transition-colors"
                   >
                     {label}
                   </Link>
@@ -176,18 +176,18 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-[var(--color-border)]">
+      <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-[12px] text-[var(--color-text-secondary)]">
+          <p className="text-[12px] text-white/40">
             &copy; {year} Corn Mart. All rights reserved.
           </p>
-          {/* <p className="text-[12px] text-[var(--color-text-secondary)]">
+          {/* <p className="text-[12px] text-white/40">
             Built by{" "}
             <a
               href="https://29cloudworks.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[var(--color-primary-text)] transition-colors"
+              className="hover:text-white transition-colors"
             >
               29CloudWorks
             </a>

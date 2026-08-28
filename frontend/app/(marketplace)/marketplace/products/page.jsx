@@ -1,9 +1,15 @@
+import { Suspense } from "react";
 import { ProductsTab } from "../ProductsTab";
 
-export const metadata = {
-  title: "Products — Corn Mart Marketplace",
-  description: "Browse and search products from independent stores",
-};
+export async function generateMetadata({ searchParams }) {
+  const { q } = await searchParams;
+  return {
+    title: q
+      ? `"${q}" — Products — Corn Mart Marketplace`
+      : "Products — Corn Mart Marketplace",
+    description: "Browse and search products from independent stores",
+  };
+}
 
 export default function ProductsPage() {
   return (
@@ -12,7 +18,9 @@ export default function ProductsPage() {
         <h1 className="text-[24px] font-bold text-[var(--color-text-primary)]">Products</h1>
         <p className="text-[13px] text-[var(--color-text-secondary)] mt-1">Browse products from independent sellers</p>
       </div>
-      <ProductsTab />
+      <Suspense>
+        <ProductsTab />
+      </Suspense>
     </div>
   );
 }

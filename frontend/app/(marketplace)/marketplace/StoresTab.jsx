@@ -1,23 +1,37 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { StoreCard }             from "@/components/stores/StoreCard";
 import { Button, Select, Skeleton, EmptyState } from "@/components/ui";
 import { useMarketplaceStores }  from "@/lib/hooks/useMarketplace";
-import { cn } from "@/lib/utils";
+import { cn, buildParams } from "@/lib/utils";
 
 export function StoresTab() {
-  const [search, setSearch] = useState("");
-  const [query,  setQuery]  = useState("");
-  const [sort,   setSort]   = useState("followers_count-desc");
-  const [page,   setPage]   = useState(1);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const sort = searchParams.get("sort") ?? "followers_count-desc";
+  const page = Number(searchParams.get("page")) || 1;
+  const urlQuery = searchParams.get("q") ?? "";
+
+  const [search, setSearch] = useState(urlQuery);
+  useEffect(() => setSearch(urlQuery), [urlQuery]);
+
+  const updateParams = (patch) => {
+    router.replace(`${pathname}?${buildParams(searchParams, patch)}`, { scroll: false });
+  };
 
   const [sortField, sortOrder] = sort.split("-");
   const { stores, meta, isLoading, isRefreshing } = useMarketplaceStores({
-    page, limit: 20, search: query, sort: sortField, order: sortOrder,
+    page, limit: 20, search: urlQuery, sort: sortField, order: sortOrder,
   });
 
-  const handleSearch = (e) => { e.preventDefault(); setQuery(search.trim()); setPage(1); };
+  const handleSearch = (e) => {
+    e.preventDefault();
+    updateParams({ q: search.trim() || null, page: null });
+  };
 
   return (
     <div>
@@ -27,7 +41,11 @@ export function StoresTab() {
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search stores…"
             className="w-full h-10 pl-9 pr-4 rounded-xl border border-[var(--color-border-md)] bg-white text-[13px] outline-none focus:border-[var(--color-primary)] transition-colors" />
         </form>
-        <Select value={sort} onChange={e => { setSort(e.target.value); setPage(1); }} className="min-w-[160px]">
+        <Select
+          value={sort}
+          onChange={e => updateParams({ sort: e.target.value, page: null })}
+          className="min-w-[160px]"
+        >
           <option value="followers_count-desc">Most popular</option>
           <option value="created_at-desc">Newest</option>
           <option value="name-asc">Name A–Z</option>
@@ -37,7 +55,7 @@ export function StoresTab() {
       {meta && (
         <p className="text-[13px] text-[var(--color-text-secondary)] mb-4">
           {meta.total.toLocaleString()} store{meta.total !== 1 ? "s" : ""}
-          {query && <span> matching "<strong className="text-[var(--color-text-primary)]">{query}</strong>"</span>}
+          {urlQuery && <span> matching "<strong className="text-[var(--color-text-primary)]">{urlQuery}</strong>"</span>}
         </p>
       )}
 
@@ -46,7 +64,7 @@ export function StoresTab() {
           {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-52 rounded-2xl" />)}
         </div>
       ) : stores.length === 0 ? (
-        <EmptyState icon={Search} title="No stores found" description={query ? "Try a different search term" : "No stores available yet"} />
+        <EmptyState icon={Search} title="No stores found" description={urlQuery ? "Try a different search term" : "No stores available yet"} />
       ) : (
         <div className={cn("grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4", isRefreshing && "opacity-60")}>
           {stores.map(s => <StoreCard key={s.id} store={s} />)}
@@ -55,9 +73,9 @@ export function StoresTab() {
 
       {meta && meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-10">
-          <Button variant="secondary" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹ Prev</Button>
+          <Button variant="secondary" size="sm" disabled={page === 1} onClick={() => updateParams({ page: page - 1 === 1 ? null : page - 1 })}>‹ Prev</Button>
           <span className="text-[13px] text-[var(--color-text-secondary)] px-2">Page {page} of {meta.totalPages}</span>
-          <Button variant="secondary" size="sm" disabled={page >= meta.totalPages} onClick={() => setPage(p => p + 1)}>Next ›</Button>
+          <Button variant="secondary" size="sm" disabled={page >= meta.totalPages} onClick={() => updateParams({ page: page + 1 })}>Next ›</Button>
         </div>
       )}
     </div>

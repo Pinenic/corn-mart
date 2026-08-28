@@ -1,42 +1,112 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+/* ─────────────────────────────────────────────────────────────
+   CORN MART — Marketplace Theme
+   ─────────────────────────────────────────────────────────────
+   Palette extracted from the Corn Mart logo:
+
+   Forest green   #1b5e35  — bag body, wordmark "CORN", primary brand
+   Mid green      #2a7a47  — hover states, active elements
+   Leaf green     #4caf50  — bright leaf, success, live indicators
+   Amber gold     #f5a623  — "M" letterform, wordmark "MART", CTA accent
+   Amber hover    #e09410  — darker gold for button hover
+   Amber subtle   #fef6e4  — gold tint for soft backgrounds
+   Off-white      #f7f8f5  — slight warm tint, feels natural not sterile
+   ───────────────────────────────────────────────────────────── */
+
 @theme {
-  /* Brand */
-  --color-primary: #16a34a;
-  --color-primary-hover: #15803d;
-  --color-primary-light: #ecfdf5;
-  --color-primary-text: #15803d;
 
-  /* Surfaces */
-  --color-surface: #ffffff;
-  --color-bg: #f5f6f8;
-  --color-bg-hover: #f0f1f4;
+  /* ── Brand — primary (forest green) ───────────────────────── */
+  --color-accent:         #1b5e35;   /* primary CTA, links, active states   */
+  --color-accent-hover:  #2a7a47;   /* hover / pressed                      */
+  --color-accent-subtle: #eaf5ee;   /* tinted backgrounds, selected rows    */
+  --color-accent-text:   #1b5e35;   /* text on subtle backgrounds           */
 
-  /* Text */
-  --color-text-primary: #0f1117;
-  --color-text-secondary: #6b7280;
-  --color-text-muted: #9ca3af;
+  /* ── Brand — primary (forest green) ───────────────────────── */
+  --color-primary:         #1b5e35;   /* primary CTA, links, active states   */
+  --color-primary-hover:  #2a7a47;   /* hover / pressed                      */
+  --color-primary-subtle: #eaf5ee;   /* tinted backgrounds, selected rows    */
+  --color-primary-text:   #1b5e35;   /* text on subtle backgrounds           */
 
-  /* Borders */
-  --color-border: rgba(0, 0, 0, 0.07);
-  --color-border-md: rgba(0, 0, 0, 0.12);
+  /* ── Brand — secondary (amber gold) ──────────────────────── */
+  --color-gold:          #f5a623;   /* secondary CTAs, badges, highlights   */
+  --color-gold-hover:    #e09410;   /* hover                                */
+  --color-gold-subtle:   #fef6e4;   /* soft amber backgrounds               */
+  --color-gold-text:     #92600e;   /* readable amber text on light bg      */
 
-  /* Semantic */
-  --color-success: #16a34a;
-  --color-success-bg: #f0fdf4;
-  --color-warning: #d97706;
-  --color-warning-bg: #fffbeb;
-  --color-danger: #dc2626;
-  --color-danger-bg: #fef2f2;
-  --color-info: #0057ff;
-  --color-info-bg: #eef3ff;
+  /* ── Surfaces ─────────────────────────────────────────────── */
+  --color-surface:       #ffffff;
+  --color-bg:            #f7f8f5;   /* warm off-white — natural, not sterile */
+  --color-bg-hover:      #eff1eb;
 
-  /* Layout */
-  --navbar-height: 64px;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --radius: 12px;
+  /* ── Text ─────────────────────────────────────────────────── */
+  --color-text-primary:   #0e1c12;  /* near-black with green undertone      */
+  --color-text-secondary: #4b5e52;  /* muted green-grey                     */
+  --color-text-tertiary:  #8a9e91;  /* placeholders, timestamps             */
+  --color-text-muted:     #b0bdb4;
+
+  /* ── Borders ──────────────────────────────────────────────── */
+  --color-border:    rgba(27, 94, 53, 0.08);   /* green-tinted border       */
+  --color-border-md: rgba(27, 94, 53, 0.14);
+
+  /* ── Semantic ─────────────────────────────────────────────── */
+  /* Success uses the leaf green from the logo illustration     */
+  --color-success:    #2e7d32;
+  --color-success-bg: #edf7ee;
+
+  /* Warning aligns with the amber gold — same family          */
+  --color-warning:    #d97706;
+  --color-warning-bg: #fef6e4;
+
+  /* Danger is a warm red — sits comfortably beside the greens */
+  --color-danger:     #c62828;
+  --color-danger-bg:  #fdecea;
+
+  /* Info uses the mid-green                                   */
+  --color-info:       #2a7a47;
+  --color-info-bg:    #eaf5ee;
+
+  /* ── Layout ───────────────────────────────────────────────── */
+  --sidebar-width:        220px;
+  --sidebar-collapsed:    56px;
+  --header-height:        56px;
+  --bottom-nav-height:    64px;
+
+  /* ── Typography ───────────────────────────────────────────── */
+  /* DM Sans is neutral and clean — pairs well with the logo's  */
+  /* bold sans wordmark without competing with it.              */
+  --font-sans:    "DM Sans", system-ui, sans-serif;
+  --font-display: "DM Sans", system-ui, sans-serif;
+
+  /* ── Radius ───────────────────────────────────────────────── */
+  /* Slightly softer than the dashboard — a marketplace feels   */
+  /* friendlier and more consumer-facing.                       */
+  --radius-sm:  8px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  18px;
+  --radius-2xl: 24px;
+
+  /* ── Shadows ──────────────────────────────────────────────── */
+  /* Green-tinted shadows root cards in the brand palette       */
+  --shadow-sm: 0 1px 3px rgba(27, 94, 53, 0.08), 0 1px 2px rgba(27, 94, 53, 0.04);
+  --shadow-md: 0 4px 12px rgba(27, 94, 53, 0.10), 0 2px 4px rgba(27, 94, 53, 0.06);
+  --shadow-lg: 0 8px 24px rgba(27, 94, 53, 0.12), 0 4px 8px rgba(27, 94, 53, 0.06);
+
+  /* ── Chart palette ───────────────────────────────────────── */
+  /* Brand colours first, then complementary tones             */
+  --color-chart-1: #1b5e35;   /* forest green  */
+  --color-chart-2: #f5a623;   /* amber gold    */
+  --color-chart-3: #4caf50;   /* leaf green    */
+  --color-chart-4: #2a7a47;   /* mid green     */
+  --color-chart-5: #e09410;   /* dark amber    */
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Base resets
+   ───────────────────────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -48,25 +118,42 @@ html {
 }
 
 body {
-  font-family: var(--font-sans);
-  background-color: var(--color-bg);
-  color: var(--color-text-primary);
-  font-size: 14px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+  font-family:              var(--font-sans);
+  background-color:         var(--color-bg);
+  color:                    var(--color-text-primary);
+  font-size:                14px;
+  line-height:              1.5;
+  -webkit-font-smoothing:   antialiased;
+  -moz-osx-font-smoothing:  grayscale;
 }
 
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+/* ─────────────────────────────────────────────────────────────
+   Scrollbar styling — green-tinted to stay on-brand
+   ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 4px; height: 4px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--color-border-md); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent-subtle); }
+
+/* ─────────────────────────────────────────────────────────────
+   Focus ring — green so it's always visible against both
+   white surfaces and the amber gold
+   ───────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline:        2px solid var(--color-accent);
+  outline-offset: 2px;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-md);
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+
+/* ─────────────────────────────────────────────────────────────
+   Theme data-attribute hooks (kept from original)
+   ───────────────────────────────────────────────────────────── */
+[data-theme="dark"]  { color-scheme: dark;  }
+[data-theme="light"] { color-scheme: light; }
+
+/* ─────────────────────────────────────────────────────────────
+   Selection — brand green tint
+   ───────────────────────────────────────────────────────────── */
+::selection {
+  background-color: var(--color-accent-subtle);
+  color:            var(--color-accent-text);
 }

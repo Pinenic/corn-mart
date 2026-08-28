@@ -9,6 +9,44 @@ import { formatPrice, formatDate } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
 import { ChevronUp } from "lucide-react";
 import { ChevronDown } from "lucide-react";
+import { Phone } from "lucide-react";
+
+const DELIVERY_STATUS_LABELS = {
+  pending: "Awaiting pickup",
+  assigned: "Rider assigned",
+  picked_up: "Picked up",
+  in_transit: "In transit",
+  delivered: "Delivered",
+  failed: "Delivery failed",
+  cancelled: "Delivery cancelled",
+};
+
+// Only using variants already proven to exist in this file
+// (STATUS_CONFIG's success/warning, and the danger seen on Button) —
+// avoids guessing at a Badge variant I haven't seen defined.
+const DELIVERY_STATUS_VARIANTS = {
+  pending: "warning",
+  assigned: "warning",
+  picked_up: "warning",
+  in_transit: "warning",
+  delivered: "success",
+  failed: "danger",
+  cancelled: "danger",
+};
+
+function Section({ title, children }) {
+  return (
+    <div className="mb-2">
+      <p
+        className="text-[11px] font-semibold uppercase tracking-wider"
+        style={{ color: "var(--color-text-tertiary)" }}
+      >
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
 
 export default function OrderDetailPage({ params }) {
   const { orderId } = use(params);
@@ -19,6 +57,8 @@ export default function OrderDetailPage({ params }) {
   const [toCancel, setToCancel] = useState(null);
   const [reason, setReason] = useState("");
 
+  console.log(order);
+
   const handleCancel = async () => {
     const result = await cancel(toCancel, reason);
     if (result) {
@@ -28,10 +68,10 @@ export default function OrderDetailPage({ params }) {
   };
 
   const orderToCancel = (id) => {
-    if(!id) return;
+    if (!id) return;
     setToCancel(id);
     setCancelModal(true);
-  }
+  };
 
   const toggleExpand = (id) => {
     if (expandedId === id) {
@@ -215,30 +255,101 @@ export default function OrderDetailPage({ params }) {
                 </span>
               </div>
             </div>
+            {/* Shipping */}
+            {so?.shipping_info && Object.keys(so.shipping_info).length > 0 && (
+              <div className="bg-white p-5 mb-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+                  Delivery
+                </p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+                  From
+                </p>
+                <div className="flex items-start gap-2 text-[13px] text-[var(--color-text-secondary)]">
+                  <MapPin
+                    size={16}
+                    className="mt-2 flex-shrink-0 text-[var(--color-primary)]"
+                  />
+                  <p className="flex justify-between w-full items-center">
+                    {so.store.location.map((l) => (
+                      <span key={`btn-${l.address}`}>
+                        {l.address}, {l.city}, {l.province}
+                      </span>
+                    ))}
+                    {so.store.location.map((l) => (
+                      <Button
+                        key={`btn-${l.address}`}
+                        onClick={() => {
+                          // 1. Create a clean label for your map pin
+                          const labelText = `${l.address}, ${l.city}`;
+                          
+                          // 2. Put the label inside parentheses right next to the coordinates
+                          // Example format: query=40.7128,-74.0060(My Store Name)
+                          const rawQuery = `${l.latitude},${l.longitude}(${labelText})`;
+                          
+                          // 3. Clean and encode the entire query parameter safely
+                          const encodedQuery = encodeURIComponent(rawQuery);
+                          
+                          const url = `https://maps.google.com/?q=${encodedQuery}`;
+                          
+                          window.open(url, '_blank');
+                        }}
+                      >
+                        View on map
+                      </Button>
+                    ))}
+                  </p>
+                </div>
+                <p className="flex gap-2 mt-2 mb-4 text-[13px] text-[var(--color-text-secondary)]">
+                  <Phone
+                    size={16}
+                    className=" flex-shrink-0 text-[var(--color-primary)]"
+                  />{" "}
+                  {so.store.location[0].contact_phone}
+                </p>
+                <Section title="Fulfillment">
+                  <div
+                    className="p-1 py-4"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span
+                        className="text-[12px] font-medium"
+                        style={{ color: "var(--color-text-primary)" }}
+                      >
+                        {so.fulfillment_method === "platform_delivery"
+                          ? "Platform delivery"
+                          : "Self-arranged"}
+                      </span>
+                      {so.fulfillment_method === "platform_delivery" &&
+                        so.delivery_status && (
+                          <Badge
+                            variant={
+                              DELIVERY_STATUS_VARIANTS[so.delivery_status] ??
+                              "warning"
+                            }
+                          >
+                            {DELIVERY_STATUS_LABELS[so.delivery_status] ??
+                              so.delivery_status}
+                          </Badge>
+                        )}
+                    </div>
+                    {so.fulfillment_method === "platform_delivery" &&
+                      !so.delivery_order_id &&
+                      so.status === "processing" && (
+                        <p
+                          className="text-[11px] mt-1"
+                          style={{ color: "var(--color-text-tertiary)" }}
+                        >
+                          A rider will be dispatched when you ship this order.
+                        </p>
+                      )}
+                  </div>
+                </Section>
+              </div>
+            )}
           </div>
         );
       })}
-
-      {/* Shipping */}
-      {order.store_orders?.[0]?.shipping_info &&
-        Object.keys(order.store_orders[0].shipping_info).length > 0 && (
-          <div className="bg-white rounded-2xl border border-[var(--color-border)] p-5 mb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
-              Delivering to
-            </p>
-            <div className="flex items-start gap-2 text-[13px] text-[var(--color-text-secondary)]">
-              <MapPin
-                size={14}
-                className="mt-0.5 flex-shrink-0 text-[var(--color-primary)]"
-              />
-              <p>
-                {Object.values(order.store_orders[0].shipping_info)
-                  .filter(Boolean)
-                  .join(", ")}
-              </p>
-            </div>
-          </div>
-        )}
 
       {/* Total */}
       <div className="bg-white rounded-2xl border border-[var(--color-border)] p-5 flex justify-between items-center">

@@ -41,47 +41,46 @@
 // }
 // ─────────────────────────────────────────────────────────────
 
-import { create }  from "zustand";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { toast }   from "@/lib/store/toastStore";
+import { toast } from "@/lib/store/toastStore";
 import { supabase } from "@/lib/supabaseClient";
+import { truncate } from "../utils";
 
 // ── DB row → flat item ────────────────────────────────────────
 function normaliseItem(row) {
   return {
-    key:           row.variant_id
-                     ? `${row.product_id}::${row.variant_id}`
-                     : row.product_id,
-    id:            row.id,
-    product_id:    row.product_id,
-    variant_id:    row.variant_id ?? null,
-    name:          row.products?.name          ?? "Product",
-    variant_name:  row.product_variants?.name  ?? null,
-    price:         Number(row.price),
-    quantity:      row.quantity,
+    key: row.variant_id
+      ? `${row.product_id}::${row.variant_id}`
+      : row.product_id,
+    id: row.id,
+    product_id: row.product_id,
+    variant_id: row.variant_id ?? null,
+    name: row.products?.name ?? "Product",
+    variant_name: row.product_variants?.name ?? null,
+    price: Number(row.price),
+    quantity: row.quantity,
     thumbnail_url: row.products?.thumbnail_url ?? null,
-    store_id:      row.store_id,
-    store_name:    row.stores?.name            ?? null,
+    store_id: row.store_id,
+    store_name: row.stores?.name ?? null,
   };
 }
 
 // ── Optimistic item (before DB confirms) ─────────────────────
 function buildOptimisticItem(product, variant, quantity) {
-  const key = variant?.id
-    ? `${product.id}::${variant.id}`
-    : product.id;
+  const key = variant?.id ? `${product.id}::${variant.id}` : product.id;
   return {
     key,
-    id:            null,
-    product_id:    product.id,
-    variant_id:    variant?.id    ?? null,
-    name:          product.name,
-    variant_name:  variant?.name  ?? null,
-    price:         Number(variant?.price ?? product.price),
+    id: null,
+    product_id: product.id,
+    variant_id: variant?.id ?? null,
+    name: product.name,
+    variant_name: variant?.name ?? null,
+    price: Number(variant?.price ?? product.price),
     quantity,
     thumbnail_url: product.thumbnail_url ?? null,
-    store_id:      product.store_id,
-    store_name:    product.store?.name   ?? null,
+    store_id: product.store_id,
+    store_name: product.store?.name ?? null,
   };
 }
 
@@ -91,16 +90,16 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       // ── State ─────────────────────────────────────────────
-      cartId:  null,
-      userId:  null,     // null = guest
-      items:   [],
+      cartId: null,
+      userId: null, // null = guest
+      items: [],
       loading: false,
-      isOpen:  false,
+      isOpen: false,
 
       // ── Drawer controls ───────────────────────────────────
-      openCart:   () => set({ isOpen: true  }),
-      closeCart:  () => set({ isOpen: false }),
-      toggleCart: () => set(s => ({ isOpen: !s.isOpen })),
+      openCart: () => set({ isOpen: true }),
+      closeCart: () => set({ isOpen: false }),
+      toggleCart: () => set((s) => ({ isOpen: !s.isOpen })),
 
       // ── Derived values ────────────────────────────────────
 
@@ -133,7 +132,8 @@ export const useCartStore = create(
 
         const { data: cart, error } = await supabase
           .from("carts")
-          .select(`
+          .select(
+            `
             id,
             cart_items (
               id,
@@ -146,7 +146,8 @@ export const useCartStore = create(
               product_variants ( name, price, images:product_images(*) ),
               stores        ( name )
             )
-          `)
+          `
+          )
           .eq("user_id", userId)
           .maybeSingle();
 
@@ -165,7 +166,7 @@ export const useCartStore = create(
       // Supabase cart, then does a full re-sync. Called by
       // useAuthStore after a successful sign-in/sign-up.
       syncGuestCart: async (userId) => {
-        const guestItems = get().items.filter(i => i.id === null);
+        const guestItems = get().items.filter((i) => i.id === null);
 
         if (guestItems.length === 0) {
           // Nothing to merge — just load the user's existing cart
@@ -179,28 +180,33 @@ export const useCartStore = create(
         // (adds quantity if the item already exists in the DB cart),
         // so duplicate items are handled automatically.
         const results = await Promise.allSettled(
-          guestItems.map(item =>
+          guestItems.map((item) =>
             supabase.rpc("add_to_cart", {
               p_product_id: item.product_id,
               p_variant_id: item.variant_id ?? null,
-              p_quantity:   item.quantity,
+              p_quantity: item.quantity,
             })
           )
         );
 
-        const failed = results.filter(r => r.status === "rejected" || r.value?.error);
+        const failed = results.filter(
+          (r) => r.status === "rejected" || r.value?.error
+        );
         if (failed.length > 0) {
-          console.warn(`[cartStore] syncGuestCart: ${failed.length} item(s) failed to sync`);
+          console.warn(
+            `[cartStore] syncGuestCart: ${failed.length} item(s) failed to sync`
+          );
         }
 
         // Full re-sync from DB to get accurate ids and merged state
         await get().getCart(userId);
 
         if (guestItems.length > 0) {
-          toast.success(
-            "Cart synced",
-            { description: `${guestItems.length} item${guestItems.length !== 1 ? "s" : ""} from your guest session were added to your cart.` }
-          );
+          toast.success("Cart synced", {
+            description: `${guestItems.length} item${
+              guestItems.length !== 1 ? "s" : ""
+            } from your guest session were added to your cart.`,
+          });
         }
       },
 
@@ -215,12 +221,10 @@ export const useCartStore = create(
       //   stock    — number (default Infinity)
       addItem: async (product, variant, quantity = 1, stock = Infinity) => {
         const prevItems = get().items;
-        const key = variant?.id
-          ? `${product.id}::${variant.id}`
-          : product.id;
+        const key = variant?.id ? `${product.id}::${variant.id}` : product.id;
 
         // Stock guard
-        const existing   = prevItems.find(i => i.key === key);
+        const existing = prevItems.find((i) => i.key === key);
         const currentQty = existing?.quantity ?? 0;
         if (currentQty + quantity > stock) {
           toast.error("Cannot add item — stock limit will be exceeded", {
@@ -231,21 +235,26 @@ export const useCartStore = create(
 
         // Optimistic update
         if (existing) {
-          set(s => ({
-            items: s.items.map(i =>
+          set((s) => ({
+            items: s.items.map((i) =>
               i.key === key ? { ...i, quantity: i.quantity + quantity } : i
             ),
           }));
         } else {
-          set(s => ({
-            items: [...s.items, buildOptimisticItem(product, variant, quantity)],
+          set((s) => ({
+            items: [
+              ...s.items,
+              buildOptimisticItem(product, variant, quantity),
+            ],
           }));
         }
 
         // Guest: stop here — item lives in local state only until sign-in
         if (!get().userId) {
           toast.success("Added to cart", {
-            description: `${product.name}${variant?.name ? ` — ${variant.name}` : ""} added. Sign in to save your cart.`,
+            description: `${product.name}${
+              variant?.name ? ` — ${variant.name}` : ""
+            } added. Sign in to save your cart.`,
           });
           return;
         }
@@ -254,7 +263,7 @@ export const useCartStore = create(
         const { error } = await supabase.rpc("add_to_cart", {
           p_product_id: product.id,
           p_variant_id: variant?.id ?? null,
-          p_quantity:   quantity,
+          p_quantity: quantity,
         });
 
         if (error) {
@@ -265,8 +274,10 @@ export const useCartStore = create(
           return;
         }
 
-        toast.success("Added to cart", {
-          description: `${product.name}${variant?.name ? ` — ${variant.name}` : ""} added.`,
+        toast.success(`${truncate(product.name, 25)} added to cart`, {
+          description: `${product.name}${
+            variant?.name ? ` — ${variant.name}` : ""
+          } added.`,
         });
 
         // Re-sync to get the DB id on the new row
@@ -282,13 +293,15 @@ export const useCartStore = create(
         }
 
         const prevItems = get().items;
-        const item = prevItems.find(i => i.key === keyOrId || i.id === keyOrId);
+        const item = prevItems.find(
+          (i) => i.key === keyOrId || i.id === keyOrId
+        );
         if (!item) return;
 
         // Optimistic
-        set(s => ({
-          items: s.items.map(i =>
-            (i.key === keyOrId || i.id === keyOrId) ? { ...i, quantity } : i
+        set((s) => ({
+          items: s.items.map((i) =>
+            i.key === keyOrId || i.id === keyOrId ? { ...i, quantity } : i
           ),
         }));
 
@@ -296,13 +309,15 @@ export const useCartStore = create(
         if (!get().userId) return;
 
         const { error } = await supabase.rpc("update_cart_quantity", {
-          p_item_id:  item.id,
+          p_item_id: item.id,
           p_quantity: quantity,
         });
 
         if (error) {
           set({ items: prevItems });
-          toast.error("Failed to update quantity", { description: error.message });
+          toast.error("Failed to update quantity", {
+            description: error.message,
+          });
           return;
         }
 
@@ -313,11 +328,13 @@ export const useCartStore = create(
       // Accepts composite key ("product::variant") or DB row id.
       removeItem: async (keyOrId) => {
         const prevItems = get().items;
-        const item = prevItems.find(i => i.key === keyOrId || i.id === keyOrId);
+        const item = prevItems.find(
+          (i) => i.key === keyOrId || i.id === keyOrId
+        );
         if (!item) return;
 
         // Optimistic
-        set(s => ({ items: s.items.filter(i => i.key !== item.key) }));
+        set((s) => ({ items: s.items.filter((i) => i.key !== item.key) }));
 
         // Guest: no DB call
         if (!get().userId) {
@@ -372,13 +389,14 @@ export const useCartStore = create(
       // Clears local state. DB cart rows are kept so they
       // reload on next sign-in. Guest items in localStorage
       // are cleared too since the user is now signed out.
-      resetCart: () => set({
-        cartId:  null,
-        userId:  null,
-        items:   [],
-        isOpen:  false,
-        loading: false,
-      }),
+      resetCart: () =>
+        set({
+          cartId: null,
+          userId: null,
+          items: [],
+          isOpen: false,
+          loading: false,
+        }),
     }),
     {
       name: "cm-cart",
@@ -387,7 +405,7 @@ export const useCartStore = create(
       // Guest items are also persisted here until sign-in syncs them.
       partialize: (s) => ({
         cartId: s.cartId,
-        items:  s.items,
+        items: s.items,
         userId: s.userId,
       }),
     }

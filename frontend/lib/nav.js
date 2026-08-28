@@ -68,6 +68,14 @@ export const NAV_ITEMS = [
     //   section: "store",
     // },
   {
+    key: "storefront",
+    label: "Storefront",
+    href: "/dashboard/storefront",
+    icon: Palette,
+    bottomTab: false,
+    section: "store",
+  },
+  {
     key: "settings",
     label: "Settings",
     href: "/dashboard/settings",

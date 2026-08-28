@@ -46,21 +46,23 @@
 
 import { useState, useCallback, useRef } from "react";
 import useAuthStore from "@/lib/store/useAuthStore";
-import { toast }   from "@/lib/store/toastStore";
+import { toast } from "@/lib/store/toastStore";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 // ── Friendly error messages ───────────────────────────────────
 const ERROR_MESSAGES = {
-  FILE_TOO_LARGE:        "That file is too large. Check the size limit and try again.",
-  TOO_MANY_FILES:        "Too many files selected.",
-  UNSUPPORTED_MEDIA_TYPE:"File type not supported. Use JPEG, PNG, WEBP, GIF, or AVIF.",
-  UNEXPECTED_FIELD:      "Unexpected upload field — please refresh and try again.",
-  STORAGE_UPLOAD_ERROR:  "Storage is temporarily unavailable. Please try again.",
-  UNAUTHORISED:          "Your session has expired. Please sign in again.",
-  FORBIDDEN:             "You don't have permission to do that.",
-  NOT_FOUND:             "Resource not found.",
-  default:               "Upload failed. Please try again.",
+  FILE_TOO_LARGE: "That file is too large. Check the size limit and try again.",
+  TOO_MANY_FILES: "Too many files selected.",
+  UNSUPPORTED_MEDIA_TYPE:
+    "File type not supported. Use JPEG, PNG, WEBP, GIF, or AVIF.",
+  UNEXPECTED_FIELD: "Unexpected upload field — please refresh and try again.",
+  STORAGE_UPLOAD_ERROR: "Storage is temporarily unavailable. Please try again.",
+  UNAUTHORISED: "Your session has expired. Please sign in again.",
+  FORBIDDEN: "You don't have permission to do that.",
+  NOT_FOUND: "Resource not found.",
+  default: "Upload failed. Please try again.",
 };
 
 function getFriendlyError(code) {
@@ -70,146 +72,156 @@ function getFriendlyError(code) {
 // ── Main hook ─────────────────────────────────────────────────
 export function useImageUpload() {
   const [uploading, setUploading] = useState(false);
-  const [removing,  setRemoving]  = useState(false);
-  const [progress,  setProgress]  = useState(0);     // 0–100
-  const [error,     setError]     = useState(null);  // string | null
-  const xhrRef = useRef(null);                       // for abort support
+  const [removing, setRemoving] = useState(false);
+  const [progress, setProgress] = useState(0); // 0–100
+  const [error, setError] = useState(null); // string | null
+  const xhrRef = useRef(null); // for abort support
 
-  const token = useAuthStore(s => s.token);
+  const token = useAuthStore((s) => s.token);
 
   // ── upload ──────────────────────────────────────────────────
   // Uploads a single file or an array of files using XHR so we
   // get real upload progress (fetch doesn't support this).
   //
   // Returns the parsed response data on success, null on failure.
-  const upload = useCallback(async ({
-    file,             // File | File[]
-    variantId,
-    endpoint,         // API path, e.g. "/stores/abc/logo"
-    field,            // Form field name expected by multer, e.g. "logo"
-    method = "POST", // HTTP method
-    onSuccess,        // optional callback(responseData)
-    successMessage,   // optional toast message override
-  }) => {
-    const files = Array.isArray(file) ? file : [file];
-    if (!files.length || !files[0]) {
-      setError("No file selected");
-      return null;
-    }
+  const upload = useCallback(
+    async ({
+      file, // File | File[]
+      variantId,
+      endpoint, // API path, e.g. "/stores/abc/logo"
+      field, // Form field name expected by multer, e.g. "logo"
+      method = "POST", // HTTP method
+      onSuccess, // optional callback(responseData)
+      successMessage, // optional toast message override
+    }) => {
+      const files = Array.isArray(file) ? file : [file];
+      if (!files.length || !files[0]) {
+        setError("No file selected");
+        return null;
+      }
 
-    setUploading(true);
-    setProgress(0);
-    setError(null);
+      setUploading(true);
+      setProgress(0);
+      setError(null);
 
-    return new Promise((resolve) => {
-      const formData = new FormData();
-      formData.append("variant_id", variantId)
-      files.forEach(f => formData.append(field, f));
+      return new Promise((resolve) => {
+        const formData = new FormData();
+        formData.append("variant_id", variantId);
+        files.forEach((f) => formData.append(field, f));
 
-      const xhr = new XMLHttpRequest();
-      xhrRef.current = xhr;
+        const xhr = new XMLHttpRequest();
+        xhrRef.current = xhr;
 
-      // Progress tracking
-      xhr.upload.addEventListener("progress", (e) => {
-        if (e.lengthComputable) {
-          setProgress(Math.round((e.loaded / e.total) * 100));
-        }
-      });
+        // Progress tracking
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            setProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        });
 
-      xhr.addEventListener("load", () => {
-        setUploading(false);
-        setProgress(0);
-        xhrRef.current = null;
+        xhr.addEventListener("load", () => {
+          setUploading(false);
+          setProgress(0);
+          xhrRef.current = null;
 
-        let json;
-        try {
-          json = JSON.parse(xhr.responseText);
-        } catch {
-          setError("Unexpected server response");
-          toast.error("Upload failed — unexpected server response");
-          resolve(null);
-          return;
-        }
+          let json;
+          try {
+            json = JSON.parse(xhr.responseText);
+          } catch {
+            setError("Unexpected server response");
+            toast.error("Upload failed — unexpected server response");
+            resolve(null);
+            return;
+          }
 
-        if (xhr.status >= 200 && xhr.status < 300 && json.success) {
-          const msg = successMessage ?? "Image updated successfully";
-          toast.success(msg);
-          onSuccess?.(json.data);
-          resolve(json.data);
-        } else {
-          const code = json.error?.code;
-          const msg  = getFriendlyError(code);
+          if (xhr.status >= 200 && xhr.status < 300 && json.success) {
+            const msg = successMessage ?? "Image updated successfully";
+            toast.success(msg);
+            onSuccess?.(json.data);
+            resolve(json.data);
+          } else {
+            const code = json.error?.code;
+            const msg = getFriendlyError(code);
+            setError(msg);
+            toast.error(msg);
+            resolve(null);
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          setUploading(false);
+          setProgress(0);
+          xhrRef.current = null;
+          const msg = "Network error — check your connection and try again";
           setError(msg);
           toast.error(msg);
           resolve(null);
-        }
-      });
+        });
 
-      xhr.addEventListener("error", () => {
-        setUploading(false);
-        setProgress(0);
-        xhrRef.current = null;
-        const msg = "Network error — check your connection and try again";
-        setError(msg);
-        toast.error(msg);
-        resolve(null);
-      });
+        xhr.addEventListener("abort", () => {
+          setUploading(false);
+          setProgress(0);
+          xhrRef.current = null;
+          resolve(null);
+        });
 
-      xhr.addEventListener("abort", () => {
-        setUploading(false);
-        setProgress(0);
-        xhrRef.current = null;
-        resolve(null);
+        xhr.open(method, `${BASE_URL}${endpoint}`);
+        if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        // Do NOT set Content-Type — the browser sets multipart/form-data with boundary automatically
+        xhr.send(formData);
       });
-
-      xhr.open(method, `${BASE_URL}${endpoint}`);
-      if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-      // Do NOT set Content-Type — the browser sets multipart/form-data with boundary automatically
-      xhr.send(formData);
-    });
-  }, [token]);
+    },
+    [token]
+  );
 
   // ── remove ──────────────────────────────────────────────────
   // Sends a DELETE request to remove an image.
   // Returns true on success, false on failure.
-  const remove = useCallback(async ({
-    endpoint,         // API path, e.g. "/stores/abc/logo" or "/products/abc/images/img-id"
-    onSuccess,        // optional callback()
-    successMessage,   // optional toast message override
-  }) => {
-    setRemoving(true);
-    setError(null);
+  const remove = useCallback(
+    async ({
+      endpoint, // API path, e.g. "/stores/abc/logo" or "/products/abc/images/img-id"
+      onSuccess, // optional callback()
+      successMessage, // optional toast message override
+    }) => {
+      setRemoving(true);
+      setError(null);
 
-    try {
-      const res = await fetch(`${BASE_URL}${endpoint}`, {
-        method:  "DELETE",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      try {
+        const res = await fetch(`${BASE_URL}${endpoint}`, {
+          method: "DELETE",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
 
-      if (res.status === 204) {
-        // No content — success
-        toast.success(successMessage ?? "Image removed");
-        onSuccess?.();
-        return true;
+        if (res.status === 204) {
+          // No content — success
+          toast.success(successMessage ?? "Image removed");
+          onSuccess?.();
+          return true;
+        }
+
+        let json;
+        try {
+          json = await res.json();
+        } catch {
+          json = null;
+        }
+
+        const code = json?.error?.code;
+        const msg = getFriendlyError(code);
+        setError(msg);
+        toast.error(msg);
+        return false;
+      } catch {
+        const msg = "Network error — check your connection and try again";
+        setError(msg);
+        toast.error(msg);
+        return false;
+      } finally {
+        setRemoving(false);
       }
-
-      let json;
-      try { json = await res.json(); } catch { json = null; }
-
-      const code = json?.error?.code;
-      const msg  = getFriendlyError(code);
-      setError(msg);
-      toast.error(msg);
-      return false;
-    } catch {
-      const msg = "Network error — check your connection and try again";
-      setError(msg);
-      toast.error(msg);
-      return false;
-    } finally {
-      setRemoving(false);
-    }
-  }, [token]);
+    },
+    [token]
+  );
 
   // ── abort ───────────────────────────────────────────────────
   // Cancels an in-progress upload.
@@ -229,9 +241,19 @@ export function useProfileAvatarUpload() {
   return {
     ...rest,
     uploadAvatar: (file, opts = {}) =>
-      upload({ file, endpoint: "/users/me/avatar", field: "avatar", method: "PATCH", ...opts }),
+      upload({
+        file,
+        endpoint: "/users/me/avatar",
+        field: "avatar",
+        method: "PATCH",
+        ...opts,
+      }),
     removeAvatar: (opts = {}) =>
-      remove({ endpoint: "/users/me/avatar", successMessage: "Avatar removed", ...opts }),
+      remove({
+        endpoint: "/users/me/avatar",
+        successMessage: "Avatar removed",
+        ...opts,
+      }),
   };
 }
 
@@ -240,9 +262,20 @@ export function useStoreLogoUpload(storeId) {
   return {
     ...rest,
     uploadLogo: (file, opts = {}) =>
-      upload({ file, endpoint: `/stores/${storeId}/logo`, field: "logo", method: "PATCH", successMessage: "Logo updated", ...opts }),
+      upload({
+        file,
+        endpoint: `/stores/${storeId}/assets/logo`,
+        field: "logo",
+        method: "PATCH",
+        successMessage: "Logo updated",
+        ...opts,
+      }),
     removeLogo: (opts = {}) =>
-      remove({ endpoint: `/stores/${storeId}/logo`, successMessage: "Logo removed", ...opts }),
+      remove({
+        endpoint: `/stores/${storeId}/assets/logo`,
+        successMessage: "Logo removed",
+        ...opts,
+      }),
   };
 }
 
@@ -251,9 +284,20 @@ export function useStoreBannerUpload(storeId) {
   return {
     ...rest,
     uploadBanner: (file, opts = {}) =>
-      upload({ file, endpoint: `/stores/${storeId}/banner`, field: "banner", method: "PATCH", successMessage: "Banner updated", ...opts }),
+      upload({
+        file,
+        endpoint: `/stores/${storeId}/assets/banner`,
+        field: "banner",
+        method: "PATCH",
+        successMessage: "Banner updated",
+        ...opts,
+      }),
     removeBanner: (opts = {}) =>
-      remove({ endpoint: `/stores/${storeId}/banner`, successMessage: "Banner removed", ...opts }),
+      remove({
+        endpoint: `/stores/${storeId}/assets/banner`,
+        successMessage: "Banner removed",
+        ...opts,
+      }),
   };
 }
 
@@ -262,8 +306,19 @@ export function useProductImageUpload(storeId, productId) {
   return {
     ...rest,
     uploadImages: (files, opts = {}) =>
-      upload({ file: files, endpoint: `/stores/${storeId}/products/${productId}/images`, field: "images", method: "POST", successMessage: "Images uploaded", ...opts }),
+      upload({
+        file: files,
+        endpoint: `/stores/${storeId}/products/${productId}/images`,
+        field: "images",
+        method: "POST",
+        successMessage: "Images uploaded",
+        ...opts,
+      }),
     removeImage: (imageId, opts = {}) =>
-      remove({ endpoint: `/stores/${storeId}/products/${productId}/images/${imageId}`, successMessage: "Image removed", ...opts }),
+      remove({
+        endpoint: `/stores/${storeId}/products/${productId}/images/${imageId}`,
+        successMessage: "Image removed",
+        ...opts,
+      }),
   };
 }
