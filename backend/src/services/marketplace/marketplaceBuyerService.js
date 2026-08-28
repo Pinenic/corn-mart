@@ -35,7 +35,7 @@ const STORE_ORDER_FIELDS = `
   subtotal, platform_fee, net_amount,
   status, payout_status, shipping_info,
   fulfillment_method, buyer_delivery_fee,
-  delivery_order_id, delivery_status,
+  delivery_order_id, delivery_status, pickup_method,
   created_at, updated_at
 `.trim();
 
@@ -142,7 +142,7 @@ const marketplaceBuyerService = {
         ${PARENT_ORDER_FIELDS},
         store_orders(
           ${STORE_ORDER_FIELDS},
-          store:store_id(id, name, logo, is_verified),
+          store:store_id(id, name, logo, is_verified, location:store_locations(address, city, province, country, latitude, longitude, contact_phone)),
           items:order_items(
             id, quantity, unit_price, subtotal,
             product:product_id(id, name, thumbnail_url, description),

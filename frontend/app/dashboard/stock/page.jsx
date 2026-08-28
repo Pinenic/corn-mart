@@ -376,7 +376,7 @@ export default function StockJournalPage() {
     }
     if (ok) closeDrawer();
   };
-
+//
   const handleDelete = async (id) => {
     await remove(id);
   };

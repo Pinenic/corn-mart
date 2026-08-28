@@ -24,6 +24,7 @@ import { useProfile } from "@/lib/store/useProfile";
 import { LayoutDashboard } from "lucide-react";
 import { MessageSquare } from "lucide-react";
 import { useStoreUnreadCount } from "@/lib/hooks/useStoreMessages";
+import Image from "next/image";
 
 const NAV_LINKS = [
   { href: "/marketplace", label: "Marketplace" },
@@ -70,28 +71,28 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-[var(--color-border)] h-16 flex items-center">
-        <div className="max-w-7xl mx-auto w-full px-4 md:px-6 flex items-center gap-4">
+        <div className="mx-auto w-full px-4 md:px-6 flex items-center gap-3 md:gap-5">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-[var(--color-primary)] flex items-center justify-center">
-              <ShoppingCart size={16} className="text-white" />
+            <div className="w-16 h-16 rounded-xl flex items-center justify-center">
+              <Image src={"/icon0.svg"} width={800} height={800} size={16} className="text-white" />
             </div>
-            <span className="text-[16px] font-bold text-[var(--color-text-primary)] hidden sm:block">
-              Corn Mart
-            </span>
+            {/* <span className="text-[16px] font-bold text-[var(--color-text-primary)] lowercase hidden sm:block">
+              corn mart
+            </span> */}
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1 flex-shrink-0">
+          <nav className="hidden lg:flex items-center gap-5 flex-shrink-0">
             {NAV_LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 className={cn(
-                  "px-3 py-1.5 rounded-xl text-[13px] font-medium transition-colors",
+                  "relative py-1.5 text-[13px] font-medium transition-colors whitespace-nowrap",
                   pathname.startsWith(l.href)
-                    ? "bg-[var(--color-primary-light)] text-[var(--color-primary-text)]"
-                    : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)]"
+                    ? "text-[var(--color-text-primary)] after:content-[''] after:absolute after:left-0 after:right-0 after:-bottom-[1px] after:h-[2px] after:bg-[var(--color-primary)]"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 )}
               >
                 {l.label}
@@ -100,9 +101,9 @@ export function Navbar() {
           </nav>
 
           {/* Search */}
-          {/* <form
+          <form
             onSubmit={handleSearch}
-            className="flex-1 max-w-md hidden md:block"
+            className="flex-1 min-w-0 hidden md:block max-w-[220px] lg:max-w-md"
           >
             <div className="relative">
               <Search
@@ -112,18 +113,20 @@ export function Navbar() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search products, brands…"
+                placeholder="Search products…"
                 className="w-full h-9 pl-9 pr-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-[13px] outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all placeholder:text-[var(--color-text-muted)]"
               />
             </div>
-          </form> */}
+          </form>
 
           {/* Actions */}
-          <div className="flex items-center gap-1 ml-auto">
-            {/* Notifications */}
+          <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+            {/* Notifications — hidden on very narrow screens to avoid the
+                action cluster overflowing past the hamburger menu; still
+                reachable from the account dropdown once signed in. */}
             <button
               onClick={() => setNotif(true)}
-              className="relative w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
+              className="hidden sm:flex relative w-9 h-9 rounded-full items-center justify-center hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
             >
               <Bell size={18} />
               {unreadNotifs > 0 && (
@@ -136,7 +139,7 @@ export function Navbar() {
             {/* Cart */}
             <button
               onClick={toggleCart}
-              className="relative w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
+              className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
             >
               <ShoppingCart size={18} />
               {cartCount > 0 && (
@@ -151,7 +154,7 @@ export function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setUser((v) => !v)}
-                  className="flex items-center gap-1.5 h-9 px-2.5 rounded-xl hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
+                  className="flex items-center gap-1.5 h-9 px-2 rounded-full hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
                 >
                   {(count > 0 || buyerUnreadCount > 0) && (
                     <span className="ml-auto w-2 h-2 rounded-full bg-red-500"></span>
@@ -160,10 +163,10 @@ export function Navbar() {
                     <img
                       src={profile?.avatar_url}
                       alt="dp"
-                      className="w-7 h-7 rounded bg-[var(--color-primary)] flex items-center justify-center"
+                      className="w-7 h-7 rounded-full bg-[var(--color-primary)] flex items-center justify-center"
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white text-[10px] font-bold">
+                    <div className="w-6 h-6 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white text-[10px] font-bold">
                       {user?.email?.[0]?.toUpperCase() ?? "U"}
                     </div>
                   )}
@@ -229,7 +232,7 @@ export function Navbar() {
               </div>
             ) : (
               <Link href="/sign-in">
-                <button className="flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[var(--color-primary)] text-white text-[13px] font-semibold hover:bg-[var(--color-primary-hover)] transition-colors">
+                <button className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-[var(--color-primary)] text-white text-[13px] font-semibold hover:bg-[var(--color-primary-hover)] transition-colors">
                   Sign in
                 </button>
               </Link>
@@ -238,7 +241,7 @@ export function Navbar() {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobile((v) => !v)}
-              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[var(--color-bg)] text-[var(--color-text-secondary)]"
+              className="lg:hidden w-9 h-9 rounded-full flex items-center justify-center hover:bg-[var(--color-bg)] text-[var(--color-text-secondary)]"
             >
               {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -247,8 +250,8 @@ export function Navbar() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-white border-b border-[var(--color-border)] shadow-lg z-30 px-4 py-4 space-y-2 md:hidden">
-            <form onSubmit={handleSearch} className="relative mb-3">
+          <div className="absolute top-16 left-0 right-0 bg-white border-b border-[var(--color-border)] shadow-lg z-30 px-4 py-4 space-y-2 lg:hidden max-h-[calc(100vh-64px)] overflow-y-auto">
+            <form onSubmit={handleSearch} className="relative mb-3 md:hidden">
               <Search
                 size={14}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none"
@@ -275,6 +278,21 @@ export function Navbar() {
                 {l.label}
               </Link>
             ))}
+            <button
+              onClick={() => {
+                setMobile(false);
+                setNotif(true);
+              }}
+              className="sm:hidden w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[13px] font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] transition-colors"
+            >
+              <Bell size={15} />
+              Notifications
+              {unreadNotifs > 0 && (
+                <span className="ml-auto w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                </span>
+              )}
+            </button>
           </div>
         )}
       </header>

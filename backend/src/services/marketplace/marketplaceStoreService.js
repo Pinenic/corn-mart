@@ -7,7 +7,7 @@ import { supabaseAdmin } from "../../config/supabase.js";
 // Only public fields — never expose account_number or internal flags
 const STORE_PUBLIC_FIELDS = `
   id, name, description, logo, banner,
-  is_verified, followers_count, created_at
+  is_verified, followers_count, created_at, config
 `.trim();
 
 const marketplaceStoreService = {

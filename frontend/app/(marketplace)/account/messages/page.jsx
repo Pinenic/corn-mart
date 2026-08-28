@@ -28,7 +28,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="flex-1 hidden md:flex flex-col items-center justify-center gap-3"
+    <div className="flex-1 hidden md:flex flex-col h-full items-center justify-center gap-3"
       style={{ background: "var(--color-bg)" }}>
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center"

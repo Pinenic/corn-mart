@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { usePendingMessageRef } from "@/lib/store/usePendingMessageRef";
 import { useStartConversation } from "@/lib/hooks/useBuyerMessages";
 import { Loader2 } from "lucide-react";
+import { X } from "lucide-react";
 
 export function ProductPreviewModal({ product: initial, open, onClose }) {
   // Fetch full product data (with variants) when modal opens
@@ -70,6 +71,9 @@ export function ProductPreviewModal({ product: initial, open, onClose }) {
         </div>
       ) : full ? (
         <div className="flex flex-col md:flex-row gap-0">
+            <div className="flex md:hidden justify-end p-2 px-4">
+              <X onClick={onClose} className="w-6 h-6"/>
+            </div>
           {/* Image */}
           <div className="md:w-1/2 bg-[var(--color-bg)] aspect-square md:aspect-auto md:min-h-[400px] flex items-center justify-center flex-shrink-0">
             {full.thumbnail_url ? (
@@ -190,6 +194,9 @@ export function ProductPreviewModal({ product: initial, open, onClose }) {
               View full details <ExternalLink size={11} />
             </Link>
           </div>
+          <div className="hidden md:flex py-2 pr-4">
+              <X onClick={onClose} className="w-6 h-6 justify-end"/>
+            </div>
         </div>
       ) : null}
     </Modal>

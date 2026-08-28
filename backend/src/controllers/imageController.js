@@ -184,7 +184,7 @@ export const deleteStoreBanner = asyncHandler(async (req, res) => {
 export const addProductImages = asyncHandler(async (req, res) => {
   const { storeId, productId } = req.params;
   const {variant_id} = req.body;
-  console.log(variant_id);
+  // console.log(variant_id);
 
   const files = req.files ?? [];
   if (files.length === 0) {
@@ -199,7 +199,7 @@ export const addProductImages = asyncHandler(async (req, res) => {
     .eq("id", variant_id)
     .maybeSingle();
 
-    console.log(defaultVariant)
+    // console.log(defaultVariant)
 
   if (!defaultVariant) {
     return response.unprocessable(

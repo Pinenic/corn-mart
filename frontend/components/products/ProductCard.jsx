@@ -41,17 +41,17 @@ export function ProductCard({ product, onQuickView }) {
       onQuickView?.(product);
       return;
     }
-    addItem(product, null, 1);
-    toast.success(`"${truncate(product.name, 30)}" added to cart`);
+    addItem(product, product.variants[0], 1,product.variants[0].stock);
+    // toast.success(`"${truncate(product.name, 30)}" added to cart`);
     openCart();
   };
 
   return (
-    <div className="group relative bg-white rounded-2xl border border-[var(--color-border)] overflow-hidden hover:shadow-lg hover:border-[var(--color-border-md)] transition-all duration-300">
+    <div className="group relative bg-[var(--color-bg)] rounded-[var(--radius)] overflow-hidden transition-colors duration-300">
       {/* Image */}
       <Link
         href={`/marketplace/products/${product.id}`}
-        className="block relative overflow-hidden bg-[var(--color-bg)] aspect-square"
+        className="block relative overflow-hidden bg-white aspect-square"
       >
         {product.thumbnail_url ? (
           <img
@@ -65,76 +65,55 @@ export function ProductCard({ product, onQuickView }) {
           </div>
         )}
 
-        {/* Overlay actions */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-        <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setWishlisted((v) => !v);
-            }}
-            className={cn(
-              "w-8 h-8 rounded-xl flex items-center justify-center shadow-sm transition-colors",
-              wishlisted
-                ? "bg-red-500 text-white"
-                : "bg-white text-[var(--color-text-secondary)] hover:text-red-500"
-            )}
-          >
-            <Heart size={14} fill={wishlisted ? "currentColor" : "none"} />
-          </button>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              onQuickView?.(product);
-            }}
-            className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
-          >
-            <Eye size={14} />
-          </button>
-        </div>
-
         {/* Out of stock overlay */}
         {isOutOfStock && (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
             <Badge variant="danger">Out of stock</Badge>
           </div>
         )}
-
-        {/* Store badge */}
-        {product.store?.name && (
-          <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="text-[10px] font-medium bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-[var(--color-text-secondary)]">
-              {product.store.name}
-            </span>
-          </div>
-        )}
       </Link>
 
-      {/* Info */}
-      <div className="p-3">
-        {product.category && (
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
-            {product.category}
-          </p>
+      {/* Wishlist — static top-right, cosmetic only (not persisted) */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          setWishlisted((v) => !v);
+        }}
+        aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        className={cn(
+          "absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-colors",
+          wishlisted
+            ? "bg-white text-red-500"
+            : "bg-white/90 text-[var(--color-text-secondary)] hover:text-red-500"
         )}
+      >
+        <Heart size={14} fill={wishlisted ? "currentColor" : "none"} />
+      </button>
+
+      {/* Info */}
+      <div className="p-3 pt-2.5 space-y-2">
         <Link href={`/marketplace/products/${product.id}`}>
-          <p className="text-[13px] font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-primary)] transition-colors line-clamp-2 leading-snug mb-1.5">
+          <p className="text-[13px] font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary)] transition-colors line-clamp-1 leading-snug">
             {product.name}
           </p>
         </Link>
 
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[15px] font-bold text-[var(--color-primary)]">
-            {formatPrice(product.price)}
-          </p>
-          {/* <button
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            className={cn("flex items-center gap-1.5 px-3 h-8 rounded-xl text-[12px] font-semibold transition-all", isOutOfStock ? "opacity-40 cursor-not-allowed bg-[var(--color-bg)] text-[var(--color-text-muted)]" : "bg-[var(--color-primary-light)] text-[var(--color-primary-text)] hover:bg-[var(--color-primary)] hover:text-white")}>
-            <ShoppingCart size={13} />
-            {hasVariants ? "Options" : "Add"}
-          </button> */}
-        </div>
+        <p className="text-[16px] font-bold text-[var(--color-text-primary)]">
+          {formatPrice(product.price)}
+        </p>
+
+        <button
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          className={cn(
+            "w-full h-9 rounded-[var(--radius-sm)] text-[13px] font-semibold transition-colors",
+            isOutOfStock
+              ? "opacity-40 cursor-not-allowed bg-[var(--color-text-muted)] text-white"
+              : "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]"
+          )}
+        >
+          {hasVariants ? "Select Options" : "Buy Now"}
+        </button>
       </div>
     </div>
   );

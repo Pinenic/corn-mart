@@ -26,7 +26,7 @@ const storeService = {
   async getByOwner(ownerId) {
     const { data, error } = await supabaseAdmin
       .from("stores")
-      .select(`${STORE_PUBLIC_FIELDS},config`)
+      .select(`${STORE_PUBLIC_FIELDS},config,stock_pin_hash`)
       .eq("owner_id", ownerId)
       .order("created_at", { ascending: false });
 

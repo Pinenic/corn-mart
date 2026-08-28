@@ -2,7 +2,9 @@
 // app/stock/layout.jsx
 // ─────────────────────────────────────────────────────────────
 // Wraps every page under /stock with the PIN lock.
-// The lock resets every time the user navigates to this route.
+// The PIN itself is synced across devices (see useStockLock.js);
+// the *unlocked* session is still per-device and resets every time
+// the user navigates to this route or refreshes.
 // ─────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from "react";
@@ -154,9 +156,24 @@ function SetupScreen({ onSetPin, error, loading, clearError }) {
   const [pin,     setPin]     = useState("");
   const [confirm, setConfirm] = useState("");
   const [step,    setStep]    = useState(1); // 1 = choose pin, 2 = confirm
+  const [mismatch, setMismatch] = useState("");
 
   const handleStep1 = () => { if (pin.length === 4) setStep(2); };
-  const handleStep2 = () => onSetPin(pin, confirm);
+  const handleStep2 = () => {
+    if (confirm.length < 4) return;
+    if (confirm !== pin) {
+      // Previously this mismatch was never actually checked — the PIN
+      // silently became whatever was typed in step 1 regardless of
+      // what was confirmed here. Now it's caught and the seller retypes.
+      setMismatch("PINs didn't match — try again");
+      setStep(1);
+      setPin("");
+      setConfirm("");
+      return;
+    }
+    setMismatch("");
+    onSetPin(pin);
+  };
 
   // Auto-advance step 1 when 4 digits
   useEffect(() => { if (pin.length === 4 && step === 1) setStep(2); }, [pin]);
@@ -180,6 +197,11 @@ function SetupScreen({ onSetPin, error, loading, clearError }) {
           <p className="text-[13px]" style={{ color: "var(--color-text-secondary)" }}>
             Set a 4-digit PIN to keep your cost data private
           </p>
+          {mismatch && (
+            <p className="text-[12px] mt-2 font-medium" style={{ color: "var(--color-danger)" }}>
+              {mismatch}
+            </p>
+          )}
         </div>
 
         <div className="bg-white rounded-3xl border p-6 space-y-5 shadow-sm"
@@ -188,7 +210,7 @@ function SetupScreen({ onSetPin, error, loading, clearError }) {
             <PinInput
               key="set"
               value={pin}
-              onChange={(v) => { setPin(v); clearError(); }}
+              onChange={(v) => { setPin(v); clearError(); setMismatch(""); }}
               onSubmit={handleStep1}
               label="Choose a 4-digit PIN"
               autoFocus
@@ -226,7 +248,6 @@ function SetupScreen({ onSetPin, error, loading, clearError }) {
 
           <p className="text-[11px] text-center leading-relaxed"
             style={{ color: "var(--color-text-muted)" }}>
-            {/* The PIN is stored locally on this device.<br /> */}
             You can change or remove it later from the journal.
           </p>
         </div>
@@ -237,14 +258,24 @@ function SetupScreen({ onSetPin, error, loading, clearError }) {
 
 // ── Layout export ──────────────────────────────────────────────
 export default function StockLayout({ children }) {
-  const { status, hasPIN, pinError:error, working:loading, setPIN, unlocked,  unlock, clearError } = useStockLock();
+  const { hasPIN, pinError: error, working: loadingAction, setPIN, unlocked, unlock, clearError, loading } = useStockLock();
+
+  // Still resolving whether this store has a PIN set — avoid flashing
+  // the setup screen (or the lock screen) before we actually know.
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-120px)] flex items-center justify-center">
+        <Loader2 size={24} className="animate-spin" style={{ color: "var(--color-text-muted)" }} />
+      </div>
+    );
+  }
 
   if (!hasPIN && !unlocked) {
-    return <SetupScreen onSetPin={setPIN} error={error} loading={loading} clearError={clearError} />;
+    return <SetupScreen onSetPin={setPIN} error={error} loading={loadingAction} clearError={clearError} />;
   }
 
   if (unlocked === false) {
-    return <LockScreen onUnlock={unlock} error={error} loading={loading} clearError={clearError} />;
+    return <LockScreen onUnlock={unlock} error={error} loading={loadingAction} clearError={clearError} />;
   }
 
   // Unlocked — render the actual page

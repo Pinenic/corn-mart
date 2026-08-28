@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ProductImageGallery({ images = [], thumbnail_url, selectedVariant }) {
-  console.log("selectedVariant ", selectedVariant);
   // Filter images relevant to the selected variant, or show all if none selected
   const variantImages = selectedVariant
     ? images.filter(img => img.variant_id === selectedVariant.id || img.variant_id === null)
@@ -27,16 +26,16 @@ export function ProductImageGallery({ images = [], thumbnail_url, selectedVarian
 
   if (allImages.length === 0) {
     return (
-      <div className="aspect-square bg-[var(--color-bg)] rounded-2xl flex items-center justify-center">
+      <div className="aspect-square bg-[var(--color-bg)] rounded-[var(--radius-lg)] flex items-center justify-center">
         <Package size={64} className="text-[var(--color-text-muted)]" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col md:flex-row-reverse gap-3">
       {/* Main image */}
-      <div className="relative aspect-square bg-[var(--color-bg)] rounded-2xl overflow-hidden group">
+      <div className="relative flex-1 aspect-square bg-[var(--color-bg)] rounded-[var(--radius-lg)] overflow-hidden group">
         <img
           src={allImages[active]?.image_url}
           alt="Product"
@@ -46,18 +45,18 @@ export function ProductImageGallery({ images = [], thumbnail_url, selectedVarian
           <>
             <button
               onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur rounded-xl flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
             >
               <ChevronLeft size={16} className="text-[var(--color-text-primary)]" />
             </button>
             <button
               onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur rounded-xl flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
             >
               <ChevronRight size={16} className="text-[var(--color-text-primary)]" />
             </button>
-            {/* Dot indicators */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {/* Dot indicators — mobile only, desktop has the thumbnail rail */}
+            <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
               {allImages.map((_, i) => (
                 <button
                   key={i}
@@ -70,15 +69,18 @@ export function ProductImageGallery({ images = [], thumbnail_url, selectedVarian
         )}
       </div>
 
-      {/* Thumbnail strip */}
+      {/* Thumbnail rail — horizontal strip on mobile, vertical column on desktop */}
       {allImages.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+        <div
+          className="flex md:flex-col gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:w-16 md:max-h-[480px] flex-shrink-0 pb-1 md:pb-0"
+          style={{ scrollbarWidth: "none" }}
+        >
           {allImages.map((img, i) => (
             <button
               key={img.id}
               onClick={() => setActive(i)}
               className={cn(
-                "flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all",
+                "flex-shrink-0 w-16 h-16 rounded-[var(--radius-sm)] overflow-hidden border-2 transition-all",
                 i === active
                   ? "border-[var(--color-primary)]"
                   : "border-[var(--color-border)] hover:border-[var(--color-border-md)]"

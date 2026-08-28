@@ -54,7 +54,7 @@ const STATUS_COLORS = {
 
 export default function SalesPage() {
   const [tab, setTab] = useState("overview");
-  const [period, setPeriod] = useState(PERIODS[1]);
+  const [period, setPeriod] = useState(PERIODS[0]);
   const [metric, setMetric] = useState("revenue");
 
   const periodKey = period.key === "12M" ? "12m" : period.key.toLowerCase();
@@ -175,7 +175,7 @@ export default function SalesPage() {
             </button>
           ))}
         </div>
-        <PeriodPicker value={period} onChange={setPeriod} include12M />
+        <PeriodPicker value={period} onChange={setPeriod} />
       </div>
 
       {/* ─── OVERVIEW TAB ─── */}
