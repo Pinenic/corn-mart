@@ -6,10 +6,11 @@ import { cn } from "@/lib/utils";
 export function VariantImageManager({
   variants = [],
   images = [],
-  onUpload,
-  onRemove,
-  progress = {},
-  uploading = false,
+  onUpload,       // (variantId, slotIndex, file) => Promise
+  onRemove,       // (variantId, slotIndex) => Promise
+  isUploading,    // (variantId, slotIndex) => boolean
+  isRemoving,     // (variantId, slotIndex) => boolean
+  getProgress,    // (variantId, slotIndex) => number (0-100)
   className,
 }) {
   const variantImagesById = variants.reduce((acc, variant) => {
@@ -24,14 +25,18 @@ export function VariantImageManager({
     const image = variantImagesById[variant.id]?.[slotIndex];
     const slotKey = `${variant.id}-${slotIndex}`;
 
+    const uploading = isUploading?.(variant.id, slotIndex) ?? false;
+    const removing  = isRemoving?.(variant.id, slotIndex) ?? false;
+    const progress  = getProgress?.(variant.id, slotIndex) ?? 0;
+
     return (
       <ImagePickerField
         key={slotKey}
         label={`Image ${slotIndex + 1}`}
         currentUrl={image?.image_url}
         aspect="square"
-        uploading={uploading}
-        progress={progress[slotKey] ?? 0}
+        uploading={uploading || removing}
+        progress={progress}
         onUpload={(file) => onUpload?.(variant.id, slotIndex, file)}
         onRemove={image ? () => onRemove?.(variant.id, slotIndex) : undefined}
         hint=""
@@ -60,28 +65,14 @@ export function VariantImageManager({
   return (
     <div className={cn("space-y-6", className)}>
       {variants.map((variant) => (
-        <div
-          key={variant.id}
-          className="rounded-3xl border border-[var(--color-border)] p-5"
-        >
+        <div key={variant.id} className="rounded-3xl border border-[var(--color-border)] p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
             <div>
-              <p
-                className="text-sm font-semibold"
-                style={{ color: "var(--color-text-primary)" }}
-              >
+              <p className="text-sm font-semibold" style={{ color: "var(--color-text-primary)" }}>
                 {variant.name || "Variant"}
               </p>
-              {/* {variant.sku && (
-                <p className="text-[11px] mt-1" style={{ color: "var(--color-text-secondary)" }}>
-                  SKU: {variant.sku}
-                </p>
-              )} */}
             </div>
-            <p
-              className="text-[11px] text-right"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
+            <p className="text-[11px] text-right" style={{ color: "var(--color-text-secondary)" }}>
               Up to 3 images
             </p>
           </div>

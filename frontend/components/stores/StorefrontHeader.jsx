@@ -66,9 +66,9 @@ export function StorefrontHeader({ store, onFollowChange }) {
   const accentColor = "#0057ff";
 
   return (
-    <div className="bg-white border-b border-[var(--color-border)] mb-6">
+    <div className="max-w-7xl mx-auto rounded-b-xl bg-white border-b border-[var(--color-border)] mb-6">
       {/* Banner */}
-      <div
+      {/* <div
         className="h-40 md:h-56 relative overflow-hidden"
         style={{
           background: `linear-gradient(135deg, ${accentColor}15 0%, ${accentColor}06 100%)`,
@@ -93,10 +93,10 @@ export function StorefrontHeader({ store, onFollowChange }) {
             />
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* Profile row */}
-      <div className="max-w-5xl mx-auto px-4 md:px-6">
+      <div className="max-w-7xl mx-auto pt-10 px-4 md:px-6">
         <div className="flex items-end gap-4 -mt-5 md:-mt-8 mb-4">
           {/* Logo */}
           <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border-4 border-white shadow-md overflow-hidden flex-shrink-0 bg-white z-10">
@@ -165,7 +165,7 @@ export function StorefrontHeader({ store, onFollowChange }) {
           <div className="flex-1 min-w-0">
             {store.description && (
               <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed max-w-xl">
-                {store.description}
+                {/* {store.description} */}
               </p>
             )}
           </div>

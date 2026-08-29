@@ -7,7 +7,7 @@ import { ImageUploader } from "./ImageUploader";
 import { VariantsEditor } from "./VariantsEditor";
 import { OptionsEditor } from "./OptionsEditor";
 import { useCategories } from "@/lib/hooks/useCategories";
-import { useImageUpload } from "@/lib/hooks/useImageUpload";
+import { useVariantImageUpload } from "@/lib/hooks/useImageUpload";
 import { getStockStatus } from "@/lib/products-data";
 import { ImagePickerField } from "../client/imagePickerField";
 import { VariantImageManager } from "../client/VariantImageManager";
@@ -23,14 +23,13 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
   const [form, setForm] = useState({ ...product });
   const [activeTab, setTab] = useState("details");
   const [dirty, setDirty] = useState(false);
-  const [progressMap, setProgressMap] = useState({});
 
   const { data: categories, isLoading: categoriesLoading } = useCategories();
 
-  // Initialize image upload hook
+  // Initialize image upload hook — one XHR + progress tracker per slot,
+  // so concurrent uploads to different slots don't share state.
   const storeId = product.store_id;
-  const { upload, remove, abort, uploading, removing, progress, error } =
-    useImageUpload(storeId, product.id);
+  const imageUpload = useVariantImageUpload(storeId, product.id);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -52,29 +51,18 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
     setDirty(true);
   };
 
-  // Handle variant image upload
+  // Handle variant image upload — server upserts the slot (create or
+  // replace) and returns the resulting row; slot addressing means we
+  // never have to guess an id or sort_order on the client.
   const handleUploadVariantImage = async (variantId, slotIndex, file) => {
-    const slotKey = `${variantId}-${slotIndex}`;
-    setProgressMap((prev) => ({ ...prev, [slotKey]: 0 }));
-
-    const result = await upload({
-      file,
-      variantId,
-      endpoint: `/stores/${storeId}/products/${product.id}/images`,
-      field: "images",
-      successMessage: `Image uploaded to slot ${slotIndex + 1}`,
+    await imageUpload.uploadToSlot(variantId, slotIndex, file, {
       onSuccess: (data) => {
-        const newImage = {
-          id: data.id,
-          image_url: data.image_url,
-          variant_id: variantId,
-          sort_order: slotIndex,
-          is_thumbnail: false,
-        };
+        const newImage = data.image;
 
         const existingIndex = form.images.findIndex(
           (img) =>
-            img.variant_id === variantId && (img.sort_order ?? 0) === slotIndex
+            img.variant_id === variantId &&
+            (img.sort_order ?? 0) === slotIndex
         );
 
         const updatedImages =
@@ -85,67 +73,36 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
             : [...form.images, newImage];
 
         update("images", updatedImages);
-
-        // Clear progress
-        setProgressMap((prev) => {
-          const next = { ...prev };
-          delete next[slotKey];
-          return next;
-        });
       },
     });
-
-    if (!result) {
-      setProgressMap((prev) => {
-        const next = { ...prev };
-        delete next[slotKey];
-        return next;
-      });
-    }
   };
 
-  // Handle variant image removal
+  // Handle variant image removal — addressed by slot, no id lookup needed.
+  // The server closes the gap left behind (e.g. deleting slot 0 shifts
+  // slot 1 -> 0, slot 2 -> 1) and returns which rows moved so we can
+  // patch local state without a refetch.
   const handleRemoveVariantImage = async (variantId, slotIndex) => {
-    const slotKey = `${variantId}-${slotIndex}`;
-
-    const imageToRemove = form.images.find(
-      (img) =>
-        img.variant_id === variantId && (img.sort_order ?? 0) === slotIndex
-    );
-
-    if (!imageToRemove) return;
-
-    await remove({
-      endpoint: `/stores/${storeId}/products/${product.id}/images/${imageToRemove.id}`,
-      successMessage: `Image removed from slot ${slotIndex + 1}`,
-      onSuccess: () => {
-        const updatedImages = form.images.filter(
-          (img) => img.id !== imageToRemove.id
+    await imageUpload.removeSlot(variantId, slotIndex, {
+      onSuccess: (data) => {
+        const shiftedById = new Map(
+          (data?.shiftedImages ?? []).map((s) => [s.id, s.sort_order])
         );
-        update("images", updatedImages);
 
-        setProgressMap((prev) => {
-          const next = { ...prev };
-          delete next[slotKey];
-          return next;
-        });
+        const updatedImages = form.images
+          .filter(
+            (img) =>
+              !(img.variant_id === variantId && (img.sort_order ?? 0) === slotIndex)
+          )
+          .map((img) =>
+            shiftedById.has(img.id)
+              ? { ...img, sort_order: shiftedById.get(img.id) }
+              : img
+          );
+
+        update("images", updatedImages);
       },
     });
   };
-
-  // Track upload progress for current slot
-  useEffect(() => {
-    if (uploading && progress > 0) {
-      const slotKeys = Object.keys(progressMap);
-      if (slotKeys.length > 0) {
-        const currentSlot = slotKeys[0];
-        setProgressMap((prev) => ({
-          ...prev,
-          [currentSlot]: progress,
-        }));
-      }
-    }
-  }, [progress, uploading]);
 
   const handleSave = () => {
     onSave?.(form);
@@ -382,8 +339,9 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
                 images={form.images}
                 onUpload={handleUploadVariantImage}
                 onRemove={handleRemoveVariantImage}
-                uploading={uploading || removing}
-                progress={progressMap}
+                isUploading={imageUpload.isUploading}
+                isRemoving={imageUpload.isRemoving}
+                getProgress={imageUpload.getProgress}
               />
             </div>
           )}

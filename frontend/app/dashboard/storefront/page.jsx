@@ -10,7 +10,10 @@ import {
 import { PageHeader, Card, Button, Badge } from "@/components/ui";
 import { useApi } from "@/lib/hooks/useApi";
 import useAuthStore from "@/lib/store/useAuthStore";
-import { useStoreLogoUpload, useStoreBannerUpload } from "@/lib/hooks/useImageUpload";
+import {
+  useStoreLogoUpload,
+  useStoreBannerUpload,
+} from "@/lib/hooks/useImageUpload";
 import { storeService } from "@/lib/api/services";
 import { toast } from "@/lib/store/toastStore";
 import {
@@ -45,7 +48,15 @@ function Toggle({ checked, onChange }) {
 }
 
 // ── Logo/Banner upload row ──────────────────────────────────────────
-function ImageUploadRow({ label, hint, currentUrl, uploading, onUpload, onRemove, wide }) {
+function ImageUploadRow({
+  label,
+  hint,
+  currentUrl,
+  uploading,
+  onUpload,
+  onRemove,
+  wide,
+}) {
   const inputRef = useRef(null);
   return (
     <div className="flex items-center gap-4 py-4 border-b border-[var(--color-border)] last:border-0">
@@ -62,7 +73,9 @@ function ImageUploadRow({ label, hint, currentUrl, uploading, onUpload, onRemove
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-[var(--color-text-primary)]">{label}</p>
+        <p className="text-[13px] font-semibold text-[var(--color-text-primary)]">
+          {label}
+        </p>
         <p className="text-[12px] text-[var(--color-text-muted)]">{hint}</p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
@@ -83,7 +96,8 @@ function ImageUploadRow({ label, hint, currentUrl, uploading, onUpload, onRemove
           disabled={uploading}
           onClick={() => inputRef.current?.click()}
         >
-          <Upload size={13} /> {uploading ? "Uploading…" : currentUrl ? "Replace" : "Upload"}
+          <Upload size={13} />{" "}
+          {uploading ? "Uploading…" : currentUrl ? "Replace" : "Upload"}
         </Button>
         {currentUrl && (
           <button
@@ -101,6 +115,7 @@ function ImageUploadRow({ label, hint, currentUrl, uploading, onUpload, onRemove
 export default function StorefrontEditorPage() {
   const storeId = useAuthStore((s) => s.storeId);
   const { data: store, isLoading, mutate } = useApi("/stores/mine");
+  let storeData = store?.[0];
 
   const logoUpload = useStoreLogoUpload(storeId);
   const bannerUpload = useStoreBannerUpload(storeId);
@@ -116,8 +131,9 @@ export default function StorefrontEditorPage() {
   // a logo upload calls mutate()) never clobbers in-progress hero/tab edits.
   const initialized = useRef(false);
   useEffect(() => {
-    if (store && !initialized.current) {
-      const blocks = parseStoreConfigForEditing(store.config);
+    console.log(store);
+    if (storeData && !initialized.current) {
+      const blocks = parseStoreConfigForEditing(storeData.config);
       setHero(getBlockOrDefault(blocks, "hero"));
       setTabs(getBlockOrDefault(blocks, "productTabs"));
       initialized.current = true;
@@ -166,7 +182,10 @@ export default function StorefrontEditorPage() {
   if (isLoading || !hero || !tabs) {
     return (
       <div className="max-w-3xl">
-        <PageHeader title="Storefront" description="Customize your public storefront page" />
+        <PageHeader
+          title="Storefront"
+          description="Customize your public storefront page"
+        />
         <div className="animate-pulse space-y-4">
           <div className="h-40 bg-[var(--color-bg)] rounded-[var(--radius)]" />
           <div className="h-40 bg-[var(--color-bg)] rounded-[var(--radius)]" />
@@ -183,14 +202,19 @@ export default function StorefrontEditorPage() {
         action={
           <div className="flex items-center gap-2">
             {store[0]?.id && (
-              <a href={`/marketplace/stores/${store[0].id}`} target="_blank" rel="noopener noreferrer">
+              <a
+                href={`/marketplace/stores/${store[0].id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button variant="secondary" size="sm">
                   <ExternalLink size={13} /> View storefront
                 </Button>
               </a>
             )}
             <Button size="sm" onClick={handleSave} disabled={!dirty || saving}>
-              <Save size={13} /> {saving ? "Saving…" : dirty ? "Save changes" : "Saved"}
+              <Save size={13} />{" "}
+              {saving ? "Saving…" : dirty ? "Save changes" : "Saved"}
             </Button>
           </div>
         }
@@ -203,7 +227,8 @@ export default function StorefrontEditorPage() {
             Logo & Banner
           </h2>
           <p className="text-[12px] text-[var(--color-text-secondary)]">
-            Your banner also doubles as the hero image on your storefront page below.
+            Your banner also doubles as the hero image on your storefront page
+            below.
           </p>
         </div>
         <div className="px-4 md:px-5">
@@ -212,16 +237,24 @@ export default function StorefrontEditorPage() {
             hint="Square image, shown next to your store name"
             currentUrl={store[0]?.logo}
             uploading={logoUpload.uploading}
-            onUpload={(file) => logoUpload.uploadLogo(file, { onSuccess: () => mutate() })}
-            onRemove={() => logoUpload.removeLogo({ onSuccess: () => mutate() })}
+            onUpload={(file) =>
+              logoUpload.uploadLogo(file, { onSuccess: () => mutate() })
+            }
+            onRemove={() =>
+              logoUpload.removeLogo({ onSuccess: () => mutate() })
+            }
           />
           <ImageUploadRow
             label="Banner"
             hint="Wide image — also used as your hero section image"
             currentUrl={store[0]?.banner}
             uploading={bannerUpload.uploading}
-            onUpload={(file) => bannerUpload.uploadBanner(file, { onSuccess: () => mutate() })}
-            onRemove={() => bannerUpload.removeBanner({ onSuccess: () => mutate() })}
+            onUpload={(file) =>
+              bannerUpload.uploadBanner(file, { onSuccess: () => mutate() })
+            }
+            onRemove={() =>
+              bannerUpload.removeBanner({ onSuccess: () => mutate() })
+            }
             wide
           />
         </div>
@@ -230,11 +263,21 @@ export default function StorefrontEditorPage() {
       {/* Hero */}
       <Card className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[15px] font-bold text-[var(--color-text-primary)]">Hero Section</h2>
-          <Toggle checked={hero.enabled} onChange={(v) => updateHero({ enabled: v })} />
+          <h2 className="text-[15px] font-bold text-[var(--color-text-primary)]">
+            Hero Section
+          </h2>
+          <Toggle
+            checked={hero.enabled}
+            onChange={(v) => updateHero({ enabled: v })}
+          />
         </div>
 
-        <div className={cn("space-y-4", !hero.enabled && "opacity-40 pointer-events-none")}>
+        <div
+          className={cn(
+            "space-y-4",
+            !hero.enabled && "opacity-40 pointer-events-none"
+          )}
+        >
           <div>
             <label className="text-[12px] font-medium text-[var(--color-text-secondary)] block mb-1.5">
               Eyebrow text
@@ -334,11 +377,21 @@ export default function StorefrontEditorPage() {
       {/* Product Tabs */}
       <Card className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[15px] font-bold text-[var(--color-text-primary)]">Product Tabs</h2>
-          <Toggle checked={tabs.enabled} onChange={(v) => updateTabsBlock({ enabled: v })} />
+          <h2 className="text-[15px] font-bold text-[var(--color-text-primary)]">
+            Product Tabs
+          </h2>
+          <Toggle
+            checked={tabs.enabled}
+            onChange={(v) => updateTabsBlock({ enabled: v })}
+          />
         </div>
 
-        <div className={cn("space-y-3", !tabs.enabled && "opacity-40 pointer-events-none")}>
+        <div
+          className={cn(
+            "space-y-3",
+            !tabs.enabled && "opacity-40 pointer-events-none"
+          )}
+        >
           {tabs.tabs.map((tab, i) => (
             <div key={i} className="flex items-center gap-3">
               <input
