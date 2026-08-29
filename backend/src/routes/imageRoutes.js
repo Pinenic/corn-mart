@@ -3,6 +3,15 @@
 // Shows how to wire the imageMiddleware and imageController into
 // your existing route files. These snippets slot into the routes
 // you already have — they are not a standalone file to copy verbatim.
+//
+// NOTE ON MOUNTING productImageRoutes:
+// Previously this router represented the "/images" sub-path and was
+// mounted at:
+//   app.use("/api/v1/stores/:storeId/products/:productId/images", productImageRoutes)
+// It now represents the whole "/products/:productId" scope (because
+// slots live under /variants/:variantId/images/:slotIndex), so mount
+// it one level up instead:
+//   app.use("/api/v1/stores/:storeId/products/:productId", productImageRoutes)
 // ─────────────────────────────────────────────────────────────
 
 import express from "express";
@@ -12,7 +21,7 @@ import {
   updateProfileAvatar, deleteProfileAvatar,
   updateStoreLogo, deleteStoreLogo,
   updateStoreBanner, deleteStoreBanner,
-  addProductImages, deleteProductImage,
+  upsertVariantImageSlot, deleteVariantImageSlot,
 } from "../controllers/imageController.js";
 import { requireStoreAccess } from "../middleware/storeAccess.js";
 import { writeLimiter }       from "../middleware/rateLimit.js";
@@ -71,20 +80,23 @@ storeImageRoutes.delete(
 );
 
 // ── Product images (add to your existing product router) ──────
+// Mount at /api/v1/stores/:storeId/products/:productId — see note above.
 export const productImageRoutes = express.Router({ mergeParams: true });
 productImageRoutes.use(authenticate, requireStoreAccess);
 
-// POST /api/v1/stores/:storeId/products/:productId/images
-productImageRoutes.post(
-  "/",
+// PUT /api/v1/stores/:storeId/products/:productId/variants/:variantId/images/:slotIndex
+// Upserts a single image into slot 0/1/2 of a variant — creates if
+// the slot is empty, replaces in place (old file removed) if occupied.
+productImageRoutes.put(
+  "/variants/:variantId/images/:slotIndex",
   writeLimiter,
-  imageUpload.productImages(3),   // up to 3 files, field "images", 10MB each
-  addProductImages
+  imageUpload.productImageSlot(),   // single file, field "image", 10MB limit
+  upsertVariantImageSlot
 );
 
-// DELETE /api/v1/stores/:storeId/products/:productId/images/:imageId
+// DELETE /api/v1/stores/:storeId/products/:productId/variants/:variantId/images/:slotIndex
 productImageRoutes.delete(
-  "/:imageId",
+  "/variants/:variantId/images/:slotIndex",
   writeLimiter,
-  deleteProductImage
+  deleteVariantImageSlot
 );

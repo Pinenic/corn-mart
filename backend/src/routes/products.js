@@ -104,6 +104,6 @@ router.patch(
 
 // mounts:
 // /api/v1/stores/:storeId/products/:productId/images/*
-router.use("/:productId/images", productImageRoutes);
+router.use("/:productId", productImageRoutes);
 
 export default router;
