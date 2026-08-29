@@ -5,18 +5,13 @@
 // These are the three use-cases:
 //   1. User profile avatar
 //   2. Store logo + banner
-//   3. Product images
+//   3. Product images (slot-addressed by variant_id + sort_order)
 //
-// Each method shows the full pattern:
-//   - Get old URL from DB (for replace/delete)
-//   - Call imageManager
-//   - Persist the new URL to DB
-//   - Return the new URL in the response
 // ─────────────────────────────────────────────────────────────
 
-import { uploadOne, uploadMany, replaceOne,
-         deleteOne, deleteMany, deleteFolder,
-         SIZE_LIMITS }               from "../services/images/imageManager.js";
+import { uploadOne, replaceOne,
+  deleteOne, deleteMany }    from "../services/images/imageManager.js";
+import { SIZE_LIMITS }               from "../services/images/imageProcessor.js";
 import { supabaseAdmin }             from "../config/supabase.js";
 import response                      from "../utils/response.js";
 import asyncHandler                  from "../utils/asyncHandler.js";
@@ -28,308 +23,359 @@ import asyncHandler                  from "../utils/asyncHandler.js";
 // PATCH /api/v1/users/me/avatar
 // Replaces the user's avatar (or sets it for the first time).
 export const updateProfileAvatar = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+const userId = req.user.id;
 
-  if (!req.file) {
-    return response.badRequest(res, "No avatar file provided");
-  }
+if (!req.file) {
+return response.badRequest(res, "No avatar file provided");
+}
 
-  // Fetch the existing avatar URL so we can delete it after the upload
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("avatar_url")
-    .eq("id", userId)
-    .single();
+const { data: profile } = await supabaseAdmin
+.from("profiles")
+.select("avatar_url")
+.eq("id", userId)
+.single();
 
-  // Upload new → then delete old (replaceOne handles both atomically)
-  const { publicUrl } = await replaceOne(
-    req.file,
-    `profiles/${userId}`,           // folder: one sub-dir per user
-    profile?.avatar_url ?? null,    // old URL to delete (null = first upload)
-    { maxSize: SIZE_LIMITS.profile }
-  );
+const { publicUrl } = await replaceOne(
+req.file,
+`profiles/${userId}`,
+profile?.avatar_url ?? null,
+{ maxSize: SIZE_LIMITS.profile }
+);
 
-  // Persist to DB
-  await supabaseAdmin
-    .from("profiles")
-    .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
-    .eq("id", userId);
+await supabaseAdmin
+.from("profiles")
+.update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+.eq("id", userId);
 
-  return response.ok(res, { avatar_url: publicUrl });
+return response.ok(res, { avatar_url: publicUrl });
 });
 
 // DELETE /api/v1/users/me/avatar
 export const deleteProfileAvatar = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+const userId = req.user.id;
 
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("avatar_url")
-    .eq("id", userId)
-    .single();
+const { data: profile } = await supabaseAdmin
+.from("profiles")
+.select("avatar_url")
+.eq("id", userId)
+.single();
 
-  if (!profile?.avatar_url) {
-    return response.notFound(res, "No avatar to delete");
-  }
+if (!profile?.avatar_url) {
+return response.notFound(res, "No avatar to delete");
+}
 
-  await deleteOne(profile.avatar_url);
+await deleteOne(profile.avatar_url);
 
-  await supabaseAdmin
-    .from("profiles")
-    .update({ avatar_url: null, updated_at: new Date().toISOString() })
-    .eq("id", userId);
+await supabaseAdmin
+.from("profiles")
+.update({ avatar_url: null, updated_at: new Date().toISOString() })
+.eq("id", userId);
 
-  return response.noContent(res);
+return response.noContent(res);
 });
 
 // ─────────────────────────────────────────────────────────────
 // 2. STORE LOGO + BANNER
 // ─────────────────────────────────────────────────────────────
-// Both live in the same folder: stores/<storeId>/
-// We keep them in separate DB columns: stores.logo and stores.banner.
 
 // PATCH /api/v1/stores/:storeId/logo
 export const updateStoreLogo = asyncHandler(async (req, res) => {
-  const { storeId } = req.params;
+const { storeId } = req.params;
 
-  if (!req.file) {
-    return response.badRequest(res, "No logo file provided");
-  }
+if (!req.file) {
+return response.badRequest(res, "No logo file provided");
+}
 
-  // req.store is set by requireStoreAccess middleware — ownership already verified
-  const oldUrl = req.store.logo ?? null;
+const oldUrl = req.store.logo ?? null;
 
-  const { publicUrl } = await replaceOne(
-    req.file,
-    `stores/${storeId}`,      // folder shared between logo and banner
-    oldUrl,
-    { maxSize: SIZE_LIMITS.logo }
-  );
+const { publicUrl } = await replaceOne(
+req.file,
+`stores/${storeId}`,
+oldUrl,
+{ maxSize: SIZE_LIMITS.logo }
+);
 
-  await supabaseAdmin
-    .from("stores")
-    .update({ logo: publicUrl, updated_at: new Date().toISOString() })
-    .eq("id", storeId);
+await supabaseAdmin
+.from("stores")
+.update({ logo: publicUrl, updated_at: new Date().toISOString() })
+.eq("id", storeId);
 
-  return response.ok(res, { logo: publicUrl });
+return response.ok(res, { logo: publicUrl });
 });
 
 // DELETE /api/v1/stores/:storeId/logo
 export const deleteStoreLogo = asyncHandler(async (req, res) => {
-  const { storeId } = req.params;
+const { storeId } = req.params;
 
-  if (!req.store.logo) {
-    return response.notFound(res, "No logo to delete");
-  }
+if (!req.store.logo) {
+return response.notFound(res, "No logo to delete");
+}
 
-  await deleteOne(req.store.logo);
+await deleteOne(req.store.logo);
 
-  await supabaseAdmin
-    .from("stores")
-    .update({ logo: null, updated_at: new Date().toISOString() })
-    .eq("id", storeId);
+await supabaseAdmin
+.from("stores")
+.update({ logo: null, updated_at: new Date().toISOString() })
+.eq("id", storeId);
 
-  return response.noContent(res);
+return response.noContent(res);
 });
 
 // PATCH /api/v1/stores/:storeId/banner
 export const updateStoreBanner = asyncHandler(async (req, res) => {
-  const { storeId } = req.params;
+const { storeId } = req.params;
 
-  if (!req.file) {
-    return response.badRequest(res, "No banner file provided");
-  }
+if (!req.file) {
+return response.badRequest(res, "No banner file provided");
+}
 
-  const oldUrl = req.store.banner ?? null;
+const oldUrl = req.store.banner ?? null;
 
-  const { publicUrl } = await replaceOne(
-    req.file,
-    `stores/${storeId}`,
-    oldUrl,
-    { maxSize: SIZE_LIMITS.banner }
-  );
+const { publicUrl } = await replaceOne(
+req.file,
+`stores/${storeId}`,
+oldUrl,
+{ maxSize: SIZE_LIMITS.banner }
+);
 
-  await supabaseAdmin
-    .from("stores")
-    .update({ banner: publicUrl, updated_at: new Date().toISOString() })
-    .eq("id", storeId);
+await supabaseAdmin
+.from("stores")
+.update({ banner: publicUrl, updated_at: new Date().toISOString() })
+.eq("id", storeId);
 
-  return response.ok(res, { banner: publicUrl });
+return response.ok(res, { banner: publicUrl });
 });
 
 // DELETE /api/v1/stores/:storeId/banner
 export const deleteStoreBanner = asyncHandler(async (req, res) => {
-  const { storeId } = req.params;
+const { storeId } = req.params;
 
-  if (!req.store.banner) {
-    return response.notFound(res, "No banner to delete");
-  }
+if (!req.store.banner) {
+return response.notFound(res, "No banner to delete");
+}
 
-  await deleteOne(req.store.banner);
+await deleteOne(req.store.banner);
 
-  await supabaseAdmin
-    .from("stores")
-    .update({ banner: null, updated_at: new Date().toISOString() })
-    .eq("id", storeId);
+await supabaseAdmin
+.from("stores")
+.update({ banner: null, updated_at: new Date().toISOString() })
+.eq("id", storeId);
 
-  return response.noContent(res);
+return response.noContent(res);
 });
 
 // ─────────────────────────────────────────────────────────────
-// 3. PRODUCT IMAGES
+// 3. PRODUCT IMAGES — slot-addressed by (variant_id, sort_order)
+// ─────────────────────────────────────────────────────────────
+// sort_order is scoped PER VARIANT and doubles as the frontend's
+// slot index (0, 1, 2). Each (variant_id, sort_order) pair maps
+// to exactly one image. Uploading to an occupied slot replaces it
+// in place (same DB row id, new image_url, old storage file removed).
+//
+// Only variants[0]'s slot 0 can ever be the product's thumbnail.
+// "First variant" = the variant with the earliest created_at for
+// this product. If your schema orders variants differently
+// (e.g. a dedicated position/is_default column), swap that here.
 // ─────────────────────────────────────────────────────────────
 
-// POST /api/v1/stores/:storeId/products/:productId/images
-// Uploads 1–3 images and links them to the product's default variant.
-export const addProductImages = asyncHandler(async (req, res) => {
-  const { storeId, productId } = req.params;
-  const {variant_id} = req.body;
-  // console.log(variant_id);
+const MAX_IMAGE_SLOTS = 3;
 
-  const files = req.files ?? [];
-  if (files.length === 0) {
-    return response.badRequest(res, "At least one image file is required");
-  }
+async function getFirstVariantId(productId) {
+const { data } = await supabaseAdmin
+.from("product_variants")
+.select("id")
+.eq("product_id", productId)
+.order("created_at", { ascending: true })
+.limit(1)
+.maybeSingle();
+return data?.id ?? null;
+}
 
-  // Find the default variant created by the DB trigger on product insert
-  const { data: defaultVariant } = await supabaseAdmin
-    .from("product_variants")
-    .select("id")
-    .eq("product_id", productId)
-    .eq("id", variant_id)
-    .maybeSingle();
+// Closes the gap left by a deleted slot so a variant's remaining images
+// stay contiguous and ascending from 0. E.g. deleting slot 0 with images
+// still in slots 1 and 2 shifts them down to 0 and 1.
+// Returns the rows that were shifted: [{ id, sort_order }, ...] (new
+// sort_order values), in case a caller needs to sync client state.
+async function reindexVariantImageSlots(variantId, deletedSlotIndex) {
+const { data: laterImages } = await supabaseAdmin
+.from("product_images")
+.select("id, sort_order")
+.eq("variant_id", variantId)
+.gt("sort_order", deletedSlotIndex)
+.order("sort_order", { ascending: true });
 
-    // console.log(defaultVariant)
+if (!laterImages?.length) return [];
 
-  if (!defaultVariant) {
-    return response.unprocessable(
-      res,
-      "Variant not found — the product may still be initialising"
-    );
-  }
+const shifted = [];
+// Ascending order matters here: each target sort_order is only freed up
+// once the row that previously held it has already been moved down.
+for (const img of laterImages) {
+const newSortOrder = img.sort_order - 1;
+await supabaseAdmin
+.from("product_images")
+.update({ sort_order: newSortOrder })
+.eq("id", img.id);
+shifted.push({ id: img.id, sort_order: newSortOrder });
+}
 
-  // Enforce 3-image limit per variant
-  const { count: existing } = await supabaseAdmin
-    .from("product_images")
-    .select("id", { count: "exact", head: true })
-    .eq("variant_id", defaultVariant.id);
+return shifted;
+}
 
-  const available = 3 - (existing ?? 0);
-  if (available <= 0) {
-    return response.unprocessable(res, "This variant already has the maximum of 3 images");
-  }
+// PUT /api/v1/stores/:storeId/products/:productId/variants/:variantId/images/:slotIndex
+// Upserts the image for a single slot. Creates a new row if the slot
+// is empty, replaces image_url in place if it's occupied.
+export const upsertVariantImageSlot = asyncHandler(async (req, res) => {
+const { storeId, productId, variantId } = req.params;
+const slotIndex = Number(req.params.slotIndex);
 
-  const filesToUpload = files.slice(0, available);
+if (!req.file) {
+return response.badRequest(res, "No image file provided");
+}
+if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= MAX_IMAGE_SLOTS) {
+return response.badRequest(res, `slotIndex must be an integer between 0 and ${MAX_IMAGE_SLOTS - 1}`);
+}
 
-  // Upload all to storage
-  const uploaded = await uploadMany(
-    filesToUpload,
-    `stores/${storeId}/products/${productId}`,
-    { maxSize: SIZE_LIMITS.product, maxCount: 3 }
-  );
+const { data: variant } = await supabaseAdmin
+.from("product_variants")
+.select("id")
+.eq("id", variantId)
+.eq("product_id", productId)
+.maybeSingle();
 
-  // Determine sort_order starting position
-  const { data: lastImage } = await supabaseAdmin
-    .from("product_images")
-    .select("sort_order")
-    .eq("product_id", productId)
-    .order("sort_order", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+if (!variant) {
+return response.notFound(res, "Variant not found");
+}
 
-  const startOrder = (lastImage?.sort_order ?? -1) + 1;
+const folder = `stores/${storeId}/products/${productId}`;
 
-  // Insert rows into product_images
-  const rows = uploaded.map((u, i) => ({
-    product_id:   productId,
-    variant_id:   defaultVariant.id,
-    image_url:    u.publicUrl,
-    is_thumbnail: existing === 0 && i === 0,   // first ever image = thumbnail
-    sort_order:   startOrder + i,
-  }));
+const { data: existingImage } = await supabaseAdmin
+.from("product_images")
+.select("id, image_url, is_thumbnail")
+.eq("variant_id", variantId)
+.eq("sort_order", slotIndex)
+.maybeSingle();
 
-  const { data: images, error } = await supabaseAdmin
-    .from("product_images")
-    .insert(rows)
-    .select("id, image_url, is_thumbnail, sort_order, variant_id");
+let imageRow;
 
-  if (error) throw error;
+if (existingImage) {
+// Replace in place: new file uploaded first, old storage file removed after.
+const { publicUrl } = await replaceOne(
+req.file, folder, existingImage.image_url, { maxSize: SIZE_LIMITS.product }
+);
 
-  // Keep products.thumbnail_url in sync with the canonical thumbnail image
-  const thumbnail = rows.find(r => r.is_thumbnail);
-  if (thumbnail) {
-    await supabaseAdmin
-      .from("products")
-      .update({ thumbnail_url: thumbnail.image_url })
-      .eq("id", productId);
-  }
+const { data: updated, error } = await supabaseAdmin
+.from("product_images")
+.update({ image_url: publicUrl })
+.eq("id", existingImage.id)
+.select("id, image_url, is_thumbnail, sort_order, variant_id")
+.single();
+if (error) throw error;
+imageRow = updated;
 
-  return response.created(res, { images, variant_id: defaultVariant.id });
+if (imageRow.is_thumbnail) {
+await supabaseAdmin
+ .from("products")
+ .update({ thumbnail_url: publicUrl })
+ .eq("id", productId);
+}
+} else {
+const { publicUrl } = await uploadOne(req.file, folder, { maxSize: SIZE_LIMITS.product });
+
+const firstVariantId = await getFirstVariantId(productId);
+const isThumbnailSlot = variantId === firstVariantId && slotIndex === 0;
+
+const { data: inserted, error } = await supabaseAdmin
+.from("product_images")
+.insert({
+ product_id:   productId,
+ variant_id:   variantId,
+ image_url:    publicUrl,
+ sort_order:   slotIndex,
+ is_thumbnail: isThumbnailSlot,
+})
+.select("id, image_url, is_thumbnail, sort_order, variant_id")
+.single();
+if (error) throw error;
+imageRow = inserted;
+
+if (isThumbnailSlot) {
+await supabaseAdmin
+ .from("products")
+ .update({ thumbnail_url: publicUrl })
+ .eq("id", productId);
+}
+}
+
+return response.ok(res, { image: imageRow });
 });
 
-// DELETE /api/v1/stores/:storeId/products/:productId/images/:imageId
-export const deleteProductImage = asyncHandler(async (req, res) => {
-  const { productId, imageId } = req.params;
+// DELETE /api/v1/stores/:storeId/products/:productId/variants/:variantId/images/:slotIndex
+export const deleteVariantImageSlot = asyncHandler(async (req, res) => {
+const { productId, variantId } = req.params;
+const slotIndex = Number(req.params.slotIndex);
 
-  const { data: image } = await supabaseAdmin
-    .from("product_images")
-    .select("id, image_url, is_thumbnail, product:product_id(store_id)")
-    .eq("id", imageId)
-    .eq("product_id", productId)
-    .single();
+const { data: image } = await supabaseAdmin
+.from("product_images")
+.select("id, image_url, is_thumbnail")
+.eq("variant_id", variantId)
+.eq("sort_order", slotIndex)
+.maybeSingle();
 
-  if (!image || image.product?.store_id !== req.store.id) {
-    return response.notFound(res, "Image not found");
-  }
+if (!image) {
+return response.notFound(res, "No image in this slot");
+}
 
-  // Delete from storage
-  await deleteOne(image.image_url);
+await deleteOne(image.image_url);
+await supabaseAdmin.from("product_images").delete().eq("id", image.id);
 
-  // Hard-delete the DB row (images are not soft-deleted)
-  await supabaseAdmin.from("product_images").delete().eq("id", imageId);
+// Close the gap so remaining images in this variant stay 0..n contiguous.
+const shiftedImages = await reindexVariantImageSlots(variantId, slotIndex);
 
-  // If the deleted image was the thumbnail, promote the next image
-  if (image.is_thumbnail) {
-    const { data: next } = await supabaseAdmin
-      .from("product_images")
-      .select("id, image_url")
-      .eq("product_id", productId)
-      .order("sort_order", { ascending: true })
-      .limit(1)
-      .maybeSingle();
+if (image.is_thumbnail) {
+// Fall back to variants[0]'s slot 0, if it still exists — otherwise clear it.
+const firstVariantId = await getFirstVariantId(productId);
+let newThumbUrl = null;
 
-    if (next) {
-      await supabaseAdmin
-        .from("product_images")
-        .update({ is_thumbnail: true })
-        .eq("id", next.id);
-      await supabaseAdmin
-        .from("products")
-        .update({ thumbnail_url: next.image_url })
-        .eq("id", productId);
-    } else {
-      // No images left — clear thumbnail_url on the product
-      await supabaseAdmin
-        .from("products")
-        .update({ thumbnail_url: null })
-        .eq("id", productId);
-    }
-  }
+if (firstVariantId) {
+const { data: slot0 } = await supabaseAdmin
+ .from("product_images")
+ .select("id, image_url")
+ .eq("variant_id", firstVariantId)
+ .eq("sort_order", 0)
+ .maybeSingle();
 
-  return response.noContent(res);
+
+if (slot0) {
+ newThumbUrl = slot0.image_url;
+ await supabaseAdmin
+   .from("product_images")
+   .update({ is_thumbnail: true })
+   .eq("id", slot0.id);
+}
+}
+
+await supabaseAdmin
+.from("products")
+.update({ thumbnail_url: newThumbUrl })
+.eq("id", productId);
+}
+
+// 200 instead of 204 — the frontend needs shiftedImages to keep its
+// local slot assignments in sync with the reindex above.
+return response.ok(res, { deleted: true, shiftedImages });
 });
 
 // Called when an entire product is soft-deleted.
 // Hard-deletes all images from storage in one call.
 // Exported so productService.js can call it directly.
 export async function purgeProductImages(productId) {
-  const { data: images } = await supabaseAdmin
-    .from("product_images")
-    .select("image_url")
-    .eq("product_id", productId);
+const { data: images } = await supabaseAdmin
+.from("product_images")
+.select("image_url")
+.eq("product_id", productId);
 
-  if (images?.length) {
-    await deleteMany(images.map(i => i.image_url));
-    await supabaseAdmin.from("product_images").delete().eq("product_id", productId);
-  }
+if (images?.length) {
+await deleteMany(images.map(i => i.image_url));
+await supabaseAdmin.from("product_images").delete().eq("product_id", productId);
+}
 }

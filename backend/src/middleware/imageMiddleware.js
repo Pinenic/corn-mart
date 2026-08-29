@@ -18,8 +18,8 @@
 //   // Store: single banner
 //   router.patch("/:storeId/banner", imageUpload.banner(), storeController.updateBanner);
 //
-//   // Products: up to 3 images, field name "images"
-//   router.post("/:productId/images", imageUpload.productImages(), productController.addImage);
+//   // Product image slot: single file, field name "image"
+//   router.put("/:productId/variants/:variantId/images/:slotIndex", imageUpload.productImageSlot(), productController.upsertVariantImageSlot);
 // ─────────────────────────────────────────────────────────────
 
 import multer from "multer";
@@ -109,9 +109,9 @@ export const imageUpload = {
     makeUploader(SIZE_LIMITS.banner).single("banner")
   ),
 
-  // Up to 3 product images — field: "images"
-  productImages: (maxCount = 3) => withMulterErrors(
-    makeUploader(SIZE_LIMITS.product).array("images", maxCount)
+  // Single product image, targeting one variant slot — field: "image"
+  productImageSlot: () => withMulterErrors(
+    makeUploader(SIZE_LIMITS.product).single("image")
   ),
 
   // Generic single-file upload with a custom field name
