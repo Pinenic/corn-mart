@@ -29,7 +29,7 @@ export function StoreDetailClient({ storeId }) {
     return (
       <div>
         <Skeleton className="h-40 md:h-56 rounded-none" />
-        <div className="max-w-5xl mx-auto px-4 md:px-6 pt-4 pb-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-10 grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[var(--color-border)]">
               <Skeleton className="aspect-square" />
@@ -59,7 +59,7 @@ export function StoreDetailClient({ storeId }) {
     <div>
       <StorefrontHeader store={store} />
 
-      <div className="max-w-5xl mx-auto px-4 md:px-6 pb-12">
+      <div className="max-w-7xl mx-auto px-1 md:px-6 pb-12">
         <StorefrontRenderer store={store} blocks={blocks} />
 
         <div className="flex items-center justify-between mb-5">
