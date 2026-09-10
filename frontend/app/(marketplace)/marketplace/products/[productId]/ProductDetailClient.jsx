@@ -18,6 +18,7 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { ProductPreviewModal } from "@/components/products/ProductPreviewModal";
 import { Button, Badge, Skeleton } from "@/components/ui";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useWishlistStore } from "@/lib/store/wishlistStore";
 import { toast } from "@/lib/store/toastStore";
 import { formatPrice, truncate, cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -48,10 +49,15 @@ export function ProductDetailClient({ productId }) {
 
   const [selectedVariant, setVariant] = useState(null);
   const [qty, setQty] = useState(1);
-  const [wishlisted, setWishlisted] = useState(false);
   const [preview, setPreview] = useState(null);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
+  // Wishlist stays product-level (no variant) everywhere in the app —
+  // matches the schema decision: you can wishlist a product without
+  // committing to a specific variant, regardless of which one happens
+  // to be selected on this page when you click it.
+  const wishlisted = useWishlistStore((s) => s.isWishlisted(product?.id));
+  const toggleWishlist = useWishlistStore((s) => s.toggle);
 
   const related = useRelatedProducts(product);
 
@@ -276,7 +282,7 @@ export function ProductDetailClient({ productId }) {
 
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => setWishlisted((v) => !v)}
+              onClick={() => toggleWishlist(product, null)}
               className={cn(
                 "h-11 rounded-[var(--radius-sm)] border text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors",
                 wishlisted

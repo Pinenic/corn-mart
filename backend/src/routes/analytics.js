@@ -1,11 +1,11 @@
 // src/routes/analytics.js
 import express from "express";
-import analyticsController    from "../controllers/analyticsController.js";
-import { authenticate }       from "../middleware/auth.js";
+import analyticsController from "../controllers/analyticsController.js";
+import { authenticate } from "../middleware/auth.js";
 import { requireStoreAccess } from "../middleware/storeAccess.js";
-import { validateQuery }      from "../middleware/validate.js";
-import { schemas }            from "../middleware/validate.js";
-import { analyticsLimiter }   from "../middleware/rateLimit.js";
+import { validateQuery } from "../middleware/validate.js";
+import { schemas } from "../middleware/validate.js";
+import { analyticsLimiter } from "../middleware/rateLimit.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -15,21 +15,74 @@ router.use(authenticate, requireStoreAccess);
 const withQuery = validateQuery(schemas.analyticsQuery);
 
 // GET /api/v1/stores/:storeId/analytics/overview
-router.get("/overview",          analyticsLimiter, withQuery, analyticsController.overview);
+router.get(
+  "/overview",
+  analyticsLimiter,
+  withQuery,
+  analyticsController.overview
+);
 
 // GET /api/v1/stores/:storeId/analytics/revenue
-router.get("/revenue",           analyticsLimiter, withQuery, analyticsController.revenue);
+router.get(
+  "/revenue",
+  analyticsLimiter,
+  withQuery,
+  analyticsController.revenue
+);
 
 // GET /api/v1/stores/:storeId/analytics/orders-by-status
-router.get("/orders-by-status",  analyticsLimiter,            analyticsController.ordersByStatus);
+router.get(
+  "/orders-by-status",
+  analyticsLimiter,
+  analyticsController.ordersByStatus
+);
 
 // GET /api/v1/stores/:storeId/analytics/products
-router.get("/products",          analyticsLimiter, withQuery, analyticsController.products);
+router.get(
+  "/products",
+  analyticsLimiter,
+  withQuery,
+  analyticsController.products
+);
 
 // GET /api/v1/stores/:storeId/analytics/followers
-router.get("/followers",         analyticsLimiter, withQuery, analyticsController.followers);
+router.get(
+  "/followers",
+  analyticsLimiter,
+  withQuery,
+  analyticsController.followers
+);
 
 // GET /api/v1/stores/:storeId/analytics/categories
-router.get("/categories",        analyticsLimiter, withQuery, analyticsController.categories);
+router.get(
+  "/categories",
+  analyticsLimiter,
+  withQuery,
+  analyticsController.categories
+);
+
+// GET /api/v1/stores/:storeId/analytics/products
+router.get(
+  "/sales",
+  analyticsLimiter,
+  withQuery,
+  analyticsController.salesSeries
+);
+
+// GET /api/v1/stores/:storeId/analytics/followers
+router.get(
+  "/recent-orders",
+  analyticsLimiter,
+  withQuery,
+  analyticsController.recentOrders
+);
+
+// GET /api/v1/stores/:storeId/analytics/categories
+router.get(
+  "/activity",
+  analyticsLimiter,
+  withQuery,
+  analyticsController.activityFeed
+);
 
 export default router;

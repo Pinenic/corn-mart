@@ -65,7 +65,7 @@ function Pagination({ page, totalPages, onChange }) {
             className={cn(
               "w-9 h-9 rounded-[var(--radius-sm)] text-[13px] font-medium transition-colors",
               p === page
-                ? "bg-[var(--color-primary)] text-white"
+                ? "bg-transparent text-primary border border-gold"
                 : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)]"
             )}
           >
@@ -266,7 +266,7 @@ export function ProductsTab() {
 
           {/* Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-4 gap-4">
               {Array.from({ length: 12 }).map((_, i) => (
                 <div key={i} className="bg-[var(--color-bg)] rounded-[var(--radius)] overflow-hidden">
                   <Skeleton className="aspect-square" />
@@ -300,7 +300,7 @@ export function ProductsTab() {
           ) : (
             <div
               className={cn(
-                "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 gap-4 transition-opacity",
+                "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 transition-opacity",
                 isRefreshing && "opacity-60"
               )}
             >

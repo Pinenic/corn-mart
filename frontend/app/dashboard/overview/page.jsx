@@ -74,16 +74,18 @@ export default function OverviewPage() {
           label: "Avg. order value",
           value: `K${kpiData.aov?.current ?? 0}`,
           change: `K${Math.abs(
-            (kpiData.aov?.current ?? 0) - (kpiData.aov?.previous ?? 0)
+            (kpiData.aov?.change_pct ?? 0)
           )} vs last period`,
           changeType: (kpiData.aov?.change_pct ?? 0) >= 0 ? "up" : "down",
           icon: TrendingUp,
         },
         {
           label: "Conversion rate",
-          value: "3.8%",
-          change: "Live data coming soon",
-          changeType: "up",
+          value: `K${kpiData.followers?.current ?? 0}`,
+          change: `K${Math.abs(
+            (kpiData.followers?.change_pct ?? 0)
+          )} vs last period`,
+          changeType: (kpiData.followers?.change_pct ?? 0) >= 0 ? "up" : "down",
           icon: Users,
         },
       ]

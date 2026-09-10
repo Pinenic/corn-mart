@@ -30,7 +30,7 @@ export function DashboardShell({ children }) {
     <DrawerProvider>
       <div
         className="flex h-screen overflow-hidden"
-        style={{ background: "var(--color-bg)" }}
+        style={{ background: "whites" }}
       >
         {/* Desktop/Tablet Sidebar */}
         <Sidebar count={count}/>
@@ -41,8 +41,8 @@ export function DashboardShell({ children }) {
           <Header />
 
           {/* Scrollable page area */}
-          <main className="flex-1 overflow-y-auto">
-            <div className="max-w-6xl mx-auto px-4 md:px-6 py-5 md:py-6">
+          <main className="flex-1 overflow-y-auto bg-white">
+            <div className="mx-auto px-4 md:px-6 py-5 md:py-6">
               {children}
             </div>
           </main>

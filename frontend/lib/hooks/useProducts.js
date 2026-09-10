@@ -12,7 +12,7 @@ import useAuthStore from "@/lib/store/useAuthStore";
 export function useProducts(filters = {}) {
   const storeId = useAuthStore((s) => s.storeId);
   const path = storeId ? `/stores/${storeId}/products` : null;
-  console.log("firing...");
+  // console.log("firing...");
 
   // Filter out undefined values to avoid sending them as query params
   const params = {

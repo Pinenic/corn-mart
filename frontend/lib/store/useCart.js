@@ -33,7 +33,7 @@ export const useCart = create(
 
     count: () => {
       const itemsCount = get().items.reduce(
-        (count, item) => count + item.quantity,
+        (count, item) => count + item,
         0
       );
       return itemsCount;

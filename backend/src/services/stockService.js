@@ -10,20 +10,22 @@ const ENTRY_FIELDS = `
 `.trim();
 
 const stockService = {
-
   // ── List entries ──────────────────────────────────────────────
-  async list(storeId, { page, limit, productId, dateFrom, dateTo, search, status }) {
+  async list(
+    storeId,
+    { page, limit, productId, dateFrom, dateTo, search, status }
+  ) {
     let query = supabaseAdmin
       .from("stock_entries")
       .select(ENTRY_FIELDS, { count: "exact" })
       .eq("store_id", storeId);
 
-    if (productId)  query = query.eq("product_id", productId);
-    if (dateFrom)   query = query.gte("entry_date", dateFrom);
-    if (dateTo)     query = query.lte("entry_date", dateTo);
+    if (productId) query = query.eq("product_id", productId);
+    if (dateFrom) query = query.gte("entry_date", dateFrom);
+    if (dateTo) query = query.lte("entry_date", dateTo);
 
     // status filter: only listed products, only pending, or all (default)
-    if (status === "listed")  query = query.not("product_id", "is", null);
+    if (status === "listed") query = query.not("product_id", "is", null);
     if (status === "pending") query = query.is("product_id", null);
 
     if (search?.trim()) {
@@ -64,7 +66,9 @@ const stockService = {
     const isPending = !payload.product_id;
 
     if (isPending && !payload.pending_product_name?.trim()) {
-      const err = new Error("pending_product_name is required when product_id is not provided");
+      const err = new Error(
+        "pending_product_name is required when product_id is not provided"
+      );
       err.statusCode = 422;
       err.code = "MISSING_PRODUCT_REFERENCE";
       throw err;
@@ -79,7 +83,9 @@ const stockService = {
         .single();
 
       if (!variant || variant.product_id !== payload.product_id) {
-        const err = new Error("variant_id does not belong to the given product_id");
+        const err = new Error(
+          "variant_id does not belong to the given product_id"
+        );
         err.statusCode = 422;
         err.code = "INVALID_VARIANT";
         throw err;
@@ -89,19 +95,19 @@ const stockService = {
     const { data, error } = await supabaseAdmin
       .from("stock_entries")
       .insert({
-        store_id:             storeId,
-        product_id:           payload.product_id           ?? null,
+        store_id: storeId,
+        product_id: payload.product_id ?? null,
         pending_product_name: isPending
-                                ? payload.pending_product_name.trim()
-                                : null,
-        variant_id:           payload.variant_id            ?? null,
-        supplier:             payload.supplier?.trim()      ?? null,
-        quantity:             payload.quantity,
-        unit_cost:            payload.unit_cost,
-        total_cost:           payload.total_cost,
-        entry_date:           payload.entry_date,
-        notes:                payload.notes?.trim()         ?? null,
-        is_adjustment:        payload.is_adjustment          ?? false,
+          ? payload.pending_product_name.trim()
+          : null,
+        variant_id: payload.variant_id ?? null,
+        supplier: payload.supplier?.trim() ?? null,
+        quantity: payload.quantity,
+        unit_cost: payload.unit_cost,
+        total_cost: payload.total_cost,
+        entry_date: payload.entry_date,
+        notes: payload.notes?.trim() ?? null,
+        is_adjustment: payload.is_adjustment ?? false,
       })
       .select(ENTRY_FIELDS)
       .single();
@@ -114,7 +120,7 @@ const stockService = {
     if (!payload.is_adjustment && payload.product_id && payload.variant_id) {
       await supabaseAdmin.rpc("increment_variant_stock", {
         p_variant_id: payload.variant_id,
-        p_amount:     payload.quantity,
+        p_amount: payload.quantity,
       });
     }
 
@@ -125,7 +131,9 @@ const stockService = {
   async update(storeId, entryId, payload) {
     const { data: existing } = await supabaseAdmin
       .from("stock_entries")
-      .select("id, product_id, pending_product_name, variant_id, quantity, is_adjustment")
+      .select(
+        "id, product_id, pending_product_name, variant_id, quantity, is_adjustment"
+      )
       .eq("id", entryId)
       .eq("store_id", storeId)
       .single();
@@ -134,21 +142,27 @@ const stockService = {
 
     // Determine the resulting state after this partial update is applied,
     // to enforce the same XOR rule the DB check constraint enforces.
-    const nextProductId = payload.product_id !== undefined
-      ? payload.product_id
-      : existing.product_id;
-    const nextPendingName = payload.pending_product_name !== undefined
-      ? payload.pending_product_name
-      : existing.pending_product_name;
+    const nextProductId =
+      payload.product_id !== undefined
+        ? payload.product_id
+        : existing.product_id;
+    const nextPendingName =
+      payload.pending_product_name !== undefined
+        ? payload.pending_product_name
+        : existing.pending_product_name;
 
     if (!nextProductId && !nextPendingName?.trim()) {
-      const err = new Error("Entry must have either product_id or pending_product_name");
+      const err = new Error(
+        "Entry must have either product_id or pending_product_name"
+      );
       err.statusCode = 422;
       err.code = "MISSING_PRODUCT_REFERENCE";
       throw err;
     }
     if (nextProductId && nextPendingName) {
-      const err = new Error("Entry cannot have both product_id and pending_product_name — clear one");
+      const err = new Error(
+        "Entry cannot have both product_id and pending_product_name — clear one"
+      );
       err.statusCode = 422;
       err.code = "AMBIGUOUS_PRODUCT_REFERENCE";
       throw err;
@@ -158,9 +172,16 @@ const stockService = {
     // and variant_id must be cleared too (matches DB constraint).
     const update = {};
     const allowed = [
-      "product_id", "pending_product_name", "supplier",
-      "quantity", "unit_cost", "total_cost",
-      "entry_date", "notes", "is_adjustment", "variant_id",
+      "product_id",
+      "pending_product_name",
+      "supplier",
+      "quantity",
+      "unit_cost",
+      "total_cost",
+      "entry_date",
+      "notes",
+      "is_adjustment",
+      "variant_id",
     ];
     for (const key of allowed) {
       if (payload[key] !== undefined) update[key] = payload[key];
@@ -188,12 +209,12 @@ const stockService = {
 
     // If this update just linked a pending entry to a real variant for
     // the first time, sync the stock increment now.
-    const wasPending  = !existing.product_id;
-    const nowLinked   = Boolean(data.product_id && data.variant_id);
+    const wasPending = !existing.product_id;
+    const nowLinked = Boolean(data.product_id && data.variant_id);
     if (wasPending && nowLinked && !data.is_adjustment) {
       await supabaseAdmin.rpc("increment_variant_stock", {
         p_variant_id: data.variant_id,
-        p_amount:     data.quantity,
+        p_amount: data.quantity,
       });
     }
 
@@ -228,7 +249,10 @@ const stockService = {
   // Typical flow: seller logged 3 purchases of "Air Max 97 (incoming)"
   // before listing it. Once they create the real product, call this
   // to retroactively link all 3 entries and credit the stock.
-  async linkPendingEntries(storeId, { pendingProductName, productId, variantId }) {
+  async linkPendingEntries(
+    storeId,
+    { pendingProductName, productId, variantId }
+  ) {
     const { data: matches, error: fetchErr } = await supabaseAdmin
       .from("stock_entries")
       .select("id, quantity, is_adjustment")
@@ -250,22 +274,24 @@ const stockService = {
         .single();
 
       if (!variant || variant.product_id !== productId) {
-        const err = new Error("variant_id does not belong to the given product_id");
+        const err = new Error(
+          "variant_id does not belong to the given product_id"
+        );
         err.statusCode = 422;
         err.code = "INVALID_VARIANT";
         throw err;
       }
     }
 
-    const ids = matches.map(m => m.id);
+    const ids = matches.map((m) => m.id);
 
     const { error: updateErr } = await supabaseAdmin
       .from("stock_entries")
       .update({
-        product_id:           productId,
-        variant_id:           variantId ?? null,
+        product_id: productId,
+        variant_id: variantId ?? null,
         pending_product_name: null,
-        updated_at:           new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .in("id", ids);
 
@@ -275,13 +301,13 @@ const stockService = {
     let stockAdded = 0;
     if (variantId) {
       const totalQty = matches
-        .filter(m => !m.is_adjustment)
+        .filter((m) => !m.is_adjustment)
         .reduce((sum, m) => sum + m.quantity, 0);
 
       if (totalQty !== 0) {
         await supabaseAdmin.rpc("increment_variant_stock", {
           p_variant_id: variantId,
-          p_amount:     totalQty,
+          p_amount: totalQty,
         });
         stockAdded = totalQty;
       }
@@ -300,7 +326,7 @@ const stockService = {
       .eq("is_adjustment", false);
 
     if (dateFrom) query = query.gte("entry_date", dateFrom);
-    if (dateTo)   query = query.lte("entry_date", dateTo);
+    if (dateTo) query = query.lte("entry_date", dateTo);
 
     const { data, error } = await query;
     if (error) throw error;
@@ -308,15 +334,15 @@ const stockService = {
     const rows = data ?? [];
 
     return {
-      totalUnits:    rows.reduce((s, e) => s + e.quantity, 0),
-      totalSpend:    rows.reduce((s, e) => s + Number(e.total_cost), 0),
-      entryCount:    rows.length,
+      totalUnits: rows.reduce((s, e) => s + e.quantity, 0),
+      totalSpend: rows.reduce((s, e) => s + Number(e.total_cost), 0),
+      entryCount: rows.length,
       // New: surfaces how much is tied up in not-yet-listed products,
       // useful as a "pending inventory value" indicator.
-      pendingCount:  rows.filter(e => !e.product_id).length,
-      pendingSpend:  rows
-                       .filter(e => !e.product_id)
-                       .reduce((s, e) => s + Number(e.total_cost), 0),
+      pendingCount: rows.filter((e) => !e.product_id).length,
+      pendingSpend: rows
+        .filter((e) => !e.product_id)
+        .reduce((s, e) => s + Number(e.total_cost), 0),
     };
   },
 };

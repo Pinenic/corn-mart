@@ -105,6 +105,10 @@ const useAuthStore = create((set, get) => ({
 
       const cartMod = await getPeerStore(() => import("@/lib/store/cartStore"));
 
+      const wishlistMod = await getPeerStore(() =>
+        import("@/lib/store/wishlistStore")
+      );
+
       const storeMod = await getPeerStore(() => import("@/lib/store/useStore"));
 
       await profileMod?.useProfile?.getState()?.fetchProfile?.(userId);
@@ -112,6 +116,8 @@ const useAuthStore = create((set, get) => ({
       // then falls through to getCart(). If there are no guest items
       // it's equivalent to a plain getCart() call.
       await cartMod?.useCartStore?.getState()?.syncGuestCart?.(userId);
+      // Wishlist has no guest mode — plain fetch.
+      await wishlistMod?.useWishlistStore?.getState()?.getWishlist?.(userId);
       await storeMod?.useStoreStore?.getState()?.fetchStore?.(userId);
     } catch (err) {
       console.warn(
@@ -160,6 +166,9 @@ const useAuthStore = create((set, get) => ({
       // Use the correct module path for cartStore (not the old useCart path)
       import("@/lib/store/cartStore")
         .then((m) => m?.useCartStore?.getState()?.resetCart?.())
+        .catch(() => {});
+      import("@/lib/store/wishlistStore")
+        .then((m) => m?.useWishlistStore?.getState()?.resetWishlist?.())
         .catch(() => {});
       getPeerStore("@/lib/stores/useStore")
         ?.useStoreStore?.getState()

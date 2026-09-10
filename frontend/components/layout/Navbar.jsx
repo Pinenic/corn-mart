@@ -12,8 +12,10 @@ import {
   Package,
   LogOut,
   ChevronDown,
+  Heart,
 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useWishlistStore } from "@/lib/store/wishlistStore";
 import useAuthStore from "@/lib/store/useAuthStore";
 import { useNotifications } from "@/lib/hooks/useNotifications";
 import { useBuyerUnreadCount } from "@/lib/hooks/useBuyerMessages";
@@ -44,7 +46,8 @@ export function Navbar() {
   const toggleCart = useCartStore((s) => s.toggleCart);
   // s.count() is a function-on-state getter — calling it inside the
   // selector makes Zustand re-render the navbar whenever items change.
-  const cartCount  = useCartStore((s) => s.count());
+  const cartCount = useCartStore((s) => s.count());
+  const wishlistCount = useWishlistStore((s) => s.items.length);
   const { unread: unreadNotifs } = useNotifications();
   const { user, storeId, isAuthenticated, signOut } = useAuthStore();
   const { profile } = useProfile();
@@ -71,11 +74,18 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-[var(--color-border)] h-16 flex items-center">
-        <div className="mx-auto w-full px-4 md:px-6 flex items-center gap-3 md:gap-5">
+        <div className="max-w-7xl mx-auto w-full px-4 md:px-6 flex items-center gap-3 md:gap-5">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="w-16 h-16 rounded-xl flex items-center justify-center">
-              <Image src={"/icon0.svg"} width={800} height={800} size={16} className="text-white" />
+              <Image
+                src={"/icon0.svg"}
+                alt="logo"
+                width={800}
+                height={800}
+                size={16}
+                className="text-white"
+              />
             </div>
             {/* <span className="text-[16px] font-bold text-[var(--color-text-primary)] lowercase hidden sm:block">
               corn mart
@@ -143,7 +153,7 @@ export function Navbar() {
             >
               <ShoppingCart size={18} />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white text-[9px] font-bold flex items-center justify-center">
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[var(--color-gold)] text-white text-[9px] font-bold flex items-center justify-center">
                   {cartCount > 9 ? "9+" : cartCount}
                 </span>
               )}
@@ -156,9 +166,6 @@ export function Navbar() {
                   onClick={() => setUser((v) => !v)}
                   className="flex items-center gap-1.5 h-9 px-2 rounded-full hover:bg-[var(--color-bg)] transition-colors text-[var(--color-text-secondary)]"
                 >
-                  {(count > 0 || buyerUnreadCount > 0) && (
-                    <span className="ml-auto w-2 h-2 rounded-full bg-red-500"></span>
-                  )}
                   {profile.avatar_url ? (
                     <img
                       src={profile?.avatar_url}
@@ -170,8 +177,13 @@ export function Navbar() {
                       {user?.email?.[0]?.toUpperCase() ?? "U"}
                     </div>
                   )}
+                  <span className="flex flex-col justify-between items-center h-full py-[2px] pt-[4px]">
+                    {(count > 0 || buyerUnreadCount > 0) && (
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                    )}
 
-                  <ChevronDown size={13} />
+                    <ChevronDown size={13} />
+                  </span>
                 </button>
                 {userMenuOpen && (
                   <>
@@ -187,6 +199,7 @@ export function Navbar() {
                           label: "Notifications",
                         },
                         { href: "/orders", Icon: Package, label: "My Orders" },
+                        { href: "/wishlist", Icon: Heart, label: "Wishlist" },
                         {
                           href: "/account/messages",
                           Icon: MessageSquare,

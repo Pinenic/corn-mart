@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
 import { ShoppingCart, Eye, Heart, Star } from "lucide-react";
 import { cn, formatPrice, truncate } from "@/lib/utils";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useWishlistStore } from "@/lib/store/wishlistStore";
 import { toast } from "@/lib/store/toastStore";
 import { Badge } from "@/components/ui";
 
@@ -26,7 +26,8 @@ function deriveSurfaces(theme) {
 }
 
 export function ProductCard({ product, onQuickView }) {
-  const [wishlisted, setWishlisted] = useState(false);
+  const wishlisted = useWishlistStore((s) => s.isWishlisted(product.id));
+  const toggleWishlist = useWishlistStore((s) => s.toggle);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
@@ -73,11 +74,11 @@ export function ProductCard({ product, onQuickView }) {
         )}
       </Link>
 
-      {/* Wishlist — static top-right, cosmetic only (not persisted) */}
+      {/* Wishlist — static top-right, wired to the real wishlist store */}
       <button
         onClick={(e) => {
           e.preventDefault();
-          setWishlisted((v) => !v);
+          toggleWishlist(product, null);
         }}
         aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
         className={cn(

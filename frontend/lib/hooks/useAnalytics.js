@@ -65,3 +65,37 @@ export function useCategoryBreakdown({ period, dateFrom, dateTo } = {}) {
 
   return useApi(path, analyticsParams(period, dateFrom, dateTo));
 }
+
+// ── Total Sales time series (sparkline) ─────────────────────────
+// NEW — matches analyticsService.getSalesSeries. This route
+// (/analytics/sales) needs registering on the backend router; it
+// doesn't exist in the current routes yet.
+// Returns array of { date, sales }
+export function useSalesSeries({ period, dateFrom, dateTo } = {}) {
+  const storeId = useAuthStore((s) => s.storeId);
+  const path = storeId ? `/stores/${storeId}/analytics/sales` : null;
+
+  return useApi(path, analyticsParams(period, dateFrom, dateTo));
+}
+
+// ── Recent orders ────────────────────────────────────────────────
+// NEW — matches analyticsService.getRecentOrders. This route
+// (/analytics/recent-orders) needs registering on the backend router.
+// Returns array of { id, order_number, customer_name, amount, status, created_at }
+export function useRecentOrders({ limit = 5 } = {}) {
+  const storeId = useAuthStore((s) => s.storeId);
+  const path = storeId ? `/stores/${storeId}/analytics/recent-orders` : null;
+
+  return useApi(path, { limit });
+}
+
+// ── Activity feed ────────────────────────────────────────────────
+// NEW — matches analyticsService.getActivityFeed. This route
+// (/analytics/activity) needs registering on the backend router.
+// Returns { events: [...], stock_alerts: [...] }
+export function useActivityFeed({ limit = 8 } = {}) {
+  const storeId = useAuthStore((s) => s.storeId);
+  const path = storeId ? `/stores/${storeId}/analytics/activity` : null;
+
+  return useApi(path, { limit });
+}

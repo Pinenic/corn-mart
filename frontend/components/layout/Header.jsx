@@ -31,7 +31,7 @@ export function Header() {
 
   return (
     <header
-      className="flex items-center gap-3 px-4 md:px-5 bg-white border-b border-black/7 flex-shrink-0 z-10"
+      className="flex items-center gap-3 px-4 md:px-5 bg-white border-black/7 flex-shrink-0 z-10"
       style={{ height: "var(--header-height)" }}
     >
       {/* Mobile hamburger */}
