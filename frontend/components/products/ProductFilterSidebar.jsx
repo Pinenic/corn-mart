@@ -46,7 +46,7 @@ export function ProductFilterSidebar({
   hasFilters,
 }) {
   return (
-    <div>
+    <div className=" sticky top-20 z-20 ">
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-[16px] font-bold text-[var(--color-text-primary)]">
           Filters

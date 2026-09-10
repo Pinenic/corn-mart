@@ -106,7 +106,8 @@ export const useCartStore = create(
       // Total number of units across all line items.
       // (items.length would only count distinct lines.)
       count() {
-        return get().items.reduce((sum, i) => sum + i.quantity, 0);
+        return get().items.length;
+        // return get().items.reduce((sum, i) => sum + i.quantity, 0);
       },
 
       subtotal() {

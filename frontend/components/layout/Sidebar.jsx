@@ -23,7 +23,7 @@ export function Sidebar({count}) {
     >
       {/* Logo */}
       <div
-        className="flex items-center gap-2.5 px-4 flex-shrink-0 border-b border-black/7"
+        className="flex items-center gap-2.5 px-4 flex-shrink-0 border-black/7"
         style={{ height: "var(--header-height)" }}
       >
         <div

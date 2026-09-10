@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { ShoppingCart, Mail, MapPin, Phone } from "lucide-react";
+import Image from "next/image";
 
 const SHOP_LINKS = [
   { href: "/marketplace", label: "Marketplace" },
@@ -12,8 +13,8 @@ const SHOP_LINKS = [
 const COMPANY_LINKS = [
   { href: "/onboarding", label: "Start Selling" },
   { href: "#", label: "About Us" },
-//   { href: "/help", label: "Help Center" },
-//   { href: "/contact", label: "Contact Us" },
+  //   { href: "/help", label: "Help Center" },
+  //   { href: "/contact", label: "Contact Us" },
 ];
 
 const LEGAL_LINKS = [
@@ -74,13 +75,21 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Logo + description */}
           <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center">
-                <ShoppingCart size={16} className="text-[var(--color-primary)]" />
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center">
+                <Image
+                  src={"/icon0.svg"}
+                  alt="logo"
+                  width={800}
+                  height={800}
+                  size={16}
+                  className="text-white"
+                />
               </div>
-              <span className="text-[16px] font-bold text-white lowercase">
-                corn mart
-              </span>
+              {/* <span className="text-[16px] font-bold text-[var(--color-text-primary)] lowercase hidden sm:block">
+              corn mart
+            </span> */}
             </Link>
             <p className="text-[13px] text-white/60 leading-relaxed max-w-xs mb-5">
               A local marketplace connecting buyers with trusted stores.
@@ -94,7 +103,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-7 h-7 rounded-full flex items-center justify-center bg-white text-[#0a0a0a] hover:bg-white/80 transition-colors"
+                  className="w-7 h-7 rounded-full flex items-center justify-center bg-gold-text text-white hover:bg-gold/80 transition-colors"
                 >
                   <Icon size={12} />
                 </a>
@@ -104,9 +113,7 @@ export function Footer() {
 
           {/* Shop links */}
           <div>
-            <h3 className="text-[13px] font-semibold text-white mb-4">
-              Shop
-            </h3>
+            <h3 className="text-[13px] font-semibold text-gold mb-4">Shop</h3>
             <ul className="space-y-2.5">
               {SHOP_LINKS.map(({ href, label }) => (
                 <li key={href}>
@@ -123,7 +130,7 @@ export function Footer() {
 
           {/* Company links */}
           <div>
-            <h3 className="text-[13px] font-semibold text-white mb-4">
+            <h3 className="text-[13px] font-semibold text-gold mb-4">
               Company
             </h3>
             <ul className="space-y-2.5">
@@ -142,7 +149,7 @@ export function Footer() {
 
           {/* Contact / legal */}
           <div>
-            <h3 className="text-[13px] font-semibold text-white mb-4">
+            <h3 className="text-[13px] font-semibold text-gold mb-4">
               Contact
             </h3>
             <ul className="space-y-2.5 mb-5">
@@ -161,7 +168,7 @@ export function Footer() {
             </ul>
             <ul className="space-y-2.5">
               {LEGAL_LINKS.map(({ href, label }) => (
-                <li key={href}>
+                <li key={label}>
                   <Link
                     href={href}
                     className="text-[13px] text-white/60 hover:text-white transition-colors"

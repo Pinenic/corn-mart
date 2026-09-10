@@ -52,6 +52,34 @@ const analyticsController = {
     );
     return response.ok(res, data);
   }),
+
+  // GET /api/v1/stores/:storeId/analytics/sales
+  // Total Sales time series (sparkline for the Total Sales KPI)
+  salesSeries: asyncHandler(async (req, res) => {
+    const data = await analyticsService.getSalesSeries(
+      req.store.id, req.query
+    );
+    return response.ok(res, data);
+  }),
+
+  // GET /api/v1/stores/:storeId/analytics/recent-orders
+  // The most recent orders in the time period
+  recentOrders: asyncHandler(async (req, res) => {
+    const series = await analyticsService.getRecentOrders(
+      req.store.id, req.query
+    );
+    return response.ok(res, series);
+  }),
+
+  // GET /api/v1/stores/:storeId/analytics/activity
+  // Events that have real timestamps: new orders and
+  // new followers
+  activityFeed: asyncHandler(async (req, res) => {
+    const data = await analyticsService.getActivityFeed(
+      req.store.id, req.query
+    );
+    return response.ok(res, data);
+  }),
 };
 
 export default analyticsController;
