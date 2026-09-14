@@ -61,8 +61,7 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
 
         const existingIndex = form.images.findIndex(
           (img) =>
-            img.variant_id === variantId &&
-            (img.sort_order ?? 0) === slotIndex
+            img.variant_id === variantId && (img.sort_order ?? 0) === slotIndex
         );
 
         const updatedImages =
@@ -91,7 +90,10 @@ export function EditProductDrawer({ product, onClose, onSave, mutate }) {
         const updatedImages = form.images
           .filter(
             (img) =>
-              !(img.variant_id === variantId && (img.sort_order ?? 0) === slotIndex)
+              !(
+                img.variant_id === variantId &&
+                (img.sort_order ?? 0) === slotIndex
+              )
           )
           .map((img) =>
             shiftedById.has(img.id)

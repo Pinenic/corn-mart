@@ -55,7 +55,7 @@ export function useVariants(productId) {
   return useApi(path);
 }
 
-// ── Create product mutation ───────────────────────────────────
+// ── Create product mutation ──────────────────────────────────
 export function useCreateProduct() {
   const storeId = useAuthStore((s) => s.storeId);
   const [loading, setLoad] = useState(false);

@@ -165,7 +165,8 @@ const productController = {
 
     // 1. Verify the product belongs to this store
     const product = await productService.getById(storeId, productId);
-    if (!product) console.log("Product not found for: ", storeId, productId, product);
+    if (!product)
+      console.log("Product not found for: ", storeId, productId, product);
     if (!product) return response.notFound(res, "Product not found");
 
     // 2. Multer already ran — req.files holds the uploaded buffers
